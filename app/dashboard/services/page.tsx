@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Loader2, Pencil } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const initialState = {
     message: '',
@@ -61,7 +62,33 @@ export default function ServicesPage() {
             </div>
 
             {loading ? (
-                <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>
+                <div className="border rounded-md">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Name</TableHead>
+                                <TableHead>SAC/HSN</TableHead>
+                                <TableHead>Tax Rate</TableHead>
+                                <TableHead>Unit Price</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {Array.from({ length: 5 }).map((_, i) => (
+                                <TableRow key={i}>
+                                    <TableCell>
+                                        <Skeleton className="h-4 w-[150px] mb-2" />
+                                        <Skeleton className="h-3 w-[100px]" />
+                                    </TableCell>
+                                    <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
+                                    <TableCell><Skeleton className="h-4 w-[50px]" /></TableCell>
+                                    <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
+                                    <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto rounded-md" /></TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
             ) : (
                 <div className="border rounded-md">
                     <Table>

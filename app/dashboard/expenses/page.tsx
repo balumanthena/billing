@@ -10,6 +10,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetFo
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Loader2, Pencil, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const initialState = {
     message: '',
@@ -68,7 +69,38 @@ export default function ExpensesPage() {
             </div>
 
             {loading ? (
-                <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>
+                <div className="border rounded-md">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Date</TableHead>
+                                <TableHead>Category</TableHead>
+                                <TableHead>Vendor</TableHead>
+                                <TableHead>Mode</TableHead>
+                                <TableHead className="text-right">Amount</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {Array.from({ length: 5 }).map((_, i) => (
+                                <TableRow key={i}>
+                                    <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
+                                    <TableCell>
+                                        <Skeleton className="h-4 w-[120px] mb-2" />
+                                        <Skeleton className="h-3 w-[80px]" />
+                                    </TableCell>
+                                    <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
+                                    <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
+                                    <TableCell className="text-right"><Skeleton className="h-4 w-[80px] ml-auto" /></TableCell>
+                                    <TableCell className="text-right flex justify-end gap-2">
+                                        <Skeleton className="h-8 w-8 rounded-md" />
+                                        <Skeleton className="h-8 w-8 rounded-md" />
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
             ) : (
                 <div className="border rounded-md">
                     <Table>

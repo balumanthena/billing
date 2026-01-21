@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Loader2, FileText, Download } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function InvoicesPage() {
     const [invoices, setInvoices] = useState<any[]>([])
@@ -35,7 +36,32 @@ export default function InvoicesPage() {
             </div>
 
             {loading ? (
-                <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>
+                <div className="border rounded-md">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Invoice #</TableHead>
+                                <TableHead>Date</TableHead>
+                                <TableHead>Customer</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="text-right">Amount</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {Array.from({ length: 5 }).map((_, i) => (
+                                <TableRow key={i}>
+                                    <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
+                                    <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
+                                    <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
+                                    <TableCell><Skeleton className="h-6 w-[80px] rounded-full" /></TableCell>
+                                    <TableCell className="text-right"><Skeleton className="h-4 w-[80px] ml-auto" /></TableCell>
+                                    <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto rounded-md" /></TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
             ) : (
                 <div className="border rounded-md">
                     <Table>

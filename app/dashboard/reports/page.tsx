@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getProfitAndLoss, getOutstanding, getSalesRegister, getGSTSummary } from "@/app/actions/reports"
 import { useEffect, useState } from "react"
 import { Loader2, TrendingUp, TrendingDown, RefreshCcw, Download } from "lucide-react"
+import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
@@ -96,7 +97,20 @@ export default function ReportsPage() {
 
                 <TabsContent value="pnl" className="space-y-4">
                     {loading && !pnlData ? (
-                        <div className="flex justify-center p-12"><Loader2 className="animate-spin" /></div>
+                        <div className="grid gap-4 md:grid-cols-3">
+                            {Array.from({ length: 3 }).map((_, i) => (
+                                <Card key={i}>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium"><Skeleton className="h-4 w-24" /></CardTitle>
+                                        <Skeleton className="h-4 w-4 rounded-full" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <Skeleton className="h-8 w-32 mb-2" />
+                                        <Skeleton className="h-3 w-40" />
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
                     ) : pnlData ? (
                         <>
                             <div className="grid gap-4 md:grid-cols-3">
@@ -144,7 +158,25 @@ export default function ReportsPage() {
                         </Button>
                     </div>
                     {loading && outstandingData.length === 0 ? (
-                        <div className="flex justify-center p-12"><Loader2 className="animate-spin" /></div>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Outstanding Invoices</CardTitle>
+                                <CardDescription>List of invoices with pending payments, categorized by aging.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-2">
+                                    {Array.from({ length: 5 }).map((_, i) => (
+                                        <div key={i} className="flex items-center space-x-4 py-2">
+                                            <Skeleton className="h-4 w-[100px]" />
+                                            <Skeleton className="h-4 w-[150px]" />
+                                            <Skeleton className="h-4 w-[100px]" />
+                                            <Skeleton className="h-6 w-[80px] rounded-full" />
+                                            <Skeleton className="h-4 w-[80px] ml-auto" />
+                                        </div>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
                     ) : (
                         <Card>
                             <CardHeader>
@@ -195,7 +227,28 @@ export default function ReportsPage() {
                         </Button>
                     </div>
                     {loading ? (
-                        <div className="flex justify-center p-12"><Loader2 className="animate-spin" /></div>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Sales Register (GSTR-1 Data)</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-2">
+                                    {Array.from({ length: 5 }).map((_, i) => (
+                                        <div key={i} className="grid grid-cols-9 gap-4 py-2">
+                                            <Skeleton className="h-4 w-full" />
+                                            <Skeleton className="h-4 w-full" />
+                                            <Skeleton className="h-4 w-full" />
+                                            <Skeleton className="h-4 w-full" />
+                                            <Skeleton className="h-4 w-full" />
+                                            <Skeleton className="h-4 w-full" />
+                                            <Skeleton className="h-4 w-full" />
+                                            <Skeleton className="h-4 w-full" />
+                                            <Skeleton className="h-4 w-full" />
+                                        </div>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
                     ) : (
                         <Card>
                             <CardHeader>
@@ -244,7 +297,19 @@ export default function ReportsPage() {
                         </Button>
                     </div>
                     {loading || !gstData ? (
-                        <div className="flex justify-center p-12"><Loader2 className="animate-spin" /></div>
+                        <div className="grid gap-6">
+                            <Card>
+                                <CardHeader><CardTitle>GST Liability Summary</CardTitle></CardHeader>
+                                <CardContent>
+                                    <div className="space-y-4">
+                                        <Skeleton className="h-8 w-full" />
+                                        <Skeleton className="h-8 w-full" />
+                                        <Skeleton className="h-8 w-full" />
+                                        <Skeleton className="h-12 w-full" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
                     ) : (
                         <div className="grid gap-6">
                             <Card>
