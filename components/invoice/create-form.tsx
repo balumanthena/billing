@@ -358,13 +358,13 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
                                     </div>
 
                                     {/* Quantity, Price, Total */}
-                                    <div className="grid grid-cols-12 gap-3 items-end">
-                                        <div className="col-span-4">
+                                    <div className="grid grid-cols-2 gap-4 items-end">
+                                        <div className="col-span-1">
                                             <Label className="text-xs text-muted-foreground mb-1 block">Qty</Label>
                                             <div className="flex items-center border rounded-md h-10">
                                                 <button
                                                     type="button"
-                                                    className="w-8 h-full flex items-center justify-center bg-muted/50 hover:bg-muted border-r disabled:opacity-50"
+                                                    className="w-10 h-full flex items-center justify-center bg-muted/50 hover:bg-muted border-r disabled:opacity-50"
                                                     onClick={() => updateItem(index, 'quantity', Math.max(1, item.quantity - 1))}
                                                     disabled={item.quantity <= 1}
                                                 >
@@ -379,7 +379,7 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
                                                 />
                                                 <button
                                                     type="button"
-                                                    className="w-8 h-full flex items-center justify-center bg-muted/50 hover:bg-muted border-l"
+                                                    className="w-10 h-full flex items-center justify-center bg-muted/50 hover:bg-muted border-l"
                                                     onClick={() => updateItem(index, 'quantity', item.quantity + 1)}
                                                 >
                                                     +
@@ -387,7 +387,7 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
                                             </div>
                                         </div>
 
-                                        <div className="col-span-4">
+                                        <div className="col-span-1">
                                             <Label className="text-xs text-muted-foreground mb-1 block">Price</Label>
                                             <Input
                                                 type="number"
@@ -397,11 +397,11 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
                                             />
                                         </div>
 
-                                        <div className="col-span-4 text-right">
-                                            <Label className="text-xs text-muted-foreground mb-1 block">Total</Label>
-                                            <div className="h-10 flex items-center justify-end font-bold text-base">
-                                                ₹{(item.quantity * item.unit_price).toFixed(0)}
-                                            </div>
+                                        <div className="col-span-2 pt-3 border-t mt-2 flex justify-between items-center bg-slate-50/50 -mx-4 px-4 pb-1">
+                                            <span className="text-sm font-medium text-muted-foreground">Total</span>
+                                            <span className="text-lg font-bold">
+                                                ₹{(item.quantity * item.unit_price).toFixed(2)}
+                                            </span>
                                         </div>
                                     </div>
                                 </CardContent>
