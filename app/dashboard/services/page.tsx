@@ -62,72 +62,120 @@ export default function ServicesPage() {
             </div>
 
             {loading ? (
-                <div className="border rounded-md">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Name</TableHead>
-                                <TableHead>SAC/HSN</TableHead>
-                                <TableHead>Tax Rate</TableHead>
-                                <TableHead>Unit Price</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {Array.from({ length: 5 }).map((_, i) => (
-                                <TableRow key={i}>
-                                    <TableCell>
-                                        <Skeleton className="h-4 w-[150px] mb-2" />
-                                        <Skeleton className="h-3 w-[100px]" />
-                                    </TableCell>
-                                    <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
-                                    <TableCell><Skeleton className="h-4 w-[50px]" /></TableCell>
-                                    <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
-                                    <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto rounded-md" /></TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </div>
-            ) : (
-                <div className="border rounded-md">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Name</TableHead>
-                                <TableHead>SAC/HSN</TableHead>
-                                <TableHead>Tax Rate</TableHead>
-                                <TableHead>Unit Price</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {items.length === 0 && (
+                <>
+                    {/* Desktop Skeleton */}
+                    <div className="hidden md:block border rounded-md">
+                        <Table>
+                            <TableHeader>
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
-                                        No items found. Add services or products.
-                                    </TableCell>
+                                    <TableHead>Name</TableHead>
+                                    <TableHead>SAC/HSN</TableHead>
+                                    <TableHead>Tax Rate</TableHead>
+                                    <TableHead>Unit Price</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
-                            )}
-                            {items.map((item) => (
-                                <TableRow key={item.id}>
-                                    <TableCell className="font-medium">
-                                        <div>{item.name}</div>
+                            </TableHeader>
+                            <TableBody>
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                    <TableRow key={i}>
+                                        <TableCell>
+                                            <Skeleton className="h-4 w-[150px] mb-2" />
+                                            <Skeleton className="h-3 w-[100px]" />
+                                        </TableCell>
+                                        <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
+                                        <TableCell><Skeleton className="h-4 w-[50px]" /></TableCell>
+                                        <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
+                                        <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto rounded-md" /></TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                    {/* Mobile Skeleton */}
+                    <div className="md:hidden space-y-4">
+                        {Array.from({ length: 3 }).map((_, i) => (
+                            <div key={i} className="border rounded-lg p-4 space-y-3">
+                                <Skeleton className="h-5 w-[150px]" />
+                                <div className="flex gap-4">
+                                    <Skeleton className="h-4 w-[80px]" />
+                                    <Skeleton className="h-4 w-[60px]" />
+                                </div>
+                                <Skeleton className="h-4 w-[100px]" />
+                            </div>
+                        ))}
+                    </div>
+                </>
+            ) : (
+                <>
+                    {/* Desktop Table */}
+                    <div className="hidden md:block border rounded-md">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Name</TableHead>
+                                    <TableHead>SAC/HSN</TableHead>
+                                    <TableHead>Tax Rate</TableHead>
+                                    <TableHead>Unit Price</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {items.length === 0 && (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
+                                            No items found. Add services or products.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                                {items.map((item) => (
+                                    <TableRow key={item.id}>
+                                        <TableCell className="font-medium">
+                                            <div>{item.name}</div>
+                                            {item.description && <div className="text-xs text-muted-foreground">{item.description}</div>}
+                                        </TableCell>
+                                        <TableCell>{item.sac_code}</TableCell>
+                                        <TableCell>{item.tax_rate}%</TableCell>
+                                        <TableCell>₹{item.unit_price}</TableCell>
+                                        <TableCell className="text-right">
+                                            <Button variant="ghost" size="sm" onClick={() => handleEdit(item)}>
+                                                <Pencil className="h-4 w-4" />
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+
+                    {/* Mobile Card List */}
+                    <div className="md:hidden space-y-4">
+                        {items.length === 0 && (
+                            <div className="text-center py-10 text-muted-foreground border rounded-md bg-muted/10">
+                                No items found. Add services or products.
+                            </div>
+                        )}
+                        {items.map((item) => (
+                            <div key={item.id} className="bg-card text-card-foreground rounded-lg border shadow-sm p-4 space-y-3">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <div className="font-semibold text-base">{item.name}</div>
                                         {item.description && <div className="text-xs text-muted-foreground">{item.description}</div>}
-                                    </TableCell>
-                                    <TableCell>{item.sac_code}</TableCell>
-                                    <TableCell>{item.tax_rate}%</TableCell>
-                                    <TableCell>₹{item.unit_price}</TableCell>
-                                    <TableCell className="text-right">
-                                        <Button variant="ghost" size="sm" onClick={() => handleEdit(item)}>
-                                            <Pencil className="h-4 w-4" />
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </div>
+                                    </div>
+                                    <div className="font-bold">₹{item.unit_price}</div>
+                                </div>
+                                <div className="flex gap-4 text-xs text-muted-foreground">
+                                    <div className="bg-muted px-2 py-1 rounded">SAC: {item.sac_code}</div>
+                                    <div className="bg-muted px-2 py-1 rounded">Tax: {item.tax_rate}%</div>
+                                </div>
+                                <div className="flex justify-end pt-2 border-t">
+                                    <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
+                                        <Pencil className="mr-2 h-3 w-3" /> Edit
+                                    </Button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </>
             )}
 
             <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -140,21 +188,21 @@ export default function ServicesPage() {
                     </DialogHeader>
                     <form action={formAction} className="grid gap-4 py-4">
                         <input type="hidden" name="id" value={editingItem?.id || ''} />
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="name" className="text-right">Name</Label>
-                            <Input id="name" name="name" defaultValue={editingItem?.name} className="col-span-3" required />
+                        <div className="grid grid-cols-1 md:grid-cols-4 items-start md:items-center gap-2 md:gap-4">
+                            <Label htmlFor="name" className="text-left md:text-right">Name</Label>
+                            <Input id="name" name="name" defaultValue={editingItem?.name} className="md:col-span-3" required />
                         </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="description" className="text-right">Desc</Label>
-                            <Input id="description" name="description" defaultValue={editingItem?.description} className="col-span-3" />
+                        <div className="grid grid-cols-1 md:grid-cols-4 items-start md:items-center gap-2 md:gap-4">
+                            <Label htmlFor="description" className="text-left md:text-right">Desc</Label>
+                            <Input id="description" name="description" defaultValue={editingItem?.description} className="md:col-span-3" />
                         </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="sac_code" className="text-right">SAC/HSN</Label>
-                            <Input id="sac_code" name="sac_code" defaultValue={editingItem?.sac_code} className="col-span-3" required placeholder="SAC Code" />
+                        <div className="grid grid-cols-1 md:grid-cols-4 items-start md:items-center gap-2 md:gap-4">
+                            <Label htmlFor="sac_code" className="text-left md:text-right">SAC/HSN</Label>
+                            <Input id="sac_code" name="sac_code" defaultValue={editingItem?.sac_code} className="md:col-span-3" required placeholder="SAC Code" />
                         </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="tax_rate" className="text-right">Tax (%)</Label>
-                            <div className="col-span-3">
+                        <div className="grid grid-cols-1 md:grid-cols-4 items-start md:items-center gap-2 md:gap-4">
+                            <Label htmlFor="tax_rate" className="text-left md:text-right">Tax (%)</Label>
+                            <div className="md:col-span-3">
                                 <Select name="tax_rate" defaultValue={editingItem?.tax_rate?.toString() || '18'}>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select Tax Rate" />
@@ -169,17 +217,17 @@ export default function ServicesPage() {
                                 </Select>
                             </div>
                         </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="unit_price" className="text-right">Price</Label>
-                            <Input id="unit_price" name="unit_price" type="number" step="0.01" defaultValue={editingItem?.unit_price} className="col-span-3" placeholder="0.00" />
+                        <div className="grid grid-cols-1 md:grid-cols-4 items-start md:items-center gap-2 md:gap-4">
+                            <Label htmlFor="unit_price" className="text-left md:text-right">Price</Label>
+                            <Input id="unit_price" name="unit_price" type="number" step="0.01" defaultValue={editingItem?.unit_price} className="md:col-span-3" placeholder="0.00" />
                         </div>
 
                         {state?.message && state.message !== 'success' && (
-                            <div className="text-red-500 text-sm col-span-4 text-center">{state.message}</div>
+                            <div className="text-red-500 text-sm md:col-span-4 text-center">{state.message}</div>
                         )}
 
                         <DialogFooter>
-                            <Button type="submit" disabled={isPending}>
+                            <Button type="submit" disabled={isPending} className="w-full md:w-auto">
                                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 Save
                             </Button>

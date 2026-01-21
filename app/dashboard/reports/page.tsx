@@ -9,6 +9,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
 export default function ReportsPage() {
     const [activeTab, setActiveTab] = useState('pnl')
     const [pnlData, setPnlData] = useState<any>(null)
@@ -87,8 +89,22 @@ export default function ReportsPage() {
                 <h1 className="text-3xl font-bold tracking-tight">Financial Reports</h1>
             </div>
 
-            <Tabs defaultValue="pnl" className="space-y-4" onValueChange={setActiveTab}>
-                <TabsList>
+            <div className="md:hidden w-full">
+                <Select value={activeTab} onValueChange={setActiveTab}>
+                    <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select Report" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="pnl">Profit & Loss</SelectItem>
+                        <SelectItem value="outstanding">Outstanding Receivables</SelectItem>
+                        <SelectItem value="sales">Sales Register</SelectItem>
+                        <SelectItem value="gst">GST Summary</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <Tabs value={activeTab} className="space-y-4" onValueChange={setActiveTab}>
+                <TabsList className="hidden md:inline-flex">
                     <TabsTrigger value="pnl">Profit & Loss</TabsTrigger>
                     <TabsTrigger value="outstanding">Outstanding Receivables</TabsTrigger>
                     <TabsTrigger value="sales">Sales Register</TabsTrigger>
@@ -183,38 +199,68 @@ export default function ReportsPage() {
                                 <CardTitle>Outstanding Invoices</CardTitle>
                                 <CardDescription>List of invoices with pending payments, categorized by aging.</CardDescription>
                             </CardHeader>
-                            <CardContent>
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Invoice No</TableHead>
-                                            <TableHead>Customer</TableHead>
-                                            <TableHead>Date</TableHead>
-                                            <TableHead>Age</TableHead>
-                                            <TableHead className="text-right">Pending Amount</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {outstandingData.length === 0 && (
-                                            <TableRow><TableCell colSpan={5} className="text-center h-24 text-muted-foreground">No outstanding payments.</TableCell></TableRow>
-                                        )}
-                                        {outstandingData.map((inv) => (
-                                            <TableRow key={inv.id}>
-                                                <TableCell className="font-medium">{inv.invoice_number}</TableCell>
-                                                <TableCell>{inv.customer_name}</TableCell>
-                                                <TableCell>{new Date(inv.date).toLocaleDateString('en-IN')}</TableCell>
-                                                <TableCell>
-                                                    <span className={`px-2 py-1 rounded-full text-xs ${inv.age_days > 60 ? 'bg-red-100 text-red-700' :
-                                                        inv.age_days > 30 ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
-                                                        }`}>
-                                                        {inv.age_days} Days
-                                                    </span>
-                                                </TableCell>
-                                                <TableCell className="text-right font-bold">₹{inv.pending_amount.toLocaleString('en-IN')}</TableCell>
+                            <CardContent className="p-0 md:p-6">
+                                {/* Desktop Table */}
+                                <div className="hidden md:block">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Invoice No</TableHead>
+                                                <TableHead>Customer</TableHead>
+                                                <TableHead>Date</TableHead>
+                                                <TableHead>Age</TableHead>
+                                                <TableHead className="text-right">Pending Amount</TableHead>
                                             </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {outstandingData.length === 0 && (
+                                                <TableRow><TableCell colSpan={5} className="text-center h-24 text-muted-foreground">No outstanding payments.</TableCell></TableRow>
+                                            )}
+                                            {outstandingData.map((inv) => (
+                                                <TableRow key={inv.id}>
+                                                    <TableCell className="font-medium">{inv.invoice_number}</TableCell>
+                                                    <TableCell>{inv.customer_name}</TableCell>
+                                                    <TableCell>{new Date(inv.date).toLocaleDateString('en-IN')}</TableCell>
+                                                    <TableCell>
+                                                        <span className={`px-2 py-1 rounded-full text-xs ${inv.age_days > 60 ? 'bg-red-100 text-red-700' :
+                                                            inv.age_days > 30 ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
+                                                            }`}>
+                                                            {inv.age_days} Days
+                                                        </span>
+                                                    </TableCell>
+                                                    <TableCell className="text-right font-bold">₹{inv.pending_amount.toLocaleString('en-IN')}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+
+                                {/* Mobile List View */}
+                                <div className="md:hidden flex flex-col divide-y">
+                                    {outstandingData.length === 0 && (
+                                        <div className="text-center py-8 text-muted-foreground">No outstanding payments.</div>
+                                    )}
+                                    {outstandingData.map((inv) => (
+                                        <div key={inv.id} className="p-4 flex flex-col gap-2">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <div className="font-semibold text-sm">{inv.customer_name}</div>
+                                                    <div className="text-xs text-muted-foreground">#{inv.invoice_number} • {new Date(inv.date).toLocaleDateString('en-IN')}</div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="font-bold text-base">₹{inv.pending_amount.toLocaleString('en-IN')}</div>
+                                                </div>
+                                            </div>
+                                            <div className="flex justify-start">
+                                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${inv.age_days > 60 ? 'bg-red-100 text-red-700' :
+                                                    inv.age_days > 30 ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
+                                                    }`}>
+                                                    Overdue by {inv.age_days} Days
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </CardContent>
                         </Card>
                     )}
@@ -236,14 +282,6 @@ export default function ReportsPage() {
                                     {Array.from({ length: 5 }).map((_, i) => (
                                         <div key={i} className="grid grid-cols-9 gap-4 py-2">
                                             <Skeleton className="h-4 w-full" />
-                                            <Skeleton className="h-4 w-full" />
-                                            <Skeleton className="h-4 w-full" />
-                                            <Skeleton className="h-4 w-full" />
-                                            <Skeleton className="h-4 w-full" />
-                                            <Skeleton className="h-4 w-full" />
-                                            <Skeleton className="h-4 w-full" />
-                                            <Skeleton className="h-4 w-full" />
-                                            <Skeleton className="h-4 w-full" />
                                         </div>
                                     ))}
                                 </div>
@@ -254,37 +292,70 @@ export default function ReportsPage() {
                             <CardHeader>
                                 <CardTitle>Sales Register (GSTR-1 Data)</CardTitle>
                             </CardHeader>
-                            <CardContent>
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Date</TableHead>
-                                            <TableHead>Inv No</TableHead>
-                                            <TableHead>Customer</TableHead>
-                                            <TableHead>GSTIN</TableHead>
-                                            <TableHead className="text-right">Taxable</TableHead>
-                                            <TableHead className="text-right">CGST</TableHead>
-                                            <TableHead className="text-right">SGST</TableHead>
-                                            <TableHead className="text-right">IGST</TableHead>
-                                            <TableHead className="text-right">Total</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {salesData.map((inv: any) => (
-                                            <TableRow key={inv.id}>
-                                                <TableCell>{new Date(inv.date).toLocaleDateString('en-IN')}</TableCell>
-                                                <TableCell>{inv.invoice_number}</TableCell>
-                                                <TableCell className="max-w-[150px] truncate">{inv.customer_name}</TableCell>
-                                                <TableCell>{inv.gstin}</TableCell>
-                                                <TableCell className="text-right">₹{inv.taxable_amount?.toLocaleString('en-IN')}</TableCell>
-                                                <TableCell className="text-right">₹{inv.cgst?.toLocaleString('en-IN')}</TableCell>
-                                                <TableCell className="text-right">₹{inv.sgst?.toLocaleString('en-IN')}</TableCell>
-                                                <TableCell className="text-right">₹{inv.igst?.toLocaleString('en-IN')}</TableCell>
-                                                <TableCell className="text-right font-bold">₹{inv.grand_total?.toLocaleString('en-IN')}</TableCell>
+                            <CardContent className="p-0 md:p-6">
+                                {/* Desktop Table */}
+                                <div className="hidden md:block">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Date</TableHead>
+                                                <TableHead>Inv No</TableHead>
+                                                <TableHead>Customer</TableHead>
+                                                <TableHead>GSTIN</TableHead>
+                                                <TableHead className="text-right">Taxable</TableHead>
+                                                <TableHead className="text-right">CGST</TableHead>
+                                                <TableHead className="text-right">SGST</TableHead>
+                                                <TableHead className="text-right">IGST</TableHead>
+                                                <TableHead className="text-right">Total</TableHead>
                                             </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {salesData.map((inv: any) => (
+                                                <TableRow key={inv.id}>
+                                                    <TableCell>{new Date(inv.date).toLocaleDateString('en-IN')}</TableCell>
+                                                    <TableCell>{inv.invoice_number}</TableCell>
+                                                    <TableCell className="max-w-[150px] truncate">{inv.customer_name}</TableCell>
+                                                    <TableCell>{inv.gstin}</TableCell>
+                                                    <TableCell className="text-right">₹{inv.taxable_amount?.toLocaleString('en-IN')}</TableCell>
+                                                    <TableCell className="text-right">₹{inv.cgst?.toLocaleString('en-IN')}</TableCell>
+                                                    <TableCell className="text-right">₹{inv.sgst?.toLocaleString('en-IN')}</TableCell>
+                                                    <TableCell className="text-right">₹{inv.igst?.toLocaleString('en-IN')}</TableCell>
+                                                    <TableCell className="text-right font-bold">₹{inv.grand_total?.toLocaleString('en-IN')}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+
+                                {/* Mobile List View */}
+                                <div className="md:hidden flex flex-col divide-y">
+                                    {salesData.map((inv: any) => (
+                                        <div key={inv.id} className="p-4 flex flex-col gap-2">
+                                            <div className="flex justify-between">
+                                                <div className="font-semibold text-sm">{inv.customer_name}</div>
+                                                <div className="text-xs text-muted-foreground">{new Date(inv.date).toLocaleDateString('en-IN')}</div>
+                                            </div>
+                                            <div className="flex justify-between items-center text-xs text-muted-foreground">
+                                                <span>#{inv.invoice_number}</span>
+                                                <span className="font-mono">{inv.gstin || 'No GSTIN'}</span>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-2 mt-1 text-xs bg-muted/30 p-2 rounded">
+                                                <div className="flex justify-between">
+                                                    <span className="text-muted-foreground">Taxable:</span>
+                                                    <span>₹{inv.taxable_amount?.toLocaleString('en-IN')}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-muted-foreground">Tax:</span>
+                                                    <span>₹{((inv.cgst || 0) + (inv.sgst || 0) + (inv.igst || 0)).toLocaleString('en-IN')}</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex justify-between items-center pt-1">
+                                                <span className="text-xs font-medium text-muted-foreground">Total Amount</span>
+                                                <span className="font-bold text-base">₹{inv.grand_total?.toLocaleString('en-IN')}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </CardContent>
                         </Card>
                     )}
@@ -312,41 +383,93 @@ export default function ReportsPage() {
                         </div>
                     ) : (
                         <div className="grid gap-6">
-                            <Card>
+                            <Card className="overflow-hidden">
                                 <CardHeader><CardTitle>GST Liability Summary</CardTitle></CardHeader>
-                                <CardContent>
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Type</TableHead>
-                                                <TableHead className="text-right">Taxable Value</TableHead>
-                                                <TableHead className="text-right">CGST</TableHead>
-                                                <TableHead className="text-right">SGST</TableHead>
-                                                <TableHead className="text-right">IGST</TableHead>
-                                                <TableHead className="text-right font-bold">Total Tax</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            <TableRow>
-                                                <TableCell className="font-medium">Output Supply (Sales)</TableCell>
-                                                <TableCell className="text-right">₹{gstData.output.taxable.toLocaleString('en-IN')}</TableCell>
-                                                <TableCell className="text-right">₹{gstData.output.cgst.toLocaleString('en-IN')}</TableCell>
-                                                <TableCell className="text-right">₹{gstData.output.sgst.toLocaleString('en-IN')}</TableCell>
-                                                <TableCell className="text-right">₹{gstData.output.igst.toLocaleString('en-IN')}</TableCell>
-                                                <TableCell className="text-right font-bold text-red-600">₹{gstData.output.total.toLocaleString('en-IN')}</TableCell>
-                                            </TableRow>
-                                            <TableRow>
-                                                <TableCell className="font-medium">Input Credit (Purchases)</TableCell>
-                                                <TableCell className="text-right">₹{gstData.input.taxable.toLocaleString('en-IN')}</TableCell>
-                                                <TableCell className="text-right" colSpan={3}>Combined (As per Expenses)</TableCell>
-                                                <TableCell className="text-right font-bold text-green-600">₹{gstData.input.total_gst.toLocaleString('en-IN')}</TableCell>
-                                            </TableRow>
-                                            <TableRow className="bg-muted/50">
-                                                <TableCell className="font-bold text-lg" colSpan={5}>NET PAYABLE</TableCell>
-                                                <TableCell className="text-right font-bold text-xl">₹{gstData.net_payable.toLocaleString('en-IN')}</TableCell>
-                                            </TableRow>
-                                        </TableBody>
-                                    </Table>
+                                <CardContent className="p-0 md:p-6">
+                                    {/* Desktop Table View */}
+                                    <div className="hidden md:block">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Type</TableHead>
+                                                    <TableHead className="text-right">Taxable Value</TableHead>
+                                                    <TableHead className="text-right">CGST</TableHead>
+                                                    <TableHead className="text-right">SGST</TableHead>
+                                                    <TableHead className="text-right">IGST</TableHead>
+                                                    <TableHead className="text-right font-bold">Total Tax</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                <TableRow>
+                                                    <TableCell className="font-medium">Output Supply (Sales)</TableCell>
+                                                    <TableCell className="text-right">₹{gstData.output.taxable.toLocaleString('en-IN')}</TableCell>
+                                                    <TableCell className="text-right">₹{gstData.output.cgst.toLocaleString('en-IN')}</TableCell>
+                                                    <TableCell className="text-right">₹{gstData.output.sgst.toLocaleString('en-IN')}</TableCell>
+                                                    <TableCell className="text-right">₹{gstData.output.igst.toLocaleString('en-IN')}</TableCell>
+                                                    <TableCell className="text-right font-bold text-red-600">₹{gstData.output.total.toLocaleString('en-IN')}</TableCell>
+                                                </TableRow>
+                                                <TableRow>
+                                                    <TableCell className="font-medium">Input Credit (Purchases)</TableCell>
+                                                    <TableCell className="text-right">₹{gstData.input.taxable.toLocaleString('en-IN')}</TableCell>
+                                                    <TableCell className="text-right" colSpan={3}>Combined (As per Expenses)</TableCell>
+                                                    <TableCell className="text-right font-bold text-green-600">₹{gstData.input.total_gst.toLocaleString('en-IN')}</TableCell>
+                                                </TableRow>
+                                                <TableRow className="bg-muted/50">
+                                                    <TableCell className="font-bold text-lg" colSpan={5}>NET PAYABLE</TableCell>
+                                                    <TableCell className="text-right font-bold text-xl">₹{gstData.net_payable.toLocaleString('en-IN')}</TableCell>
+                                                </TableRow>
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+
+                                    {/* Mobile Card View */}
+                                    <div className="md:hidden flex flex-col gap-4 p-4">
+                                        {/* Output Card */}
+                                        <div className="border rounded-lg p-4 space-y-3">
+                                            <h4 className="font-semibold text-sm border-b pb-2">Output Supply (Sales)</h4>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-muted-foreground">Taxable Value</span>
+                                                <span>₹{gstData.output.taxable.toLocaleString('en-IN')}</span>
+                                            </div>
+                                            <div className="grid grid-cols-3 gap-2 text-xs bg-muted/30 p-2 rounded text-center">
+                                                <div>
+                                                    <div className="text-muted-foreground">CGST</div>
+                                                    <div>₹{gstData.output.cgst.toLocaleString('en-IN')}</div>
+                                                </div>
+                                                <div>
+                                                    <div className="text-muted-foreground">SGST</div>
+                                                    <div>₹{gstData.output.sgst.toLocaleString('en-IN')}</div>
+                                                </div>
+                                                <div>
+                                                    <div className="text-muted-foreground">IGST</div>
+                                                    <div>₹{gstData.output.igst.toLocaleString('en-IN')}</div>
+                                                </div>
+                                            </div>
+                                            <div className="flex justify-between font-bold pt-2 border-t">
+                                                <span>Total Tax Liability</span>
+                                                <span className="text-red-600">₹{gstData.output.total.toLocaleString('en-IN')}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Input Card */}
+                                        <div className="border rounded-lg p-4 space-y-3">
+                                            <h4 className="font-semibold text-sm border-b pb-2">Input Credit (Purchases)</h4>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-muted-foreground">Taxable Value</span>
+                                                <span>₹{gstData.input.taxable.toLocaleString('en-IN')}</span>
+                                            </div>
+                                            <div className="flex justify-between font-bold pt-2 border-t">
+                                                <span>Total Input Credit</span>
+                                                <span className="text-green-600">₹{gstData.input.total_gst.toLocaleString('en-IN')}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Net Card */}
+                                        <div className="bg-muted/50 rounded-lg p-4 flex justify-between items-center border border-blue-100">
+                                            <span className="font-bold text-lg">NET PAYABLE</span>
+                                            <span className="font-bold text-xl text-blue-700">₹{gstData.net_payable.toLocaleString('en-IN')}</span>
+                                        </div>
+                                    </div>
                                 </CardContent>
                             </Card>
                         </div>

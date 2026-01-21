@@ -201,101 +201,230 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
                         <CardTitle className="text-base">Line Items</CardTitle>
                         <CardDescription>Add products or services to this invoice.</CardDescription>
                     </div>
-                    <Button type="button" size="sm" onClick={addItem}>
+                    <Button type="button" size="sm" onClick={addItem} className="hidden md:flex">
                         <Plus className="h-4 w-4 mr-2" /> Add Item
                     </Button>
                 </CardHeader>
                 <CardContent className="p-0 flex-1">
-                    <Table className="table-fixed">
-                        <TableHeader>
-                            <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
-                                <TableHead className="w-[30%]">Item / Service</TableHead>
-                                <TableHead className="w-[12%]">SAC</TableHead>
-                                <TableHead className="w-[10%]">Qty</TableHead>
-                                <TableHead className="w-[15%]">Price (₹)</TableHead>
-                                <TableHead className="w-[10%]">Tax %</TableHead>
-                                <TableHead className="w-[15%] text-right">Total (₹)</TableHead>
-                                <TableHead className="w-[5%]"></TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {lineItems.length === 0 && (
-                                <TableRow>
-                                    <TableCell colSpan={7} className="text-center h-32 text-muted-foreground">
-                                        No items added. Click "Add Item" to start.
-                                    </TableCell>
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block">
+                        <Table className="table-fixed">
+                            <TableHeader>
+                                <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
+                                    <TableHead className="w-[30%]">Item / Service</TableHead>
+                                    <TableHead className="w-[12%]">SAC</TableHead>
+                                    <TableHead className="w-[10%]">Qty</TableHead>
+                                    <TableHead className="w-[15%]">Price (₹)</TableHead>
+                                    <TableHead className="w-[10%]">Tax %</TableHead>
+                                    <TableHead className="w-[15%] text-right">Total (₹)</TableHead>
+                                    <TableHead className="w-[5%]"></TableHead>
                                 </TableRow>
-                            )}
-                            {lineItems.map((item, index) => (
-                                <TableRow key={item.id}>
-                                    <TableCell className="align-top pt-3">
-                                        <Select
-                                            value={item.item_id}
-                                            onValueChange={(val) => updateItem(index, 'item_id', val)}
-                                        >
-                                            <SelectTrigger className="h-9">
-                                                <SelectValue placeholder="Select Item" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {items.map(i => (
-                                                    <SelectItem key={i.id} value={i.id}>{i.name}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <Input
-                                            value={item.description}
-                                            onChange={(e) => updateItem(index, 'description', e.target.value)}
-                                            className="h-8 mt-2 text-xs"
-                                            placeholder="Description (Optional)"
-                                        />
-                                    </TableCell>
-                                    <TableCell className="align-top pt-3">
-                                        <Input
-                                            value={item.sac_code}
-                                            onChange={(e) => updateItem(index, 'sac_code', e.target.value)}
-                                            className="h-9"
-                                        />
-                                    </TableCell>
-                                    <TableCell className="align-top pt-3">
-                                        <Input
-                                            type="number"
-                                            value={isNaN(item.quantity) ? '' : item.quantity}
-                                            onChange={(e) => updateItem(index, 'quantity', parseFloat(e.target.value))}
-                                            className="h-9 text-center"
-                                            min={1}
-                                        />
-                                    </TableCell>
-                                    <TableCell className="align-top pt-3">
-                                        <Input
-                                            type="number"
-                                            value={isNaN(item.unit_price) ? '' : item.unit_price}
-                                            onChange={(e) => updateItem(index, 'unit_price', parseFloat(e.target.value))}
-                                            className="h-9 text-right"
-                                        />
-                                    </TableCell>
-                                    <TableCell className="align-top pt-3">
-                                        <div className="flex items-center h-9 px-3 border rounded-md bg-muted text-sm justify-center">
-                                            {item.tax_rate}%
+                            </TableHeader>
+                            <TableBody>
+                                {lineItems.length === 0 && (
+                                    <TableRow>
+                                        <TableCell colSpan={7} className="text-center h-32 text-muted-foreground">
+                                            No items added. Click "Add Item" to start.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                                {lineItems.map((item, index) => (
+                                    <TableRow key={item.id}>
+                                        <TableCell className="align-top pt-3">
+                                            <Select
+                                                value={item.item_id}
+                                                onValueChange={(val) => updateItem(index, 'item_id', val)}
+                                            >
+                                                <SelectTrigger className="h-9">
+                                                    <SelectValue placeholder="Select Item" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {items.map(i => (
+                                                        <SelectItem key={i.id} value={i.id}>{i.name}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <Input
+                                                value={item.description}
+                                                onChange={(e) => updateItem(index, 'description', e.target.value)}
+                                                className="h-8 mt-2 text-xs"
+                                                placeholder="Description (Optional)"
+                                            />
+                                        </TableCell>
+                                        <TableCell className="align-top pt-3">
+                                            <Input
+                                                value={item.sac_code}
+                                                onChange={(e) => updateItem(index, 'sac_code', e.target.value)}
+                                                className="h-9"
+                                            />
+                                        </TableCell>
+                                        <TableCell className="align-top pt-3">
+                                            <Input
+                                                type="number"
+                                                value={isNaN(item.quantity) ? '' : item.quantity}
+                                                onChange={(e) => updateItem(index, 'quantity', parseFloat(e.target.value))}
+                                                className="h-9 text-center"
+                                                min={1}
+                                            />
+                                        </TableCell>
+                                        <TableCell className="align-top pt-3">
+                                            <Input
+                                                type="number"
+                                                value={isNaN(item.unit_price) ? '' : item.unit_price}
+                                                onChange={(e) => updateItem(index, 'unit_price', parseFloat(e.target.value))}
+                                                className="h-9 text-right"
+                                            />
+                                        </TableCell>
+                                        <TableCell className="align-top pt-3">
+                                            <div className="flex items-center h-9 px-3 border rounded-md bg-muted text-sm justify-center">
+                                                {item.tax_rate}%
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="text-right font-medium align-top pt-4">
+                                            ₹{(item.quantity * item.unit_price).toFixed(2)}
+                                        </TableCell>
+                                        <TableCell className="align-top pt-3">
+                                            <Button type="button" variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-red-600" onClick={() => removeItem(index)}>
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="block md:hidden space-y-4 p-4">
+                        {lineItems.length === 0 && (
+                            <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
+                                No items added. Tap "Add Item".
+                            </div>
+                        )}
+                        {lineItems.map((item, index) => (
+                            <Card key={item.id} className="overflow-hidden border-2">
+                                <CardContent className="p-4 space-y-4">
+                                    {/* Header: Item & Delete */}
+                                    <div className="flex justify-between items-start gap-3">
+                                        <div className="flex-1 space-y-2">
+                                            <Select
+                                                value={item.item_id}
+                                                onValueChange={(val) => updateItem(index, 'item_id', val)}
+                                            >
+                                                <SelectTrigger className="h-10 font-medium">
+                                                    <SelectValue placeholder="Select Item" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {items.map(i => (
+                                                        <SelectItem key={i.id} value={i.id}>{i.name}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <Input
+                                                value={item.description}
+                                                onChange={(e) => updateItem(index, 'description', e.target.value)}
+                                                className="h-8 text-xs"
+                                                placeholder="Description (Optional)"
+                                            />
                                         </div>
-                                    </TableCell>
-                                    <TableCell className="text-right font-medium align-top pt-4">
-                                        ₹{(item.quantity * item.unit_price).toFixed(2)}
-                                    </TableCell>
-                                    <TableCell className="align-top pt-3">
-                                        <Button type="button" variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-red-600" onClick={() => removeItem(index)}>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 -mr-2 -mt-2 text-muted-foreground hover:text-red-600"
+                                            onClick={() => removeItem(index)}
+                                        >
                                             <Trash2 className="h-4 w-4" />
                                         </Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                                    </div>
+
+                                    {/* SAC & Tax */}
+                                    <div className="flex items-center gap-4 text-sm">
+                                        <div className="flex-1">
+                                            <Label className="text-xs text-muted-foreground mb-1 block">SAC Code</Label>
+                                            <Input
+                                                value={item.sac_code}
+                                                onChange={(e) => updateItem(index, 'sac_code', e.target.value)}
+                                                className="h-8"
+                                                placeholder="SAC"
+                                            />
+                                        </div>
+                                        <div className="w-24">
+                                            <Label className="text-xs text-muted-foreground mb-1 block">Tax %</Label>
+                                            <div className="flex items-center h-8 px-3 border rounded-md bg-muted text-sm justify-center font-medium">
+                                                {item.tax_rate}%
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Quantity, Price, Total */}
+                                    <div className="grid grid-cols-12 gap-3 items-end">
+                                        <div className="col-span-4">
+                                            <Label className="text-xs text-muted-foreground mb-1 block">Qty</Label>
+                                            <div className="flex items-center border rounded-md h-10">
+                                                <button
+                                                    type="button"
+                                                    className="w-8 h-full flex items-center justify-center bg-muted/50 hover:bg-muted border-r disabled:opacity-50"
+                                                    onClick={() => updateItem(index, 'quantity', Math.max(1, item.quantity - 1))}
+                                                    disabled={item.quantity <= 1}
+                                                >
+                                                    -
+                                                </button>
+                                                <input
+                                                    type="number"
+                                                    className="w-full h-full text-center border-none focus:ring-0 p-0 text-sm"
+                                                    value={isNaN(item.quantity) ? '' : item.quantity}
+                                                    onChange={(e) => updateItem(index, 'quantity', parseFloat(e.target.value))}
+                                                    min={1}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    className="w-8 h-full flex items-center justify-center bg-muted/50 hover:bg-muted border-l"
+                                                    onClick={() => updateItem(index, 'quantity', item.quantity + 1)}
+                                                >
+                                                    +
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="col-span-4">
+                                            <Label className="text-xs text-muted-foreground mb-1 block">Price</Label>
+                                            <Input
+                                                type="number"
+                                                value={isNaN(item.unit_price) ? '' : item.unit_price}
+                                                onChange={(e) => updateItem(index, 'unit_price', parseFloat(e.target.value))}
+                                                className="h-10 text-right pr-2"
+                                            />
+                                        </div>
+
+                                        <div className="col-span-4 text-right">
+                                            <Label className="text-xs text-muted-foreground mb-1 block">Total</Label>
+                                            <div className="h-10 flex items-center justify-end font-bold text-base">
+                                                ₹{(item.quantity * item.unit_price).toFixed(0)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
                 </CardContent>
 
                 {/* Totals Section */}
+                {/* Totals Section */}
                 <div className="bg-slate-50 border-t p-6">
-                    <div className="flex justify-end">
+                    <div className="flex flex-col md:flex-row justify-between items-end gap-6">
+                        {/* Mobile: Full Width Add Item */}
+                        <div className="w-full md:hidden">
+                            <Button type="button" size="lg" variant="outline" className="w-full border-dashed border-2" onClick={addItem}>
+                                <Plus className="h-4 w-4 mr-2" /> Add Another Item
+                            </Button>
+                        </div>
+
                         <div className="w-full md:w-1/3 space-y-3">
+                            {/* Mobile Header for Totals */}
+                            <h4 className="font-semibold md:hidden pb-2 mb-2 border-b">Summary</h4>
+
                             <div className="flex justify-between text-sm">
                                 <span className="text-muted-foreground">Subtotal</span>
                                 <span>₹{totals.subtotal.toFixed(2)}</span>
