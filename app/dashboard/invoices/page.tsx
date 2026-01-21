@@ -142,33 +142,35 @@ export default function InvoicesPage() {
                     {/* Mobile Card List View */}
                     <div className="md:hidden space-y-4">
                         {invoices.length === 0 && (
-                            <div className="text-center py-10 text-muted-foreground border rounded-md bg-muted/10">
+                            <div className="text-center py-10 text-slate-400 font-medium border-2 border-dashed border-slate-100 rounded-lg">
                                 No invoices generated yet.
                             </div>
                         )}
                         {invoices.map((invoice) => (
-                            <div key={invoice.id} className="bg-card text-card-foreground rounded-lg border shadow-sm p-4 space-y-3">
+                            <div key={invoice.id} className="bg-white rounded-xl border-none shadow-md ring-1 ring-slate-100 p-4 space-y-3 transition-all active:scale-[0.98]">
                                 <div className="flex justify-between items-start">
                                     <div>
-                                        <div className="font-semibold text-base">{invoice.customer_snapshot?.name || 'Unknown'}</div>
-                                        <div className="text-xs text-muted-foreground">
+                                        <div className="font-bold text-lg text-slate-800">{invoice.customer_snapshot?.name || 'Unknown'}</div>
+                                        <div className="text-xs text-slate-500 font-medium mt-0.5">
                                             #{invoice.invoice_number} • {format(new Date(invoice.date), 'dd MMM yyyy')}
                                         </div>
                                     </div>
-                                    <span className={`px-2 py-1 rounded-full text-[10px] font-semibold uppercase ${invoice.status === 'finalized' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ring-1 ${invoice.status === 'finalized'
+                                            ? 'bg-emerald-50 text-emerald-700 ring-emerald-100'
+                                            : 'bg-amber-50 text-amber-700 ring-amber-100'
                                         }`}>
                                         {invoice.status}
                                     </span>
                                 </div>
 
-                                <div className="flex justify-between items-end border-t pt-3">
-                                    <div>
-                                        <div className="text-xs text-muted-foreground">Grand Total</div>
-                                        <div className="text-xl font-bold">₹{invoice.grand_total.toLocaleString('en-IN')}</div>
+                                <div className="flex justify-between items-center pt-3 border-t border-slate-50">
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Grand Total</span>
+                                        <span className="text-xl font-bold text-slate-900 leading-tight">₹{invoice.grand_total.toLocaleString('en-IN')}</span>
                                     </div>
                                     <Link href={`/dashboard/invoices/${invoice.id}`}>
-                                        <Button size="sm" variant="outline">
-                                            <FileText className="mr-2 h-4 w-4" /> View
+                                        <Button size="sm" variant="outline" className="border-slate-200 text-slate-600 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50">
+                                            <FileText className="mr-2 h-4 w-4" /> View Details
                                         </Button>
                                     </Link>
                                 </div>

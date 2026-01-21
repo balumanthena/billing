@@ -236,24 +236,24 @@ export default function ReportsPage() {
                                 </div>
 
                                 {/* Mobile List View */}
-                                <div className="md:hidden flex flex-col divide-y">
+                                <div className="md:hidden space-y-4 pt-2">
                                     {outstandingData.length === 0 && (
-                                        <div className="text-center py-8 text-muted-foreground">No outstanding payments.</div>
+                                        <div className="text-center py-10 text-slate-400 font-medium border-2 border-dashed border-slate-100 rounded-lg">No outstanding payments.</div>
                                     )}
                                     {outstandingData.map((inv) => (
-                                        <div key={inv.id} className="p-4 flex flex-col gap-2">
+                                        <div key={inv.id} className="bg-white rounded-xl border-none shadow-md ring-1 ring-slate-100 p-4 space-y-3 transition-all active:scale-[0.98]">
                                             <div className="flex justify-between items-start">
                                                 <div>
-                                                    <div className="font-semibold text-sm">{inv.customer_name}</div>
-                                                    <div className="text-xs text-muted-foreground">#{inv.invoice_number} • {new Date(inv.date).toLocaleDateString('en-IN')}</div>
+                                                    <div className="font-bold text-lg text-slate-800">{inv.customer_name}</div>
+                                                    <div className="text-xs text-slate-500 font-medium mt-0.5">#{inv.invoice_number} • {new Date(inv.date).toLocaleDateString('en-IN')}</div>
                                                 </div>
                                                 <div className="text-right">
-                                                    <div className="font-bold text-base">₹{inv.pending_amount.toLocaleString('en-IN')}</div>
+                                                    <div className="font-bold text-lg text-slate-900">₹{inv.pending_amount.toLocaleString('en-IN')}</div>
                                                 </div>
                                             </div>
-                                            <div className="flex justify-start">
-                                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${inv.age_days > 60 ? 'bg-red-100 text-red-700' :
-                                                    inv.age_days > 30 ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
+                                            <div className="flex justify-start pt-2 border-t border-slate-50">
+                                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ring-1 ${inv.age_days > 60 ? 'bg-red-50 text-red-700 ring-red-100' :
+                                                    inv.age_days > 30 ? 'bg-amber-50 text-amber-700 ring-amber-100' : 'bg-emerald-50 text-emerald-700 ring-emerald-100'
                                                     }`}>
                                                     Overdue by {inv.age_days} Days
                                                 </span>
@@ -328,30 +328,34 @@ export default function ReportsPage() {
                                 </div>
 
                                 {/* Mobile List View */}
-                                <div className="md:hidden flex flex-col divide-y">
+                                <div className="md:hidden space-y-4 pt-2">
                                     {salesData.map((inv: any) => (
-                                        <div key={inv.id} className="p-4 flex flex-col gap-2">
-                                            <div className="flex justify-between">
-                                                <div className="font-semibold text-sm">{inv.customer_name}</div>
-                                                <div className="text-xs text-muted-foreground">{new Date(inv.date).toLocaleDateString('en-IN')}</div>
-                                            </div>
-                                            <div className="flex justify-between items-center text-xs text-muted-foreground">
-                                                <span>#{inv.invoice_number}</span>
-                                                <span className="font-mono">{inv.gstin || 'No GSTIN'}</span>
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-2 mt-1 text-xs bg-muted/30 p-2 rounded">
-                                                <div className="flex justify-between">
-                                                    <span className="text-muted-foreground">Taxable:</span>
-                                                    <span>₹{inv.taxable_amount?.toLocaleString('en-IN')}</span>
+                                        <div key={inv.id} className="bg-white rounded-xl border-none shadow-md ring-1 ring-slate-100 p-4 space-y-3 transition-all active:scale-[0.98]">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <div className="font-bold text-base text-slate-800">{inv.customer_name}</div>
+                                                    <div className="text-xs text-slate-500 font-medium mt-0.5">{new Date(inv.date).toLocaleDateString('en-IN')}</div>
                                                 </div>
-                                                <div className="flex justify-between">
-                                                    <span className="text-muted-foreground">Tax:</span>
-                                                    <span>₹{((inv.cgst || 0) + (inv.sgst || 0) + (inv.igst || 0)).toLocaleString('en-IN')}</span>
+                                                <div className="text-right">
+                                                    <div className="text-xs text-slate-400 font-medium">#{inv.invoice_number}</div>
+                                                    <div className="font-mono text-xs text-slate-500 bg-slate-50 px-1.5 py-0.5 rounded mt-1">{inv.gstin || 'No GSTIN'}</div>
                                                 </div>
                                             </div>
-                                            <div className="flex justify-between items-center pt-1">
-                                                <span className="text-xs font-medium text-muted-foreground">Total Amount</span>
-                                                <span className="font-bold text-base">₹{inv.grand_total?.toLocaleString('en-IN')}</span>
+
+                                            <div className="grid grid-cols-2 gap-3 mt-2 text-xs bg-slate-50/80 p-3 rounded-lg border border-slate-100">
+                                                <div className="flex justify-between">
+                                                    <span className="text-slate-500 font-medium">Taxable</span>
+                                                    <span className="font-mono text-slate-700">₹{inv.taxable_amount?.toLocaleString('en-IN')}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-slate-500 font-medium">Tax</span>
+                                                    <span className="font-mono text-slate-700">₹{((inv.cgst || 0) + (inv.sgst || 0) + (inv.igst || 0)).toLocaleString('en-IN')}</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex justify-between items-center pt-2 border-t border-slate-50">
+                                                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Amount</span>
+                                                <span className="font-bold text-lg text-emerald-700">₹{inv.grand_total?.toLocaleString('en-IN')}</span>
                                             </div>
                                         </div>
                                     ))}
@@ -423,51 +427,57 @@ export default function ReportsPage() {
                                     </div>
 
                                     {/* Mobile Card View */}
-                                    <div className="md:hidden flex flex-col gap-4 p-4">
+                                    <div className="md:hidden flex flex-col gap-4 pt-2">
                                         {/* Output Card */}
-                                        <div className="border rounded-lg p-4 space-y-3">
-                                            <h4 className="font-semibold text-sm border-b pb-2">Output Supply (Sales)</h4>
+                                        <div className="bg-white rounded-xl border-none shadow-md ring-1 ring-slate-100 p-4 space-y-4">
+                                            <h4 className="font-bold text-sm text-slate-800 border-b border-slate-100 pb-3 flex items-center gap-2">
+                                                <TrendingDown className="h-4 w-4 text-red-500" />
+                                                Output Supply (Sales)
+                                            </h4>
                                             <div className="flex justify-between text-sm">
-                                                <span className="text-muted-foreground">Taxable Value</span>
-                                                <span>₹{gstData.output.taxable.toLocaleString('en-IN')}</span>
+                                                <span className="text-slate-500 font-medium">Taxable Value</span>
+                                                <span className="font-mono text-slate-900">₹{gstData.output.taxable.toLocaleString('en-IN')}</span>
                                             </div>
-                                            <div className="grid grid-cols-3 gap-2 text-xs bg-muted/30 p-2 rounded text-center">
+                                            <div className="grid grid-cols-3 gap-2 text-xs bg-slate-50 p-3 rounded-lg border border-slate-100 text-center">
                                                 <div>
-                                                    <div className="text-muted-foreground">CGST</div>
-                                                    <div>₹{gstData.output.cgst.toLocaleString('en-IN')}</div>
+                                                    <div className="text-slate-400 font-medium mb-1">CGST</div>
+                                                    <div className="font-mono text-slate-700">₹{gstData.output.cgst.toLocaleString('en-IN')}</div>
                                                 </div>
                                                 <div>
-                                                    <div className="text-muted-foreground">SGST</div>
-                                                    <div>₹{gstData.output.sgst.toLocaleString('en-IN')}</div>
+                                                    <div className="text-slate-400 font-medium mb-1">SGST</div>
+                                                    <div className="font-mono text-slate-700">₹{gstData.output.sgst.toLocaleString('en-IN')}</div>
                                                 </div>
                                                 <div>
-                                                    <div className="text-muted-foreground">IGST</div>
-                                                    <div>₹{gstData.output.igst.toLocaleString('en-IN')}</div>
+                                                    <div className="text-slate-400 font-medium mb-1">IGST</div>
+                                                    <div className="font-mono text-slate-700">₹{gstData.output.igst.toLocaleString('en-IN')}</div>
                                                 </div>
                                             </div>
-                                            <div className="flex justify-between font-bold pt-2 border-t">
-                                                <span>Total Tax Liability</span>
-                                                <span className="text-red-600">₹{gstData.output.total.toLocaleString('en-IN')}</span>
+                                            <div className="flex justify-between font-bold pt-2 border-t border-slate-50">
+                                                <span className="text-slate-600 text-sm">Total Tax Liability</span>
+                                                <span className="text-red-600 text-lg">₹{gstData.output.total.toLocaleString('en-IN')}</span>
                                             </div>
                                         </div>
 
                                         {/* Input Card */}
-                                        <div className="border rounded-lg p-4 space-y-3">
-                                            <h4 className="font-semibold text-sm border-b pb-2">Input Credit (Purchases)</h4>
+                                        <div className="bg-white rounded-xl border-none shadow-md ring-1 ring-slate-100 p-4 space-y-4">
+                                            <h4 className="font-bold text-sm text-slate-800 border-b border-slate-100 pb-3 flex items-center gap-2">
+                                                <TrendingUp className="h-4 w-4 text-green-500" />
+                                                Input Credit (Purchases)
+                                            </h4>
                                             <div className="flex justify-between text-sm">
-                                                <span className="text-muted-foreground">Taxable Value</span>
-                                                <span>₹{gstData.input.taxable.toLocaleString('en-IN')}</span>
+                                                <span className="text-slate-500 font-medium">Taxable Value</span>
+                                                <span className="font-mono text-slate-900">₹{gstData.input.taxable.toLocaleString('en-IN')}</span>
                                             </div>
-                                            <div className="flex justify-between font-bold pt-2 border-t">
-                                                <span>Total Input Credit</span>
-                                                <span className="text-green-600">₹{gstData.input.total_gst.toLocaleString('en-IN')}</span>
+                                            <div className="flex justify-between font-bold pt-2 border-t border-slate-50">
+                                                <span className="text-slate-600 text-sm">Total Input Credit</span>
+                                                <span className="text-green-600 text-lg">₹{gstData.input.total_gst.toLocaleString('en-IN')}</span>
                                             </div>
                                         </div>
 
                                         {/* Net Card */}
-                                        <div className="bg-muted/50 rounded-lg p-4 flex justify-between items-center border border-blue-100">
-                                            <span className="font-bold text-lg">NET PAYABLE</span>
-                                            <span className="font-bold text-xl text-blue-700">₹{gstData.net_payable.toLocaleString('en-IN')}</span>
+                                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 flex justify-between items-center border border-blue-100 shadow-sm">
+                                            <span className="font-bold text-blue-900 text-sm uppercase tracking-wide">NET PAYABLE</span>
+                                            <span className="font-bold text-2xl text-blue-700">₹{gstData.net_payable.toLocaleString('en-IN')}</span>
                                         </div>
                                     </div>
                                 </CardContent>

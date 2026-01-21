@@ -214,30 +214,35 @@ export default function PartiesPage() {
                     {/* Mobile Card List */}
                     <div className="md:hidden space-y-4">
                         {parties.length === 0 && (
-                            <div className="text-center py-10 text-muted-foreground border rounded-md bg-muted/10">
+                            <div className="text-center py-10 text-slate-400 font-medium border-2 border-dashed border-slate-100 rounded-lg">
                                 No parties found. Add one to get started.
                             </div>
                         )}
                         {parties.map((party) => (
-                            <div key={party.id} className="bg-card text-card-foreground rounded-lg border shadow-sm p-4 space-y-3">
+                            <div key={party.id} className="bg-white rounded-xl border-none shadow-md ring-1 ring-slate-100 p-4 space-y-3 transition-all active:scale-[0.98]">
                                 <div className="flex justify-between items-start">
-                                    <div className="font-semibold text-base">{party.name}</div>
-                                    <span className="capitalize text-xs bg-muted px-2 py-1 rounded">{party.type}</span>
-                                </div>
-                                <div className="text-sm space-y-1">
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">GSTIN:</span>
-                                        <span className="font-mono">{party.gstin || '-'}</span>
+                                    <div>
+                                        <div className="font-bold text-lg text-slate-800">{party.name}</div>
+                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${party.type === 'customer'
+                                                ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100'
+                                                : 'bg-rose-50 text-rose-700 ring-1 ring-rose-100'
+                                            }`}>
+                                            {party.type}
+                                        </span>
                                     </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">State:</span>
-                                        <span>{party.state} ({party.state_code})</span>
-                                    </div>
-                                </div>
-                                <div className="flex justify-end pt-2 border-t">
-                                    <Button variant="outline" size="sm" onClick={() => handleEdit(party)}>
-                                        <Pencil className="mr-2 h-3 w-3" /> Edit
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50" onClick={() => handleEdit(party)}>
+                                        <Pencil className="h-4 w-4" />
                                     </Button>
+                                </div>
+                                <div className="space-y-2 pt-2 border-t border-slate-50">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-slate-500 font-medium">GSTIN</span>
+                                        <span className="font-mono text-slate-700 bg-slate-50 px-2 py-0.5 rounded">{party.gstin || 'N/A'}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-slate-500 font-medium">State</span>
+                                        <span className="text-slate-700 font-medium">{party.state} <span className="text-slate-400 text-xs">({party.state_code})</span></span>
+                                    </div>
                                 </div>
                             </div>
                         ))}

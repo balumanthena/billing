@@ -150,27 +150,37 @@ export default function ServicesPage() {
                     {/* Mobile Card List */}
                     <div className="md:hidden space-y-4">
                         {items.length === 0 && (
-                            <div className="text-center py-10 text-muted-foreground border rounded-md bg-muted/10">
+                            <div className="text-center py-10 text-slate-400 font-medium border-2 border-dashed border-slate-100 rounded-lg">
                                 No items found. Add services or products.
                             </div>
                         )}
                         {items.map((item) => (
-                            <div key={item.id} className="bg-card text-card-foreground rounded-lg border shadow-sm p-4 space-y-3">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <div className="font-semibold text-base">{item.name}</div>
-                                        {item.description && <div className="text-xs text-muted-foreground">{item.description}</div>}
+                            <div key={item.id} className="bg-white rounded-xl border-none shadow-md ring-1 ring-slate-100 p-4 space-y-3 transition-all active:scale-[0.98]">
+                                <div className="flex justify-between items-start gap-4">
+                                    <div className="flex-1">
+                                        <div className="font-bold text-lg text-slate-800 leading-tight">{item.name}</div>
+                                        {item.description && <div className="text-sm text-slate-500 mt-1 line-clamp-2">{item.description}</div>}
                                     </div>
-                                    <div className="font-bold">₹{item.unit_price}</div>
+                                    <div className="flex flex-col items-end gap-2">
+                                        <div className="font-bold text-lg text-slate-900">₹{item.unit_price}</div>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50 -mr-2 -mt-2" onClick={() => handleEdit(item)}>
+                                            <Pencil className="h-4 w-4" />
+                                        </Button>
+                                    </div>
                                 </div>
-                                <div className="flex gap-4 text-xs text-muted-foreground">
-                                    <div className="bg-muted px-2 py-1 rounded">SAC: {item.sac_code}</div>
-                                    <div className="bg-muted px-2 py-1 rounded">Tax: {item.tax_rate}%</div>
-                                </div>
-                                <div className="flex justify-end pt-2 border-t">
-                                    <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
-                                        <Pencil className="mr-2 h-3 w-3" /> Edit
-                                    </Button>
+
+                                <div className="flex items-center gap-3 pt-3 border-t border-slate-50">
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] text-slate-400 uppercase font-semibold">SAC Code</span>
+                                        <span className="text-sm font-mono font-medium text-slate-700">{item.sac_code}</span>
+                                    </div>
+                                    <div className="w-px h-8 bg-slate-100"></div>
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] text-slate-400 uppercase font-semibold">Tax Rate</span>
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-slate-100 text-slate-700">
+                                            {item.tax_rate}%
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         ))}
