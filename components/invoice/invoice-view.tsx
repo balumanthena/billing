@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Download, ArrowLeft, Trash2, CheckCircle, Ban } from 'lucide-react'
+import { Download, ArrowLeft, Trash2, CheckCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { InvoicePDF } from './invoice-pdf'
@@ -11,6 +11,17 @@ import { CancelInvoiceDialog } from './cancel-dialog'
 import { finalizeInvoice, deleteInvoice } from '@/app/actions/invoices'
 import { useState } from 'react'
 import { Badge } from "@/components/ui/badge"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 // Dynamically import PDFDownloadLink to avoid server-side issues
 const PDFDownloadLink = dynamic(
@@ -26,7 +37,6 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
     const [loading, setLoading] = useState(false)
 
     const handleFinalize = async () => {
-        if (!confirm('Are you sure you want to finalize this invoice? It will be locked for editing.')) return
         setLoading(true)
         await finalizeInvoice(invoice.id)
         setLoading(false)
@@ -82,9 +92,37 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
                             <Button variant="outline" size="sm" onClick={handleDelete} disabled={loading}>
                                 <Trash2 className="h-4 w-4 mr-2" /> Delete
                             </Button>
-                            <Button variant="default" size="sm" onClick={handleFinalize} disabled={loading} className="bg-green-600 hover:bg-green-700">
-                                <CheckCircle className="h-4 w-4 mr-2" /> Finalize
-                            </Button>
+
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="default" size="sm" disabled={loading} className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm ring-1 ring-emerald-600">
+                                        <CheckCircle className="h-4 w-4 mr-2" /> Finalize
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent className="max-w-md border-none shadow-2xl ring-1 ring-slate-100">
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                                            <CheckCircle className="h-6 w-6 text-emerald-600" />
+                                            Finalize Invoice?
+                                        </AlertDialogTitle>
+                                        <AlertDialogDescription className="text-base text-slate-600">
+                                            This action will lock the invoice and prevent any further edits.
+                                            <br /><br />
+                                            <span className="bg-emerald-50 text-emerald-800 px-2 py-1 rounded text-sm font-medium border border-emerald-100">
+                                                Invoice #{invoice.invoice_number}
+                                            </span>
+                                            <br /><br />
+                                            Are you sure you want to proceed with finalizing this document?
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter className="mt-4">
+                                        <AlertDialogCancel className="border-slate-200 text-slate-600 hover:bg-slate-50">Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={handleFinalize} className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium shadow-md">
+                                            Yes, Finalize Invoice
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
                         </>
                     )}
 
