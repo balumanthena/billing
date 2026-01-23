@@ -18,10 +18,9 @@ export default async function DashboardLayout({
     return (
         <Sheet>
             <div className="flex min-h-screen flex-col pb-16 md:pb-0">
-                <header className="sticky top-0 z-30 flex h-16 items-center border-b bg-background px-4 md:px-6">
-                    <div className="flex items-center gap-2 text-lg font-semibold md:text-base">
-                        <Package2 className="h-6 w-6" />
-                        <span className="">Billing Citrux</span>
+                <header className="sticky top-0 z-30 flex h-16 items-center border-b border-gray-800 bg-gray-900 text-white pl-2 pr-4 md:pr-6 shadow-md">
+                    <div className="flex items-center gap-2 text-lg font-semibold md:text-base h-full">
+                        <img src="/logo.png" alt="CitruX Health Solutions" className="h-16 w-auto" />
                     </div>
                     {/* Desktop Sidebar Trigger (Hidden on Desktop usually, but here just hidden completely as we have sidebar) */}
 
@@ -48,9 +47,8 @@ export default async function DashboardLayout({
                     Main navigation menu for mobile devices
                 </SheetDescription>
                 <nav className="grid gap-2 text-lg font-medium">
-                    <div className="flex items-center gap-2 text-lg font-semibold mb-4">
-                        <Package2 className="h-6 w-6" />
-                        <span className="sr-only">Acme Inc</span>
+                    <div className="flex items-center gap-2 text-lg font-semibold mb-4 bg-gray-900 text-white p-2 rounded-md">
+                        <img src="/logo.png" alt="CitruX Health Solutions" className="h-8 w-auto" />
                     </div>
                     {/* Reusing SidebarNav but tailored for sheet if needed, or just insert links directly */}
                     {/* For simplicity, let's render SidebarNav here too */}
