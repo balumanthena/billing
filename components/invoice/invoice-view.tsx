@@ -9,8 +9,10 @@ import { InvoicePDF } from './invoice-pdf'
 import { IssueCreditNoteDialog } from './credit-note-dialog'
 import { CancelInvoiceDialog } from './cancel-dialog'
 import { finalizeInvoice, deleteInvoice } from '@/app/actions/invoices'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Badge } from "@/components/ui/badge"
+// @ts-ignore
+import bwipjs from 'bwip-js'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -35,6 +37,26 @@ const PDFDownloadLink = dynamic(
 export default function InvoiceDetailView({ invoice }: { invoice: any }) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+    const [barcodeUrl, setBarcodeUrl] = useState<string>('')
+
+    useEffect(() => {
+        try {
+            const canvas = document.createElement('canvas')
+
+            // Format data for the QR code
+            const qrData = `Invoice: ${invoice.invoice_number}\nCustomer: ${invoice.customer_snapshot.name}\nDate: ${invoice.date}\nAmount: ${invoice.grand_total}`
+
+            bwipjs.toCanvas(canvas, {
+                bcid: 'qrcode',        // QR Code
+                text: qrData,          // Formatted text
+                scale: 3,              // Scaling factor
+                includetext: false,    // No text below QR code
+            })
+            setBarcodeUrl(canvas.toDataURL('image/png'))
+        } catch (e) {
+            console.error('QR generation failed', e)
+        }
+    }, [invoice])
 
     const handleFinalize = async () => {
         setLoading(true)
@@ -132,7 +154,7 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
                             <IssueCreditNoteDialog invoice={invoice} />
 
                             <PDFDownloadLink
-                                document={<InvoicePDF invoice={invoice} />}
+                                document={<InvoicePDF invoice={{ ...invoice, barcodeUrl }} />}
                                 fileName={`${invoice.invoice_number}.pdf`}
                             >
                                 {({ blob, url, loading, error }) =>

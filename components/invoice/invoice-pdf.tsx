@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 40,
+        marginBottom: 20,
     },
     companySection: {
         width: '55%',
@@ -219,13 +219,13 @@ export const InvoicePDF = ({ invoice }: InvoicePDFProps) => {
                 {/* Header Section */}
                 <View style={styles.header}>
                     <View style={styles.companySection}>
-                        {/* Logo if available */}
-                        {company?.logo_url && (
+                        {/* Logo removed as per request */}
+                        {/* {company?.logo_url && (
                             <Image
                                 src={company.logo_url}
                                 style={{ width: 100, height: 40, objectFit: 'contain', marginBottom: 10 }}
                             />
-                        )}
+                        )} */}
                         <Text style={styles.companyName}>{company?.name || 'Company Name'}</Text>
                         <Text style={styles.companyText}>{company?.address}</Text>
                         <Text style={styles.companyText}>{company?.state} ({company?.state_code})</Text>
@@ -260,6 +260,13 @@ export const InvoicePDF = ({ invoice }: InvoicePDFProps) => {
                                 {invoice.status.toUpperCase()}
                             </Text>
                         </View>
+
+                        {/* QR Code */}
+                        {invoice.barcodeUrl && (
+                            <View style={{ marginTop: 10, alignItems: 'flex-end', width: '100%' }}>
+                                <Image src={invoice.barcodeUrl} style={{ width: 60, height: 60 }} />
+                            </View>
+                        )}
                     </View>
                 </View>
 
@@ -342,6 +349,8 @@ export const InvoicePDF = ({ invoice }: InvoicePDFProps) => {
                         </View>
                     </View>
                 </View>
+
+
 
                 {/* Footer */}
                 <View style={styles.footer}>

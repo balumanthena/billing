@@ -179,13 +179,21 @@ export default function CompanyPage() {
 
                             {/* Preview */}
                             {logoUrl ? (
-                                <div className="mb-4">
+                                <div className="mb-4 flex items-center gap-4">
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src={logoUrl}
                                         alt="Company Logo"
                                         className="h-20 object-contain border rounded p-1"
                                     />
+                                    <Button
+                                        type="button"
+                                        variant="destructive"
+                                        size="sm"
+                                        onClick={() => setLogoUrl('')}
+                                    >
+                                        Remove Logo
+                                    </Button>
                                 </div>
                             ) : null}
 
