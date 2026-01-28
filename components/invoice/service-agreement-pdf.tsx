@@ -177,7 +177,7 @@ export const ServiceAgreementPDF = ({ invoice }: ServiceAgreementProps) => {
     // 1. DATA EXTRACTION
     const agreementType = "MASTER SERVICES AGREEMENT"; // Fixed or from input? Prompt says {{agreement_type}} input. defaulting.
     const agreementDate = invoice.date ? format(new Date(invoice.date), 'MMMM dd, yyyy') : format(new Date(), 'MMMM dd, yyyy');
-    const version = invoice.project_settings?.agreement_version || '1.0';
+    const version = invoice.project_settings?.agreementVersion || '1.0';
     const invoiceId = invoice.invoice_number || invoice.agreement_number || 'DRAFT';
 
     // Parties
@@ -190,9 +190,9 @@ export const ServiceAgreementPDF = ({ invoice }: ServiceAgreementProps) => {
 
     // Commercials
     const grandTotal = invoice.grand_total || 0;
-    const advancePercent = invoice.project_settings?.advance_percent || '0';
-    const milestonePercent = invoice.project_settings?.milestone_percent || '0';
-    const finalPercent = invoice.project_settings?.final_percent || '0';
+    const advancePercent = invoice.project_settings?.advancePercent || '0';
+    const milestonePercent = invoice.project_settings?.milestonePercent || '0';
+    const finalPercent = invoice.project_settings?.finalPercent || '0';
 
     // Services
     // Prefer services_snapshot, fallback to invoice_items
@@ -322,20 +322,20 @@ export const ServiceAgreementPDF = ({ invoice }: ServiceAgreementProps) => {
 
                 {/* 5. PROJECT SPECIFICATIONS */}
                 {/* Only include if present in project_settings */}
-                {invoice.project_settings?.technology_stack || invoice.project_settings?.total_pages ? (
+                {invoice.project_settings?.technologyStack || invoice.project_settings?.totalPages ? (
                     <View style={styles.section}>
                         <Text style={styles.heading}>5. PROJECT SPECIFICATIONS</Text>
                         <View style={styles.list}>
-                            {invoice.project_settings?.technology_stack && (
+                            {invoice.project_settings?.technologyStack && (
                                 <View style={styles.listItem}>
                                     <Text style={styles.bullet}>•</Text>
-                                    <Text style={styles.text}><Text style={styles.bold}>Technology Stack:</Text> {invoice.project_settings.technology_stack}</Text>
+                                    <Text style={styles.text}><Text style={styles.bold}>Technology Stack:</Text> {invoice.project_settings.technologyStack}</Text>
                                 </View>
                             )}
-                            {invoice.project_settings?.total_pages && (
+                            {invoice.project_settings?.totalPages && (
                                 <View style={styles.listItem}>
                                     <Text style={styles.bullet}>•</Text>
-                                    <Text style={styles.text}><Text style={styles.bold}>Estimated Volume:</Text> {invoice.project_settings.total_pages}</Text>
+                                    <Text style={styles.text}><Text style={styles.bold}>Estimated Volume:</Text> {invoice.project_settings.totalPages}</Text>
                                 </View>
                             )}
                         </View>
