@@ -36,8 +36,12 @@ export async function updateCompany(prevState: any, formData: FormData) {
     const name = formData.get('name') as string
     const gstin = formData.get('gstin') as string
     const address = formData.get('address') as string
+    const city = formData.get('city') as string
     const state = formData.get('state') as string
     const state_code = formData.get('state_code') as string
+    const email = formData.get('email') as string
+    const phone = formData.get('phone') as string
+    const pan = formData.get('pan') as string
     const logo_url = formData.get('logo_url') as string
     const id = formData.get('id') as string
 
@@ -50,8 +54,12 @@ export async function updateCompany(prevState: any, formData: FormData) {
         name,
         gstin,
         address,
+        city,
         state,
         state_code,
+        email,
+        phone,
+        pan,
         logo_url,
         // updated_at: new Date().toISOString() // Not in schema yet
     }

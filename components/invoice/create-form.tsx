@@ -49,6 +49,13 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
     // Derived state for selected customer
     const selectedCustomer = parties.find(p => p.id === customerId)
 
+    // Handle Success Redirect
+    useEffect(() => {
+        if (state.message === 'success') {
+            router.push('/dashboard/invoices')
+        }
+    }, [state.message, router])
+
     useEffect(() => {
         if (!company || !selectedCustomer) return
 

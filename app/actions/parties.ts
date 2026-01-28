@@ -47,6 +47,10 @@ export async function upsertParty(prevState: any, formData: FormData) {
     const state = formData.get('state') as string
     const state_code = formData.get('state_code') as string
     const address = formData.get('address') as string
+    const email = formData.get('email') as string
+    const phone = formData.get('phone') as string
+    const pan = formData.get('pan') as string
+    const city = formData.get('city') as string
 
     const payload = {
         company_id: profile.company_id,
@@ -56,6 +60,10 @@ export async function upsertParty(prevState: any, formData: FormData) {
         state,
         state_code,
         address,
+        email,
+        phone,
+        pan,
+        city
     }
 
     let error = null

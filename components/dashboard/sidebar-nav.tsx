@@ -42,6 +42,11 @@ const items = [
         href: "/dashboard/reports",
         icon: BarChart3,
     },
+    {
+        title: "Agreements",
+        href: "/dashboard/agreements",
+        icon: FileText,
+    },
 ]
 
 interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {

@@ -7,8 +7,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Loader2 } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
+import { GST_STATES } from '@/lib/gst-states'
+import { CITIES_BY_STATE } from '@/lib/cities'
 
 const initialState = {
     message: '',
@@ -20,6 +23,11 @@ export default function CompanyPage() {
     const [loading, setLoading] = useState(true)
     const [uploading, setUploading] = useState(false)
     const [logoUrl, setLogoUrl] = useState('')
+
+    // Controlled state for form inter-dependencies
+    const [selectedStateCode, setSelectedStateCode] = useState('')
+    const [selectedStateName, setSelectedStateName] = useState('')
+    const [selectedCity, setSelectedCity] = useState('')
 
     // Fetch company data on mount
     useEffect(() => {
@@ -38,12 +46,28 @@ export default function CompanyPage() {
         loadCompany()
     }, [])
 
-    // Initialize logoUrl from company data
+    // Initialize state from company data
     useEffect(() => {
-        if (company?.logo_url) {
-            setLogoUrl(company.logo_url)
+        if (company) {
+            if (company.logo_url) setLogoUrl(company.logo_url)
+            if (company.state_code) setSelectedStateCode(company.state_code)
+            if (company.state) setSelectedStateName(company.state)
+            if (company.city) setSelectedCity(company.city)
         }
     }, [company])
+
+    const handleStateChange = (code: string) => {
+        setSelectedStateCode(code)
+        const stateObj = GST_STATES.find(s => s.code === code)
+        if (stateObj) {
+            setSelectedStateName(stateObj.name)
+            // Reset city if state changes, as the old city might not be in new state
+            setSelectedCity('')
+        }
+    }
+
+    // Get cities for selected state
+    const availableCities = selectedStateName ? (CITIES_BY_STATE[selectedStateName] || []) : []
 
     const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         try {
@@ -158,19 +182,71 @@ export default function CompanyPage() {
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="address">Address</Label>
-                            <Input id="address" name="address" defaultValue={company?.address} placeholder="123 Business Park, Tech City" />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="address">Address</Label>
+                                <Input id="address" name="address" defaultValue={company?.address} placeholder="123 Business Park, Tech City" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="city">City</Label>
+                                <input type="hidden" name="city" value={selectedCity} />
+                                <Select value={selectedCity} onValueChange={setSelectedCity} disabled={!selectedStateName}>
+                                    <SelectTrigger id="city">
+                                        <SelectValue placeholder={selectedStateName ? "Select City" : "Select State First"} />
+                                    </SelectTrigger>
+                                    <SelectContent className="max-h-[200px]">
+                                        {availableCities.length > 0 ? (
+                                            availableCities.map((city) => (
+                                                <SelectItem key={city} value={city}>{city}</SelectItem>
+                                            ))
+                                        ) : (
+                                            <div className="p-2 text-sm text-muted-foreground text-center">
+                                                No cities found
+                                            </div>
+                                        )}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="email">Email</Label>
+                                <Input id="email" name="email" type="email" defaultValue={company?.email} placeholder="contact@company.com" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="phone">Phone</Label>
+                                <Input id="phone" name="phone" defaultValue={company?.phone} placeholder="+91 98765 43210" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="pan">PAN</Label>
+                                <Input id="pan" name="pan" defaultValue={company?.pan} placeholder="ABCDE1234F" maxLength={10} />
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="state">State</Label>
-                                <Input id="state" name="state" defaultValue={company?.state} required placeholder="Telangana" />
+                                <Label htmlFor="state_code">State</Label>
+                                {/* Hidden inputs to submit standard names */}
+                                <input type="hidden" name="state" value={selectedStateName} />
+                                <input type="hidden" name="state_code" value={selectedStateCode} />
+
+                                <Select value={selectedStateCode} onValueChange={handleStateChange}>
+                                    <SelectTrigger id="state">
+                                        <SelectValue placeholder="Select State" />
+                                    </SelectTrigger>
+                                    <SelectContent className="max-h-[200px]">
+                                        {GST_STATES.map((s) => (
+                                            <SelectItem key={s.code} value={s.code}>
+                                                {s.name} ({s.code})
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="state_code">State Code</Label>
-                                <Input id="state_code" name="state_code" defaultValue={company?.state_code} required placeholder="36" maxLength={2} />
+                                <Label htmlFor="state_code_display">State Code</Label>
+                                <Input id="state_code_display" value={selectedStateCode} disabled placeholder="Auto-filled" />
                             </div>
                         </div>
 

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Loader2, Pencil } from 'lucide-react'
 import { GST_STATES } from '@/lib/gst-states'
@@ -31,10 +31,29 @@ export default function PartiesPage() {
         type: 'customer',
         gstin: '',
         stateCode: '',
-        address: ''
+        address: '',
+        email: '',
+        phone: '',
+        pan: '',
+        city: ''
     })
 
     const [gstError, setGstError] = useState('')
+
+    const resetForm = () => {
+        setFormData({
+            name: '',
+            type: 'customer',
+            gstin: '',
+            stateCode: '',
+            address: '',
+            email: '',
+            phone: '',
+            pan: '',
+            city: ''
+        })
+        setGstError('')
+    }
 
     async function loadParties() {
         setLoading(true)
@@ -63,23 +82,18 @@ export default function PartiesPage() {
                 type: editingParty.type,
                 gstin: editingParty.gstin || '',
                 stateCode: editingParty.state_code,
-                address: editingParty.address || ''
+                address: editingParty.address || '',
+                email: editingParty.email || '',
+                phone: editingParty.phone || '',
+                pan: editingParty.pan || '',
+                city: editingParty.city || ''
             })
         } else {
             resetForm()
         }
     }, [editingParty])
 
-    const resetForm = () => {
-        setFormData({
-            name: '',
-            type: 'customer',
-            gstin: '',
-            stateCode: '',
-            address: ''
-        })
-        setGstError('')
-    }
+
 
     const handleEdit = (party: any) => {
         setEditingParty(party)
@@ -224,8 +238,8 @@ export default function PartiesPage() {
                                     <div>
                                         <div className="font-bold text-lg text-slate-800">{party.name}</div>
                                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${party.type === 'customer'
-                                                ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100'
-                                                : 'bg-rose-50 text-rose-700 ring-1 ring-rose-100'
+                                            ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100'
+                                            : 'bg-rose-50 text-rose-700 ring-1 ring-rose-100'
                                             }`}>
                                             {party.type}
                                         </span>
@@ -297,6 +311,44 @@ export default function PartiesPage() {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-4 items-start md:items-center gap-2 md:gap-4">
+                            <Label htmlFor="email" className="text-left md:text-right">Email</Label>
+                            <Input
+                                id="email"
+                                name="email"
+                                type="email"
+                                value={formData.email}
+                                onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                className="md:col-span-3"
+                                placeholder="name@company.com"
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-4 items-start md:items-center gap-2 md:gap-4">
+                            <Label htmlFor="phone" className="text-left md:text-right">Phone</Label>
+                            <Input
+                                id="phone"
+                                name="phone"
+                                value={formData.phone}
+                                onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                                className="md:col-span-3"
+                                placeholder="+91 98765 43210"
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-4 items-start md:items-center gap-2 md:gap-4">
+                            <Label htmlFor="pan" className="text-left md:text-right">PAN</Label>
+                            <Input
+                                id="pan"
+                                name="pan"
+                                value={formData.pan}
+                                onChange={e => setFormData({ ...formData, pan: e.target.value.toUpperCase() })}
+                                className="md:col-span-3"
+                                placeholder="ABCDE1234F"
+                                maxLength={10}
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-4 items-start md:items-center gap-2 md:gap-4">
                             <Label htmlFor="state_code" className="text-left md:text-right">State</Label>
                             <div className="md:col-span-3">
                                 <Select
@@ -339,6 +391,17 @@ export default function PartiesPage() {
                                 name="address"
                                 value={formData.address}
                                 onChange={e => setFormData({ ...formData, address: e.target.value })}
+                                className="md:col-span-3"
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-4 items-start md:items-center gap-2 md:gap-4">
+                            <Label htmlFor="city" className="text-left md:text-right">City</Label>
+                            <Input
+                                id="city"
+                                name="city"
+                                value={formData.city}
+                                onChange={e => setFormData({ ...formData, city: e.target.value })}
                                 className="md:col-span-3"
                             />
                         </div>

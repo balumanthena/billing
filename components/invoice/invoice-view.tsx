@@ -8,6 +8,7 @@ import dynamic from 'next/dynamic'
 import { InvoicePDF } from './invoice-pdf'
 import { IssueCreditNoteDialog } from './credit-note-dialog'
 import { CancelInvoiceDialog } from './cancel-dialog'
+import { AgreementDialog } from './agreement-dialog'
 import { finalizeInvoice, deleteInvoice } from '@/app/actions/invoices'
 import { useState, useEffect } from 'react'
 import { Badge } from "@/components/ui/badge"
@@ -66,7 +67,6 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
     }
 
     const handleDelete = async () => {
-        if (!confirm('Are you sure you want to delete this draft?')) return
         setLoading(true)
         const res = await deleteInvoice(invoice.id)
         setLoading(false)
@@ -111,9 +111,30 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
                     {/* Actions for Draft */}
                     {invoice.status === 'draft' && (
                         <>
-                            <Button variant="outline" size="sm" onClick={handleDelete} disabled={loading}>
-                                <Trash2 className="h-4 w-4 mr-2" /> Delete
-                            </Button>
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="outline" size="sm" disabled={loading} className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200">
+                                        <Trash2 className="h-4 w-4 mr-2" /> Delete
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent className="border-none shadow-xl ring-1 ring-red-100">
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+                                            <Trash2 className="h-5 w-5" />
+                                            Delete Draft Invoice?
+                                        </AlertDialogTitle>
+                                        <AlertDialogDescription className="text-slate-600">
+                                            This action cannot be undone. This will permanently delete the draft invoice <span className="font-semibold text-slate-900">{invoice.invoice_number}</span>.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700 text-white">
+                                            Delete Invoice
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
 
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
