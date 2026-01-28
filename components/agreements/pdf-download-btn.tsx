@@ -57,12 +57,13 @@ export function PdfDownloadBtn({ agreement }: { agreement: any }) {
             email: agreement.parties?.email || '',
             address: agreement.parties?.address || ''
         },
-        invoice_items: agreement.services_snapshot || []
+        invoice_items: agreement.services_snapshot || [],
+        project_settings: agreement.project_settings || {}
     }
 
     return (
         <PDFDownloadLink
-            document={<ServiceAgreementPDF invoice={mockInvoice} projectParams={agreement.project_settings || {}} />}
+            document={<ServiceAgreementPDF invoice={mockInvoice} />}
             fileName={`Agreement_${agreement.parties?.name || 'Client'}.pdf`}
         >
             {({ loading }) =>

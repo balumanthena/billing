@@ -184,7 +184,8 @@ export default function GeneratorForm({ company, parties, items }: GeneratorForm
         grand_total: calculateGrandTotal(),
         company_snapshot: company,
         customer_snapshot: selectedCustomer || {},
-        invoice_items: lineItems
+        invoice_items: lineItems,
+        project_settings: params
     }
 
     return (
@@ -473,7 +474,7 @@ export default function GeneratorForm({ company, parties, items }: GeneratorForm
                 </div>
 
                 <PDFDownloadLink
-                    document={<ServiceAgreementPDF invoice={mockInvoice} projectParams={params} />}
+                    document={<ServiceAgreementPDF invoice={mockInvoice} />}
                     fileName={`Service_Agreement_${selectedCustomer?.name || 'Draft'}.pdf`}
                 >
                     {({ loading }) =>

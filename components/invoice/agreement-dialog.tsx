@@ -128,7 +128,7 @@ export function AgreementDialog({ invoice }: AgreementDialogProps) {
 
                 <DialogFooter>
                     <PDFDownloadLink
-                        document={<ServiceAgreementPDF invoice={invoice} projectParams={params} />}
+                        document={<ServiceAgreementPDF invoice={{ ...invoice, project_settings: params }} />}
                         fileName={`Agreement-${invoice.invoice_number}.pdf`}
                     >
                         {({ loading }) =>

@@ -7,116 +7,101 @@ const styles = StyleSheet.create({
     page: {
         fontFamily: 'Helvetica',
         fontSize: 10,
-        paddingTop: 30,
+        paddingTop: 40,
         paddingBottom: 60,
-        paddingHorizontal: 40,
-        lineHeight: 1.5,
-        color: '#1a1a1a', // Darker grey for softer black
+        paddingHorizontal: 50, // Slightly wider margins for legal doc
+        lineHeight: 1.6, // More breathing room
+        color: '#000000', // Strict black for legal
     },
     // Cover Page Styles
     coverPageContainer: {
         flex: 1,
         margin: 40,
-        borderWidth: 2,
-        borderColor: '#1e3a8a',
+        borderWidth: 1,
+        borderColor: '#000000',
         padding: 40,
         flexDirection: 'column',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    coverHeader: {
-        marginTop: 60,
+        justifyContent: 'center',
         alignItems: 'center',
     },
     coverTitle: {
-        fontSize: 28,
+        fontSize: 24,
         fontWeight: 'bold',
         textTransform: 'uppercase',
-        color: '#1e3a8a',
-        marginBottom: 10,
-        letterSpacing: 1,
+        marginBottom: 20,
+        textAlign: 'center',
     },
     coverSubtitle: {
-        fontSize: 14,
-        color: '#64748b', // Slate 500
-        letterSpacing: 2,
-    },
-    coverBody: {
-        alignItems: 'center',
-        width: '100%',
+        fontSize: 16,
+        marginBottom: 60,
+        textAlign: 'center',
     },
     coverSection: {
-        marginVertical: 10,
+        marginBottom: 20,
         alignItems: 'center',
     },
     coverLabel: {
-        fontSize: 9,
-        color: '#94a3b8', // Slate 400
-        textTransform: 'uppercase',
+        fontSize: 10,
+        color: '#444',
         marginBottom: 4,
-        letterSpacing: 1,
+        textTransform: 'uppercase',
     },
     coverValue: {
         fontSize: 14,
         fontWeight: 'bold',
-        color: '#0f172a', // Slate 900
-    },
-    coverDivider: {
-        width: 40,
-        height: 2,
-        backgroundColor: '#e2e8f0',
-        marginVertical: 20,
-    },
-    coverFooter: {
-        marginBottom: 20,
-        alignItems: 'center',
     },
 
-    // Content Page Styles
+    // Header/Footer
     header: {
         position: 'absolute',
         top: 20,
-        left: 40,
-        right: 40,
+        left: 50,
+        right: 50,
         borderBottomWidth: 1,
-        borderBottomColor: '#e2e8f0',
-        paddingBottom: 10,
+        borderBottomColor: '#ccc',
+        paddingBottom: 5,
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    headerText: {
         fontSize: 8,
-        color: '#94a3b8',
+        color: '#666',
     },
+    footer: {
+        position: 'absolute',
+        bottom: 30,
+        left: 50,
+        right: 50,
+        borderTopWidth: 1,
+        borderTopColor: '#ccc',
+        paddingTop: 10,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        fontSize: 8,
+        color: '#666',
+    },
+
+    // Content
     section: {
-        marginBottom: 16,
+        marginBottom: 15,
     },
     heading: {
-        fontSize: 12,
+        fontSize: 11, // Standard legal heading size
         fontWeight: 'bold',
-        color: '#1e3a8a',
         textTransform: 'uppercase',
         marginBottom: 8,
-        borderBottomWidth: 1,
-        borderBottomColor: '#e2e8f0',
-        paddingBottom: 4,
-        letterSpacing: 0.5,
+        textDecoration: 'underline',
     },
     text: {
         fontSize: 10,
         textAlign: 'justify',
         marginBottom: 6,
-        color: '#334155', // Slate 700
     },
     bold: {
         fontWeight: 'bold',
-        color: '#0f172a',
     },
 
-    // List Styles
+    // Lists
     list: {
-        marginLeft: 10,
+        marginLeft: 20,
         marginBottom: 6,
     },
     listItem: {
@@ -126,135 +111,107 @@ const styles = StyleSheet.create({
     bullet: {
         width: 15,
         fontSize: 10,
-        color: '#1e3a8a',
     },
 
-    // Table Styles
+    // Tables
     table: {
         width: '100%',
         marginVertical: 10,
-        borderRadius: 4,
-        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: '#000',
     },
     tableHeader: {
         flexDirection: 'row',
-        backgroundColor: '#1e3a8a',
-        paddingVertical: 8,
-        paddingHorizontal: 6,
-    },
-    tableHeaderCell: {
-        color: '#ffffff',
-        fontSize: 9,
-        fontWeight: 'bold',
-        textTransform: 'uppercase',
+        backgroundColor: '#eee',
+        borderBottomWidth: 1,
+        borderBottomColor: '#000',
+        padding: 4,
     },
     tableRow: {
         flexDirection: 'row',
         borderBottomWidth: 1,
-        borderBottomColor: '#f1f5f9',
-        paddingVertical: 8,
-        paddingHorizontal: 6,
+        borderBottomColor: '#ccc',
+        padding: 4,
     },
-    tableRowAlt: {
-        backgroundColor: '#f8fafc',
+    tableCell: {
+        fontSize: 9,
     },
     col1: { width: '50%' },
     col2: { width: '25%' },
     col3: { width: '25%', textAlign: 'right' },
 
-    // Footer
-    footer: {
-        position: 'absolute',
-        bottom: 30,
-        left: 40,
-        right: 40,
-        borderTopWidth: 1,
-        borderTopColor: '#e2e8f0',
-        paddingTop: 10,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    footerText: {
-        fontSize: 8,
-        color: '#94a3b8',
+    // Financial Box
+    financialBox: {
+        borderWidth: 1,
+        borderColor: '#000',
+        padding: 10,
+        marginVertical: 10,
+        backgroundColor: '#f9f9f9',
     },
 
     // Signatures
     signatureBlock: {
-        marginTop: 40,
+        marginTop: 50,
         flexDirection: 'row',
         justifyContent: 'space-between',
         pageBreakInside: 'avoid',
-        backgroundColor: '#f8fafc',
-        padding: 20,
-        borderRadius: 4,
-        borderWidth: 1,
-        borderColor: '#e2e8f0',
     },
     signatureBox: {
         width: '45%',
     },
     signatureLine: {
         borderTopWidth: 1,
-        borderTopColor: '#94a3b8',
-        marginTop: 50,
+        borderTopColor: '#000',
+        marginTop: 40,
         marginBottom: 5,
-        borderStyle: 'dashed',
-    },
-    signatureRole: {
-        fontSize: 9,
-        fontStyle: 'italic',
-        color: '#64748b',
     }
 });
 
 interface ServiceAgreementProps {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     invoice: any;
-    projectParams: {
-        developerWebsite?: string;
-        technologyStack?: string;
-        totalPages?: string;
-        monthlyTraffic?: string;
-        blogLimit?: string;
-        appointmentMode?: string;
-        adminFeatures?: string;
-        advancePercent?: string;
-        milestonePercent?: string;
-        finalPercent?: string;
-        jurisdiction?: string;
-        acceptancePeriod?: string;
-        supportPeriod?: string;
-        agreementVersion?: string;
-    }
+    // We expect the 'invoice' object to contain all necessary data structure
 }
 
-export const ServiceAgreementPDF = ({ invoice, projectParams }: ServiceAgreementProps) => {
-    // 1. INPUT DATA MAPPING
+export const ServiceAgreementPDF = ({ invoice }: ServiceAgreementProps) => {
+
+    // 1. DATA EXTRACTION
+    const agreementType = "MASTER SERVICES AGREEMENT"; // Fixed or from input? Prompt says {{agreement_type}} input. defaulting.
+    const agreementDate = invoice.date ? format(new Date(invoice.date), 'MMMM dd, yyyy') : format(new Date(), 'MMMM dd, yyyy');
+    const version = invoice.project_settings?.agreement_version || '1.0';
+    const invoiceId = invoice.invoice_number || invoice.agreement_number || 'DRAFT';
+
+    // Parties
     const developerName = invoice.company_snapshot?.name || 'Developer Name';
-    const developerAddress = invoice.company_snapshot?.address || 'Developer Address';
-    const developerGstin = invoice.company_snapshot?.gstin || 'N/A';
+    const developerAddress = invoice.company_snapshot?.address || '';
+    const developerGstin = invoice.company_snapshot?.gstin || '';
 
     const clientName = invoice.customer_snapshot?.name || 'Client Name';
-    const clientAddress = invoice.customer_snapshot?.address || 'Client Address';
+    const clientAddress = invoice.customer_snapshot?.address || '';
 
-    const agreementDate = invoice.date ? format(new Date(invoice.date), 'MMMM dd, yyyy') : format(new Date(), 'MMMM dd, yyyy');
-    const jurisdiction = projectParams.jurisdiction || invoice.company_snapshot?.state || 'India';
+    // Commercials
+    const grandTotal = invoice.grand_total || 0;
+    const advancePercent = invoice.project_settings?.advance_percent || '0';
+    const milestonePercent = invoice.project_settings?.milestone_percent || '0';
+    const finalPercent = invoice.project_settings?.final_percent || '0';
 
-    // Fallback if jurisdiction is just a state
+    // Services
+    // Prefer services_snapshot, fallback to invoice_items
+    const services = invoice.services_snapshot || invoice.invoice_items || [];
+
+    // Clauses
+    const clauses = invoice.project_settings?.clauses || [];
+    const getClause = (key: string) => clauses.find((c: any) => c.clause_key === key);
+    const isClauseEnabled = (key: string) => {
+        const c = getClause(key);
+        return c?.enabled === true;
+    };
+    const getClauseText = (key: string) => {
+        const c = getClause(key);
+        return c?.text || '';
+    };
+
+    const jurisdiction = invoice.project_settings?.jurisdiction || invoice.company_snapshot?.state || 'India';
     const formattedJurisdiction = jurisdiction.includes(',') ? jurisdiction : `${jurisdiction}, India`;
-
-    const advance = projectParams.advancePercent || '0';
-    const milestone = projectParams.milestonePercent || '0';
-    const final = projectParams.finalPercent || '0';
-
-    const acceptanceDays = projectParams.acceptancePeriod || '7';
-    const supportDays = projectParams.supportPeriod || '30';
-    const version = projectParams.agreementVersion || '1.0';
-
-    const services = invoice.invoice_items || [];
-    const invoiceId = invoice.invoice_number || 'PENDING';
 
     const formatCurrency = (amount: number) => {
         return "Rs. " + amount.toLocaleString('en-IN', {
@@ -265,349 +222,294 @@ export const ServiceAgreementPDF = ({ invoice, projectParams }: ServiceAgreement
 
     return (
         <Document>
-            {/* COVER PAGE */}
+            {/* TITLE PAGE */}
             <Page size="A4" style={{ padding: 0 }}>
                 <View style={styles.coverPageContainer}>
-                    {/* Header Section */}
-                    <View style={styles.coverHeader}>
-                        <Text style={styles.coverTitle}>SERVICE AGREEMENT</Text>
-                        <Text style={styles.coverSubtitle}>PREPARED FOR {clientName.toUpperCase()}</Text>
+                    <Text style={styles.coverTitle}>{agreementType}</Text>
+
+                    <View style={styles.coverSection}>
+                        <Text style={styles.coverLabel}>AGREEMENT DATE</Text>
+                        <Text style={styles.coverValue}>{agreementDate}</Text>
                     </View>
 
-                    {/* Middle Section */}
-                    <View style={styles.coverBody}>
-                        <View style={styles.coverSection}>
-                            <Text style={styles.coverLabel}>Agreement Date</Text>
-                            <Text style={styles.coverValue}>{agreementDate}</Text>
-                        </View>
-
-                        <View style={styles.coverSection}>
-                            <Text style={styles.coverLabel}>Version</Text>
-                            <Text style={styles.coverValue}>{version}</Text>
-                        </View>
-
-                        <View style={styles.coverDivider} />
-
-                        <View style={styles.coverSection}>
-                            <Text style={styles.coverLabel}>Service Provider</Text>
-                            <Text style={styles.coverValue}>{developerName}</Text>
-                        </View>
-
-                        <View style={styles.coverSection}>
-                            <Text style={styles.coverLabel}>Client</Text>
-                            <Text style={styles.coverValue}>{clientName}</Text>
-                        </View>
+                    <View style={styles.coverSection}>
+                        <Text style={styles.coverLabel}>VERSION</Text>
+                        <Text style={styles.coverValue}>{version}</Text>
                     </View>
 
-                    {/* Footer Section */}
-                    <View style={styles.coverFooter}>
-                        <Text style={{ fontSize: 10, color: '#94a3b8' }}>Reference ID: {invoiceId}</Text>
+                    <View style={styles.coverSection}>
+                        <Text style={styles.coverLabel}>REFERENCE ID</Text>
+                        <Text style={styles.coverValue}>{invoiceId}</Text>
+                    </View>
+
+                    <View style={{ height: 40 }} />
+
+                    <View style={styles.coverSection}>
+                        <Text style={styles.coverLabel}>BETWEEN</Text>
+                        <Text style={[styles.coverValue, { fontSize: 18 }]}>{developerName}</Text>
+                        <Text style={{ fontSize: 10, marginTop: 4 }}>AND</Text>
+                        <Text style={[styles.coverValue, { fontSize: 18, marginTop: 4 }]}>{clientName}</Text>
                     </View>
                 </View>
             </Page>
 
-            {/* CONTENT PAGES */}
+            {/* CONTENT */}
             <Page size="A4" style={styles.page}>
-                {/* Header */}
                 <View style={styles.header} fixed>
-                    <Text style={[styles.headerText, { fontWeight: 'bold', color: '#1e3a8a' }]}>SERVICE AGREEMENT</Text>
-                    <Text style={styles.headerText}>{developerName}  |  {invoiceId}</Text>
-                </View>
-
-                {/* Footer */}
-                <View style={styles.footer} fixed>
-                    <Text style={styles.footerText}>Confidential & Proprietary</Text>
-                    <Text style={styles.footerText} render={({ pageNumber, totalPages }) => (
-                        `Page ${pageNumber} of ${totalPages}`
-                    )} />
+                    <Text>{agreementType}</Text>
+                    <Text>{invoiceId}</Text>
                 </View>
 
                 {/* 1. DEFINITIONS */}
                 <View style={styles.section}>
-                    <Text style={styles.heading}>1. Definitions & Interpretation</Text>
+                    <Text style={styles.heading}>1. DEFINITIONS & INTERPRETATION</Text>
                     <Text style={styles.text}>
-                        <Text style={styles.bold}>"Agreement"</Text> shall mean this Service Agreement, including all schedules and the Invoice.
+                        <Text style={styles.bold}>"Agreement"</Text> means this {agreementType}, including all schedules, annexures, and the Invoice.
                     </Text>
                     <Text style={styles.text}>
-                        <Text style={styles.bold}>"Developer"</Text> or "Service Provider" refers to {developerName}, providing the services.
+                        <Text style={styles.bold}>"Services"</Text> means the scope of work defined in Section 4 and the detailed line items in the Invoice.
                     </Text>
                     <Text style={styles.text}>
-                        <Text style={styles.bold}>"Client"</Text> refers to {clientName}, the recipient of services.
+                        <Text style={styles.bold}>"Deliverables"</Text> means all software, designs, documentation, and other materials developed by the Developer for the Client.
                     </Text>
                     <Text style={styles.text}>
-                        <Text style={styles.bold}>"Services"</Text> means the specific tasks and deliverables outlined in this Agreement and the corresponding Invoice.
-                    </Text>
-                    <Text style={styles.text}>
-                        <Text style={styles.bold}>"Invoice"</Text> refers to Invoice ID {invoiceId}, which serves as the primary commercial document.
-                    </Text>
-                    <Text style={styles.text}>
-                        In this Agreement, singular includes plural, and headings are for convenience only.
+                        <Text style={styles.bold}>"Effective Date"</Text> means the date specified on the Title Page.
                     </Text>
                 </View>
 
                 {/* 2. PARTIES */}
                 <View style={styles.section}>
-                    <Text style={styles.heading}>2. Parties</Text>
-                    <View style={{ marginBottom: 10, padding: 10, backgroundColor: '#f8fafc', borderRadius: 4 }}>
-                        <Text style={[styles.text, { marginBottom: 2 }]}>
-                            <Text style={styles.bold}>The Developer:</Text> {developerName}
+                    <Text style={styles.heading}>2. PARTIES</Text>
+                    <Text style={styles.text}>This Agreement is entered into by and between:</Text>
+
+                    <View style={{ marginLeft: 10, marginTop: 5 }}>
+                        <Text style={styles.text}>
+                            <Text style={styles.bold}>DEVELOPER:</Text> {developerName}, located at {developerAddress} (GSTIN: {developerGstin}).
                         </Text>
-                        <Text style={[styles.text, { marginBottom: 2, fontSize: 9, color: '#64748b' }]}>
-                            Address: {developerAddress}
-                        </Text>
-                        <Text style={[styles.text, { fontSize: 9, color: '#64748b' }]}>
-                            GSTIN: {developerGstin}
-                        </Text>
-                    </View>
-                    <View style={{ padding: 10, backgroundColor: '#f8fafc', borderRadius: 4 }}>
-                        <Text style={[styles.text, { marginBottom: 2 }]}>
-                            <Text style={styles.bold}>The Client:</Text> {clientName}
-                        </Text>
-                        <Text style={[styles.text, { fontSize: 9, color: '#64748b' }]}>
-                            Address: {clientAddress}
+                        <Text style={styles.text}>
+                            <Text style={styles.bold}>CLIENT:</Text> {clientName}, located at {clientAddress}.
                         </Text>
                     </View>
                 </View>
 
-                {/* 3. EFFECTIVE DATE */}
+                {/* 3. EFFECTIVE DATE & TERM */}
                 <View style={styles.section}>
-                    <Text style={styles.heading}>3. Effective Date & Term</Text>
+                    <Text style={styles.heading}>3. EFFECTIVE DATE & TERM</Text>
                     <Text style={styles.text}>
-                        This Agreement shall commence on <Text style={styles.bold}>{agreementDate}</Text> ("Effective Date") and shall remain valid until the completion of the Services or termination by either Party in accordance with this Agreement.
+                        This Agreement shall commence on the Effective Date ({agreementDate}) and shall continue until the completion of the Services, unless terminated earlier in accordance with the provisions of this Agreement.
                     </Text>
                 </View>
 
                 {/* 4. SCOPE OF SERVICES */}
                 <View style={styles.section}>
-                    <Text style={styles.heading}>4. Scope of Services</Text>
-                    <Text style={styles.text}>The Developer agrees to provide the following Services to the Client:</Text>
-
-                    {/* CUSTOM TABLE */}
+                    <Text style={styles.heading}>4. SCOPE OF SERVICES</Text>
+                    <Text style={styles.text}>The Developer shall provide the following Services:</Text>
                     <View style={styles.table}>
                         <View style={styles.tableHeader}>
-                            <View style={styles.col1}><Text style={styles.tableHeaderCell}>Service Description</Text></View>
-                            <View style={styles.col2}><Text style={styles.tableHeaderCell}>SAC/HSN</Text></View>
-                            <View style={styles.col3}><Text style={styles.tableHeaderCell}>GST Rate</Text></View>
+                            <View style={styles.col1}><Text style={[styles.tableCell, styles.bold]}>Service / Item</Text></View>
+                            <View style={styles.col2}><Text style={[styles.tableCell, styles.bold]}>HSN/SAC</Text></View>
+                            <View style={styles.col3}><Text style={[styles.tableCell, styles.bold, { textAlign: 'right' }]}>Rate</Text></View>
                         </View>
-                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                        {services.map((item: any, index: number) => (
-                            <View style={[styles.tableRow, index % 2 === 1 ? styles.tableRowAlt : {}]} key={index}>
-                                <View style={styles.col1}>
-                                    <Text style={[styles.text, { fontWeight: 'bold', marginBottom: 2 }]}>{item.item_id || 'Service'}</Text>
-                                    <Text style={[styles.text, { fontSize: 9, color: '#64748b' }]}>{item.description}</Text>
-                                </View>
-                                <View style={styles.col2}><Text style={styles.text}>{item.sac_code || 'N/A'}</Text></View>
-                                <View style={styles.col3}><Text style={styles.text}>{item.tax_rate}%</Text></View>
+                        {services.map((s: any, i: number) => (
+                            <View style={styles.tableRow} key={i}>
+                                <View style={styles.col1}><Text style={styles.tableCell}>{s.description || s.item_id}</Text></View>
+                                <View style={styles.col2}><Text style={styles.tableCell}>{s.sac_code || '-'}</Text></View>
+                                <View style={styles.col3}><Text style={[styles.tableCell, { textAlign: 'right' }]}>{s.tax_rate}%</Text></View>
                             </View>
                         ))}
                     </View>
-                    <Text style={[styles.text, { fontStyle: 'italic', color: '#64748b', fontSize: 9 }]}>
-                        * Any service not expressly stated herein shall be deemed excluded from the scope and requires separate approval.
-                    </Text>
                 </View>
 
                 {/* 5. PROJECT SPECIFICATIONS */}
-                {(projectParams.technologyStack || projectParams.totalPages || projectParams.adminFeatures) && (
+                {/* Only include if present in project_settings */}
+                {invoice.project_settings?.technology_stack || invoice.project_settings?.total_pages ? (
                     <View style={styles.section}>
-                        <Text style={styles.heading}>5. Project Specifications</Text>
+                        <Text style={styles.heading}>5. PROJECT SPECIFICATIONS</Text>
                         <View style={styles.list}>
-                            {projectParams.technologyStack && (
+                            {invoice.project_settings?.technology_stack && (
                                 <View style={styles.listItem}>
                                     <Text style={styles.bullet}>•</Text>
-                                    <Text style={styles.text}><Text style={styles.bold}>Technology Stack:</Text> {projectParams.technologyStack}</Text>
+                                    <Text style={styles.text}><Text style={styles.bold}>Technology Stack:</Text> {invoice.project_settings.technology_stack}</Text>
                                 </View>
                             )}
-                            {projectParams.totalPages && (
+                            {invoice.project_settings?.total_pages && (
                                 <View style={styles.listItem}>
                                     <Text style={styles.bullet}>•</Text>
-                                    <Text style={styles.text}><Text style={styles.bold}>Estimated Scope:</Text> {projectParams.totalPages}</Text>
-                                </View>
-                            )}
-                            {projectParams.appointmentMode && (
-                                <View style={styles.listItem}>
-                                    <Text style={styles.bullet}>•</Text>
-                                    <Text style={styles.text}><Text style={styles.bold}>Workflow:</Text> {projectParams.appointmentMode}</Text>
-                                </View>
-                            )}
-                            {projectParams.adminFeatures && (
-                                <View style={styles.listItem}>
-                                    <Text style={styles.bullet}>•</Text>
-                                    <Text style={styles.text}><Text style={styles.bold}>Admin Capabilities:</Text> {projectParams.adminFeatures}</Text>
+                                    <Text style={styles.text}><Text style={styles.bold}>Estimated Volume:</Text> {invoice.project_settings.total_pages}</Text>
                                 </View>
                             )}
                         </View>
+                    </View>
+                ) : null}
+
+                {/* 6. ROLES & RESPONSIBILITIES (Conditional) */}
+                {isClauseEnabled('client_responsibilities') && (
+                    <View style={styles.section}>
+                        <Text style={styles.heading}>6. ROLES & RESPONSIBILITIES</Text>
+                        <Text style={styles.text}>{getClauseText('client_responsibilities')}</Text>
                     </View>
                 )}
 
-                {/* 6. ROLES & RESPONSIBILITIES */}
-                <View style={styles.section}>
-                    <Text style={styles.heading}>6. Roles & Responsibilities</Text>
-
-                    <Text style={[styles.text, styles.bold, { color: '#1e3a8a', marginTop: 4 }]}>Developer Responsibilities:</Text>
-                    <View style={styles.list}>
-                        <View style={styles.listItem}><Text style={styles.bullet}>•</Text><Text style={styles.text}>Deliver services professionally and in accordance with industry standards.</Text></View>
-                        <View style={styles.listItem}><Text style={styles.bullet}>•</Text><Text style={styles.text}>Deploy deliverables to the Client's infrastructure upon receipt of final payment.</Text></View>
+                {/* 7. DELIVERY, ACCEPTANCE & SIGN-OFF (Conditional) */}
+                {isClauseEnabled('acceptance_period') && (
+                    <View style={styles.section}>
+                        <Text style={styles.heading}>7. DELIVERY, ACCEPTANCE & SIGN-OFF</Text>
+                        <Text style={styles.text}>{getClauseText('acceptance_period')}</Text>
                     </View>
+                )}
 
-                    <Text style={[styles.text, styles.bold, { color: '#1e3a8a', marginTop: 4 }]}>Client Responsibilities:</Text>
-                    <View style={styles.list}>
-                        <View style={styles.listItem}><Text style={styles.bullet}>•</Text><Text style={styles.text}>Provide necessary content, approvals, and access credentials in a timely manner.</Text></View>
-                        <View style={styles.listItem}><Text style={styles.bullet}>•</Text><Text style={styles.text}>Make payments strictly according to the Commercial Terms.</Text></View>
+                {/* 8. TECHNOLOGY STACK & SCALABILITY */}
+                <View style={styles.section}>
+                    <Text style={styles.heading}>8. TECHNOLOGY STACK & SCALABILITY</Text>
+                    <Text style={styles.text}>
+                        Unless otherwise specified, services are delivered using modern, industry-standard technology suitable for the Client's current requirements. Future scalability or feature enhancements beyond the initial Scope of Services shall be treated as a Change Order.
+                    </Text>
+                </View>
+
+                {/* 9. THIRD-PARTY SERVICES (Conditional) */}
+                {isClauseEnabled('third_party_services') && (
+                    <View style={styles.section}>
+                        <Text style={styles.heading}>9. THIRD-PARTY SERVICES</Text>
+                        <Text style={styles.text}>{getClauseText('third_party_services')}</Text>
                     </View>
-                    <Text style={[styles.text, { marginTop: 4 }]}>Delays caused by the Client regarding content or approvals shall extend the project timeline accordingly.</Text>
-                </View>
+                )}
 
-                {/* 7. DELIVERY & ACCEPTANCE */}
-                <View style={styles.section}>
-                    <Text style={styles.heading}>7. Delivery, Acceptance & Sign-off</Text>
-                    <Text style={styles.text}>
-                        The Client shall have a period of <Text style={styles.bold}>{acceptanceDays} working days</Text> ("Acceptance Period") to review the deliverables. If no written objection is raised within this period, the deliverables shall be deemed accepted. Minor change requests shall not withhold the final payment or sign-off.
-                    </Text>
-                </View>
+                {/* 10. DATA, CONTENT & COMPLIANCE (Conditional) */}
+                {isClauseEnabled('data_handling') && (
+                    <View style={styles.section}>
+                        <Text style={styles.heading}>10. DATA, CONTENT & COMPLIANCE</Text>
+                        <Text style={styles.text}>{getClauseText('data_handling')}</Text>
+                    </View>
+                )}
 
-                {/* 8. TECH */}
+                {/* 11. COMMERCIAL TERMS & PAYMENT */}
                 <View style={styles.section}>
-                    <Text style={styles.heading}>8. Technology Stack & Scalability</Text>
-                    <Text style={styles.text}>
-                        Services are delivered using modern, scalable platforms. Based on current requirements, existing infrastructure is sufficient at delivery. Future upgrades due to increased usage or scope may be implemented without redevelopment and shall be commercially separate.
-                    </Text>
-                </View>
-
-                {/* 9. THIRD PARTY */}
-                <View style={styles.section}>
-                    <Text style={styles.heading}>9. Third-Party Services</Text>
-                    <Text style={styles.text}>
-                        The Services may rely on third-party platforms, APIs, or hosting providers. The Developer is not liable for any downtime, policy changes, or service failures caused by such third-party providers.
-                    </Text>
-                </View>
-
-                {/* 10. DATA */}
-                <View style={styles.section}>
-                    <Text style={styles.heading}>10. Data, Content & Compliance</Text>
-                    <Text style={styles.text}>
-                        The Client is solely responsible for all content published or used. No sensitive personal data shall be stored unless explicitly agreed. The Developer is not liable for specific regulatory compliance (e.g., medical or financial regulations) unless strictly scoped.
-                    </Text>
-                </View>
-
-                {/* 11. COMMERCIAL TERMS */}
-                <View style={styles.section}>
-                    <Text style={styles.heading}>11. Commercial Terms & Payment</Text>
-                    <View style={{ backgroundColor: '#f0f9ff', padding: 10, borderRadius: 4, marginBottom: 10, borderWidth: 1, borderColor: '#bae6fd' }}>
-                        <Text style={[styles.text, { fontSize: 12, textAlign: 'center' }]}>
-                            Total Project Value: <Text style={[styles.bold, { color: '#0369a1' }]}>{formatCurrency(invoice.grand_total)}</Text>
+                    <Text style={styles.heading}>11. COMMERCIAL TERMS & PAYMENT</Text>
+                    <View style={styles.financialBox}>
+                        <Text style={[styles.text, { textAlign: 'center' }]}>
+                            TOTAL PROJECT VALUE: <Text style={styles.bold}>{formatCurrency(grandTotal)}</Text>
                         </Text>
-                        <Text style={{ fontSize: 8, textAlign: 'center', color: '#0ea5e9' }}>(Inclusive of GST)</Text>
+                        <Text style={{ fontSize: 8, textAlign: 'center', marginTop: 2 }}>(Inclusive of GST)</Text>
                     </View>
-
-                    <Text style={styles.text}>Payment Structure:</Text>
+                    <Text style={styles.text}>The Client agrees to pay the Developer as follows:</Text>
                     <View style={styles.list}>
                         <View style={styles.listItem}>
-                            <Text style={styles.bullet}>•</Text>
-                            <Text style={styles.text}><Text style={styles.bold}>{advance}% Advance</Text> (Non-refundable upon project commencement).</Text>
+                            <Text style={styles.bullet}>1.</Text>
+                            <Text style={styles.text}><Text style={styles.bold}>{advancePercent}% Advance Payment</Text> upon signing of this Agreement.</Text>
                         </View>
-                        {(milestone && milestone !== '0') && (
+                        {milestonePercent !== '0' && (
                             <View style={styles.listItem}>
-                                <Text style={styles.bullet}>•</Text>
-                                <Text style={styles.text}><Text style={styles.bold}>{milestone}% Milestone</Text> after milestone completion.</Text>
+                                <Text style={styles.bullet}>2.</Text>
+                                <Text style={styles.text}><Text style={styles.bold}>{milestonePercent}% Milestone Payment</Text> upon completion of agreed milestones.</Text>
                             </View>
                         )}
                         <View style={styles.listItem}>
-                            <Text style={styles.bullet}>•</Text>
-                            <Text style={styles.text}><Text style={styles.bold}>{final}% Final</Text> before final deployment/handover.</Text>
+                            <Text style={styles.bullet}>{milestonePercent !== '0' ? '3.' : '2.'}</Text>
+                            <Text style={styles.text}><Text style={styles.bold}>{finalPercent}% Final Payment</Text> prior to final handover/deployment.</Text>
                         </View>
                     </View>
-                    <Text style={styles.text}>The Invoice shall govern the specific taxation and payment details.</Text>
                 </View>
 
-                {/* 12. TAXATION */}
+                {/* 12. TAXATION (GST) */}
                 <View style={styles.section}>
-                    <Text style={styles.heading}>12. Taxation (GST)</Text>
+                    <Text style={styles.heading}>12. TAXATION (GST)</Text>
                     <Text style={styles.text}>
-                        Goods and Services Tax (GST) is applicable as per Indian law and is reflected in the Invoice.
+                        All fees quoted are exclusive of Goods and Services Tax (GST) unless explicitly stated otherwise. GST shall be charged at the applicable rate (currently 18%) on all invoices.
                     </Text>
                 </View>
 
-                {/* 13. IP */}
+                {/* 13. INTELLECTUAL PROPERTY */}
                 <View style={styles.section}>
-                    <Text style={styles.heading}>13. Intellectual Property</Text>
+                    <Text style={styles.heading}>13. INTELLECTUAL PROPERTY</Text>
                     <Text style={styles.text}>
-                        Upon full payment, ownership of specific deliverables transfers to the Client. The Developer retains rights to reusable code libraries, generic components, and the right to showcase the work in their portfolio.
+                        Upon receipt of full payment, the Developer grants the Client ownership of the Deliverables. The Developer retains ownership of its pre-existing intellectual property, reusable code, tools, and methodologies used in creating the Deliverables.
                     </Text>
                 </View>
 
-                {/* 14. SUPPORT */}
-                <View style={styles.section}>
-                    <Text style={styles.heading}>14. Support & Maintenance</Text>
-                    <Text style={styles.text}>
-                        The Developer provides a <Text style={styles.bold}>{supportDays}-day limited support period</Text> for bug fixes related to the original scope. No Annual Maintenance Contract (AMC) is included unless separately contracted.
-                    </Text>
-                </View>
+                {/* 14. SUPPORT & MAINTENANCE (Conditional) */}
+                {isClauseEnabled('support_clause') && (
+                    <View style={styles.section}>
+                        <Text style={styles.heading}>14. SUPPORT & MAINTENANCE</Text>
+                        <Text style={styles.text}>{getClauseText('support_clause')}</Text>
+                    </View>
+                )}
 
-                {/* 15. CONFIDENTIALITY */}
-                <View style={styles.section}>
-                    <Text style={styles.heading}>15. Confidentiality</Text>
-                    <Text style={styles.text}>
-                        Both Parties agree to maintain the confidentiality of proprietary information and shall not disclose it to any third party without prior written consent, except as required by law.
-                    </Text>
-                </View>
+                {/* 15. CONFIDENTIALITY (Conditional) */}
+                {isClauseEnabled('confidentiality') && (
+                    <View style={styles.section}>
+                        <Text style={styles.heading}>15. CONFIDENTIALITY</Text>
+                        <Text style={styles.text}>{getClauseText('confidentiality')}</Text>
+                    </View>
+                )}
 
                 {/* 16. TERMINATION */}
                 <View style={styles.section}>
-                    <Text style={styles.heading}>16. Termination</Text>
+                    <Text style={styles.heading}>16. TERMINATION</Text>
                     <Text style={styles.text}>
-                        Either Party may terminate this Agreement with written notice. In the event of termination, the Advance is non-refundable. The Client is liable to pay for all work completed up to the date of termination. No ownership rights transfer until full payment is made.
+                        Either Party may terminate this Agreement for material breach by the other Party upon 30 days' written notice, provided the breach is not cured within the notice period. In the event of termination, the Client shall pay for all Services performed up to the termination date.
                     </Text>
                 </View>
 
-                {/* 17. FORCE MAJEURE */}
+                {/* 17. FORCE MAJEURE (Conditional) */}
+                {isClauseEnabled('force_majeure') && (
+                    <View style={styles.section}>
+                        <Text style={styles.heading}>17. FORCE MAJEURE</Text>
+                        <Text style={styles.text}>{getClauseText('force_majeure')}</Text>
+                    </View>
+                )}
+
+                {/* 18. LIMITATION OF LIABILITY */}
                 <View style={styles.section}>
-                    <Text style={styles.heading}>17. Force Majeure</Text>
+                    <Text style={styles.heading}>18. LIMITATION OF LIABILITY</Text>
                     <Text style={styles.text}>
-                        Neither Party shall be liable for any failure or delay in performance due to causes beyond their reasonable control (e.g., natural disasters, internet outages, acts of government).
+                        Except for confidentiality obligations, the Developer's total liability under this Agreement shall not exceed the total fees actually paid by the Client. Neither Party shall be liable for indirect, incidental, or consequential damages.
                     </Text>
                 </View>
 
-                {/* 18. LIABILITY */}
+                {/* 19. GOVERNING LAW & JURISDICTION */}
                 <View style={styles.section}>
-                    <Text style={styles.heading}>18. Limitation of Liability</Text>
+                    <Text style={styles.heading}>19. GOVERNING LAW & JURISDICTION</Text>
                     <Text style={styles.text}>
-                        The Developer's total liability under this Agreement shall be limited to the total professional fees paid by the Client. The Developer shall not be liable for any indirect, consequential, or incidental damages.
-                    </Text>
-                </View>
-
-                {/* 19. GOVERNING LAW */}
-                <View style={styles.section}>
-                    <Text style={styles.heading}>19. Governing Law & Jurisdiction</Text>
-                    <Text style={styles.text}>
-                        This Agreement shall be governed by the laws of India. Any disputes shall be subject to the exclusive jurisdiction of the courts in <Text style={styles.bold}>{formattedJurisdiction}</Text>.
+                        This Agreement shall be governed by the laws of India. The courts of <Text style={styles.bold}>{formattedJurisdiction}</Text> shall have exclusive jurisdiction over any disputes arising out of this Agreement.
                     </Text>
                 </View>
 
                 {/* 20. ENTIRE AGREEMENT */}
                 <View style={styles.section}>
-                    <Text style={styles.heading}>20. Entire Agreement</Text>
+                    <Text style={styles.heading}>20. ENTIRE AGREEMENT</Text>
                     <Text style={styles.text}>
-                        This Agreement, along with the Invoice, constitutes the entire understanding between the Parties and supersedes all prior communications. Amendments must be in writing and signed by both Parties.
+                        This Agreement constitutes the entire agreement between the Parties and supersedes all prior agreements, understandings, or representations. No amendment shall be binding unless in writing and signed by both Parties.
                     </Text>
                 </View>
 
-                {/* 21. SIGNATURES */}
+                {/* 21. ACCEPTANCE & SIGNATURES */}
                 <View style={styles.section} break={false}>
-                    <Text style={styles.heading}>21. Acceptance & Signatures</Text>
+                    <Text style={styles.heading}>21. ACCEPTANCE & SIGNATURES</Text>
+                    <Text style={styles.text}>
+                        IN WITNESS WHEREOF, the Parties have executed this Agreement as of the Effective Date.
+                    </Text>
+
                     <View style={styles.signatureBlock}>
                         <View style={styles.signatureBox}>
-                            <Text style={[styles.text, styles.bold]}>Signed for the Developer:</Text>
-                            <Text style={styles.text}>{developerName}</Text>
+                            <Text style={styles.bold}>Signed for: {developerName}</Text>
                             <View style={styles.signatureLine} />
-                            <Text style={styles.signatureRole}>Authorized Signatory</Text>
+                            <Text style={{ fontSize: 8 }}>Name & Designation</Text>
                         </View>
+
                         <View style={styles.signatureBox}>
-                            <Text style={[styles.text, styles.bold]}>Signed for the Client:</Text>
-                            <Text style={styles.text}>{clientName}</Text>
+                            <Text style={styles.bold}>Signed for: {clientName}</Text>
                             <View style={styles.signatureLine} />
-                            <Text style={styles.signatureRole}>Authorized Signatory</Text>
+                            <Text style={{ fontSize: 8 }}>Name & Designation</Text>
                         </View>
                     </View>
+                </View>
+
+                {/* Footer on each page */}
+                <View style={styles.footer} fixed>
+                    <Text>{version} | Confidential</Text>
+                    <Text render={({ pageNumber, totalPages }) => (
+                        `Page ${pageNumber} of ${totalPages}`
+                    )} />
                 </View>
 
             </Page>

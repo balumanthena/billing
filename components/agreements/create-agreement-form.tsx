@@ -89,7 +89,61 @@ interface ProjectParams {
     acceptancePeriod: string
     supportPeriod: string
     agreementVersion: string
+    confidentiality?: boolean
+    clauses: Clause[]
 }
+
+interface Clause {
+    clause_key: string
+    label: string
+    enabled: boolean
+    text: string
+}
+
+const DEFAULT_CLAUSES: Clause[] = [
+    {
+        clause_key: 'client_responsibilities',
+        label: 'Client Responsibilities',
+        enabled: true,
+        text: "The Client shall provide necessary content, approvals, and access credentials in a timely manner. Delays caused by the Client regarding content or approvals shall extend the project timeline accordingly."
+    },
+    {
+        clause_key: 'acceptance_period',
+        label: 'Acceptance Period',
+        enabled: true,
+        text: "The Client shall have a period of 7 working days to review the deliverables. If no written objection is raised within this period, the deliverables shall be deemed accepted."
+    },
+    {
+        clause_key: 'third_party_services',
+        label: 'Third-Party Services',
+        enabled: true,
+        text: "The Services may rely on third-party platforms, APIs, or hosting providers. The Developer is not liable for any downtime, policy changes, or service failures caused by such third-party providers."
+    },
+    {
+        clause_key: 'data_handling',
+        label: 'Data & Compliance',
+        enabled: true,
+        text: "The Client is solely responsible for all content published or used. No sensitive personal data shall be stored unless explicitly agreed."
+    },
+    {
+        clause_key: 'support_clause',
+        label: 'Support & Maintenance',
+        enabled: true,
+        text: "The Developer provides a 30-day limited support period for bug fixes related to the original scope. No Annual Maintenance Contract (AMC) is included unless separately contracted."
+    },
+    {
+        clause_key: 'confidentiality',
+        label: 'Confidentiality',
+        enabled: true,
+        text: "Both Parties agree to maintain the confidentiality of proprietary information and shall not disclose it to any third party without prior written consent, except as required by law."
+    },
+    {
+        clause_key: 'force_majeure',
+        label: 'Force Majeure',
+        enabled: true,
+        text: "Neither Party shall be liable for any failure or delay in performance due to causes beyond their reasonable control (e.g., natural disasters, internet outages, acts of government)."
+    }
+]
 
 export default function CreateAgreementForm({ company, parties, items, initialData }: CreateAgreementFormProps) {
     const router = useRouter()
@@ -120,6 +174,7 @@ export default function CreateAgreementForm({ company, parties, items, initialDa
         acceptancePeriod: '7',
         supportPeriod: '30',
         agreementVersion: '1.0',
+        clauses: DEFAULT_CLAUSES
     }
 
     const [params, setParams] = useState<ProjectParams>(initialData?.project_settings || defaultParams)
@@ -175,6 +230,15 @@ export default function CreateAgreementForm({ company, parties, items, initialDa
     const handleParamChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
         setParams(prev => ({ ...prev, [name]: value }))
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updateClause = (index: number, field: keyof Clause, value: any) => {
+        const newClauses = [...params.clauses]
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        newClauses[index][field] = value
+        setParams(prev => ({ ...prev, clauses: newClauses }))
     }
 
     const calculateBreakdown = () => {
@@ -485,6 +549,40 @@ export default function CreateAgreementForm({ company, parties, items, initialDa
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Clauses Configuration */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-blue-600" /> Legal Clauses
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    {params.clauses?.map((clause, index) => (
+                        <div key={clause.clause_key} className="border p-4 rounded-md space-y-3 bg-slate-50/50">
+                            <div className="flex items-center justify-between">
+                                <Label className="font-semibold">{clause.label}</Label>
+                                <div className="flex items-center gap-2">
+                                    <label className="text-xs text-slate-500 mr-2">Enabled</label>
+                                    <Input
+                                        type="checkbox"
+                                        checked={clause.enabled}
+                                        onChange={(e) => updateClause(index, 'enabled', e.target.checked)}
+                                        className="h-4 w-4"
+                                    />
+                                </div>
+                            </div>
+                            {clause.enabled && (
+                                <textarea
+                                    className="w-full min-h-[60px] p-2 text-sm border rounded-md"
+                                    value={clause.text}
+                                    onChange={(e) => updateClause(index, 'text', e.target.value)}
+                                />
+                            )}
+                        </div>
+                    ))}
+                </CardContent>
+            </Card>
 
 
 
