@@ -173,7 +173,18 @@ export interface Database {
           created_at?: string
         }
       }
-      // Add other tables as needed for development, will use generation later
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }

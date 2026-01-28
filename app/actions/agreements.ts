@@ -2,9 +2,11 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { Database } from '@/types/database.types'
+import { SupabaseClient } from '@supabase/supabase-js'
 
 export async function createAgreement(prevState: any, formData: FormData) {
-    const supabase = await createClient()
+    const supabase = (await createClient()) as SupabaseClient<Database>
 
     // 1. Get User & Company
     const { data: { user } } = await supabase.auth.getUser()
@@ -14,7 +16,7 @@ export async function createAgreement(prevState: any, formData: FormData) {
         .from('profiles')
         .select('company_id')
         .eq('id', user.id)
-        .single()
+        .single() as any
 
     if (!profile?.company_id) return { message: 'No company profile found' }
 
@@ -28,7 +30,7 @@ export async function createAgreement(prevState: any, formData: FormData) {
     const servicesSnapshot = JSON.parse(formData.get('services_snapshot') as string)
 
     // 3. Insert
-    const { error } = await supabase.from('agreements').insert({
+    const { error } = await (supabase.from('agreements') as any).insert({
         company_id: profile.company_id,
         customer_id: customerId,
         date: date,
@@ -51,7 +53,7 @@ export async function createAgreement(prevState: any, formData: FormData) {
 
 
 export async function getAgreements() {
-    const supabase = await createClient()
+    const supabase = (await createClient()) as SupabaseClient<Database>
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return []
@@ -60,12 +62,12 @@ export async function getAgreements() {
         .from('profiles')
         .select('company_id')
         .eq('id', user.id)
-        .single()
+        .single() as any
 
     if (!profile?.company_id) return []
 
-    const { data, error } = await supabase
-        .from('agreements')
+    const { data, error } = await (supabase
+        .from('agreements') as any)
         .select(`
             *,
             parties (*),
@@ -83,12 +85,12 @@ export async function getAgreements() {
 }
 
 export async function getAgreement(id: string) {
-    const supabase = await createClient()
+    const supabase = (await createClient()) as SupabaseClient<Database>
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return null
 
-    const { data, error } = await supabase
-        .from('agreements')
+    const { data, error } = await (supabase
+        .from('agreements') as any)
         .select('*')
         .eq('id', id)
         .single()
@@ -98,12 +100,12 @@ export async function getAgreement(id: string) {
 }
 
 export async function deleteAgreement(id: string) {
-    const supabase = await createClient()
+    const supabase = (await createClient()) as SupabaseClient<Database>
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { message: 'Not authenticated' }
 
-    const { error } = await supabase
-        .from('agreements')
+    const { error } = await (supabase
+        .from('agreements') as any)
         .delete()
         .eq('id', id)
 
@@ -116,9 +118,9 @@ export async function deleteAgreement(id: string) {
 }
 
 export async function updateAgreementStatus(id: string, status: string) {
-    const supabase = await createClient()
-    const { error } = await supabase
-        .from('agreements')
+    const supabase = (await createClient()) as SupabaseClient<Database>
+    const { error } = await (supabase
+        .from('agreements') as any)
         .update({ status })
         .eq('id', id)
 
@@ -129,7 +131,7 @@ export async function updateAgreementStatus(id: string, status: string) {
 }
 
 export async function updateAgreement(id: string, prevState: any, formData: FormData) {
-    const supabase = await createClient()
+    const supabase = (await createClient()) as SupabaseClient<Database>
 
     const customerId = formData.get('customer_id') as string
     const date = formData.get('date') as string
@@ -138,7 +140,7 @@ export async function updateAgreement(id: string, prevState: any, formData: Form
     const projectSettings = JSON.parse(formData.get('project_settings') as string)
     const servicesSnapshot = JSON.parse(formData.get('services_snapshot') as string)
 
-    const { error } = await supabase.from('agreements').update({
+    const { error } = await (supabase.from('agreements') as any).update({
         customer_id: customerId,
         date: date,
         grand_total: grandTotal,
