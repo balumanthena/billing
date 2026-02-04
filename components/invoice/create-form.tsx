@@ -90,6 +90,9 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
     // Tax Logic
     const [taxMode, setTaxMode] = useState<'exclusive' | 'inclusive'>('exclusive')
 
+    // TDS State
+    const [tdsRate, setTdsRate] = useState<number>(0)
+
     // Derived Tax Values
     const taxableBase = taxMode === 'exclusive'
         ? contractTotal
@@ -97,6 +100,8 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
 
     const gstTotalAmount = parseFloat((taxableBase * 0.18).toFixed(2))
     const finalContractTotal = parseFloat((taxableBase + gstTotalAmount).toFixed(2))
+    const tdsAmount = parseFloat((taxableBase * (tdsRate / 100)).toFixed(2))
+    const netReceivable = parseFloat((finalContractTotal - tdsAmount).toFixed(2))
 
     // Parse Initial Phases if Master
     const initialPhases = initialData?.phases ? initialData.phases.map((p: any) => ({
@@ -168,7 +173,8 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
             lineItems,
             company.state_code,
             selectedCustomer.state_code,
-            taxMode
+            taxMode,
+            tdsRate
         )
 
         setTotals({
@@ -176,10 +182,14 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
             totalCGST: calc.totalCGST,
             totalSGST: calc.totalSGST,
             totalIGST: calc.totalIGST,
-            grandTotal: calc.grandTotal
+            grandTotal: calc.grandTotal,
+            // @ts-ignore
+            tdsAmount: calc.tdsAmount,
+            // @ts-ignore
+            netReceivable: calc.netReceivable
         })
 
-    }, [lineItems, customerId, company, selectedCustomer, taxMode])
+    }, [lineItems, customerId, company, selectedCustomer, taxMode, tdsRate])
 
     const addItem = () => {
         setLineItems([...lineItems, {
@@ -499,6 +509,9 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
                 totalAmount: finalContractTotal, // Sending likely the Full Contract Value
                 taxMode: taxMode, // Direct string value
                 isTaxInclusive: taxMode === 'inclusive', // Keep for backward compat if needed
+                tdsRate: tdsRate,
+                tdsAmount: tdsAmount,
+                netReceivable: netReceivable,
                 phases: phases.map(p => {
                     let subtotal = 0;
                     let tax = 0;
@@ -630,8 +643,18 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
                                         <span className="font-mono font-medium text-primary text-lg">₹{gstTotalAmount.toLocaleString()}</span>
                                     </div>
                                     <div className="text-right">
-                                        <span className="text-muted-foreground block text-xs mb-1">Total Contract Value</span>
-                                        <span className="font-mono font-bold text-xl text-foreground">₹{finalContractTotal.toLocaleString()}</span>
+                                        <span className="text-muted-foreground block text-xs mb-1">Invoice Total</span>
+                                        <span className="font-mono font-medium text-xl text-foreground">₹{finalContractTotal.toLocaleString()}</span>
+                                    </div>
+                                    <div className="col-span-3 pt-3 border-t border-dashed border-primary/20 flex justify-between items-center">
+                                        <div className="text-muted-foreground text-xs">
+                                            Less: TDS ({tdsRate}%) <br />
+                                            <span className="font-mono text-red-400">- ₹{tdsAmount.toLocaleString()}</span>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="text-primary block text-xs mb-1 font-semibold uppercase tracking-wider">Net Receivable</span>
+                                            <span className="font-mono font-bold text-2xl text-primary">₹{netReceivable.toLocaleString()}</span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="space-y-2">

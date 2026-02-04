@@ -360,6 +360,18 @@ export const InvoicePDF = ({ invoice }: InvoicePDFProps) => {
                                 <Text style={styles.grandTotalLabel}>Grand Total</Text>
                                 <Text style={styles.grandTotalValue}>Rs. {formatCurrency(invoice.grand_total)}</Text>
                             </View>
+                            {invoice.tds_amount > 0 && (
+                                <>
+                                    <View style={styles.totalRow}>
+                                        <Text style={{ ...styles.totalLabel, color: '#ef4444' }}>Less: TDS ({invoice.tds_rate}%)</Text>
+                                        <Text style={{ ...styles.totalValue, color: '#ef4444' }}>- {formatCurrency(invoice.tds_amount)}</Text>
+                                    </View>
+                                    <View style={{ ...styles.grandTotalRow, marginTop: 4, borderTopWidth: 1, borderTopColor: '#e2e8f0', paddingTop: 4 }}>
+                                        <Text style={styles.grandTotalLabel}>Net Receivable</Text>
+                                        <Text style={styles.grandTotalValue}>Rs. {formatCurrency(invoice.net_receivable)}</Text>
+                                    </View>
+                                </>
+                            )}
                         </View>
                     </View>
 

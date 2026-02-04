@@ -186,6 +186,9 @@ export interface Database {
           subtotal: number | null
           tax_total: number | null
           grand_total: number | null
+          tds_rate: number | null
+          tds_amount: number | null
+          net_receivable: number | null
           customer_snapshot: Json | null
           company_snapshot: Json | null
           created_by: string | null
@@ -207,6 +210,9 @@ export interface Database {
           subtotal?: number | null
           tax_total?: number | null
           grand_total?: number | null
+          tds_rate?: number | null
+          tds_amount?: number | null
+          net_receivable?: number | null
           customer_snapshot?: Json | null
           company_snapshot?: Json | null
           created_by?: string | null
@@ -228,6 +234,9 @@ export interface Database {
           subtotal?: number | null
           tax_total?: number | null
           grand_total?: number | null
+          tds_rate?: number | null
+          tds_amount?: number | null
+          net_receivable?: number | null
           customer_snapshot?: Json | null
           company_snapshot?: Json | null
           created_by?: string | null

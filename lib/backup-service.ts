@@ -1,9 +1,10 @@
-import { generatePDF } from "./pdf"
+import { renderToBuffer } from '@react-pdf/renderer';
+import React from 'react';
 import { sendBackupEmail } from "./mailer"
-import { renderInvoiceHTML } from "./invoice-template"
-import { renderReceiptHTML } from "./receipt-template"
-import { renderAgreementHTML } from "./agreement-template"
-import { renderPartyHTML } from "./party-template"
+import { InvoicePDF } from '@/components/invoice/invoice-pdf';
+import { ReceiptPDF } from '@/components/receipt/receipt-pdf';
+import { ServiceAgreementPDF } from '@/components/invoice/service-agreement-pdf';
+// import { renderPartyHTML } from "./party-template"
 
 // --- TYPES ---
 type BackupResult = { success: boolean; error?: any }
@@ -23,7 +24,7 @@ function getFY(date: Date | string) {
 async function safeBackup(
     type: string,
     id: string,
-    renderFn: () => string,
+    component: React.ReactElement,
     emailLog: string,
     customSubject?: string
 ): Promise<BackupResult> {
@@ -67,19 +68,9 @@ async function safeBackup(
 
         console.log(`[Backup Service] Starting backup process...`)
 
-        // 3. Generate HTML & PDF
-        const html = renderFn()
-        let pdfBuffer: Buffer | undefined
-
-        // Lightweight check: Party backup doesn't use PDF mostly, but we support it.
-        // If renderFn returns simple string/html.
-        // Assuming renderFn always returns HTML.
-        // Wait, Party backup in lightweight mode uses `text-only`. 
-        // But `safeBackup` is designed for PDF flow. 
-        // The `backupParty` function uses lightweight mode and DOES NOT CALL `safeBackup`.
-        // So `safeBackup` ALWAYS generates PDF.
-        const pdf = await generatePDF(html)
-        pdfBuffer = Buffer.from(pdf)
+        // 3. Generate PDF Buffer using React PDF Renderer
+        console.log(`[Backup Service] Generating PDF for ${type} ${id}...`)
+        const pdfBuffer = await renderToBuffer(component as any);
 
         // 4. Send Email
         await sendBackupEmail({
@@ -128,7 +119,8 @@ export const BackupService = {
         return safeBackup(
             "Invoice",
             invoice.invoice_number,
-            () => renderInvoiceHTML(invoice, items, company, customer),
+            // @ts-ignore - invoice object usually contains items, or props match
+            React.createElement(InvoicePDF, { invoice: { ...invoice, invoice_items: items }, company, customer } as any),
             `
 [SYSTEM GENERATED AUDIT RECORD]
 
@@ -158,7 +150,7 @@ This document was generated and archived automatically at the time of finalizati
         return safeBackup(
             "Receipt",
             receiptNo,
-            () => renderReceiptHTML(payment, invoice, company, customer),
+            React.createElement(ReceiptPDF, { payment, invoice, company, customer }),
             `
 [SYSTEM GENERATED AUDIT RECORD]
 
@@ -191,7 +183,7 @@ This document was generated and archived automatically at the time of finalizati
         return safeBackup(
             "Agreement",
             agNum,
-            () => renderAgreementHTML(agreement, party, company),
+            React.createElement(ServiceAgreementPDF, { invoice: agreement }), // Agreement PDF takes 'invoice' prop but treats it as agreement object
             `
 [SYSTEM GENERATED AUDIT RECORD]
 

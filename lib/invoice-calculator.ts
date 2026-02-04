@@ -25,7 +25,8 @@ export function calculateInvoice(
     items: InvoiceItem[],
     companyStateCode: string,
     partyStateCode: string,
-    taxMode: 'inclusive' | 'exclusive' = 'exclusive'
+    taxMode: 'inclusive' | 'exclusive' = 'exclusive',
+    tdsRate: number = 0
 ) {
     const isInterState = companyStateCode !== partyStateCode
 
@@ -80,13 +81,21 @@ export function calculateInvoice(
         }
     })
 
+    const grandTotal = round(subtotal + totalCGST + totalSGST + totalIGST)
+    const tdsAmount = round(subtotal * (tdsRate / 100))
+    const netReceivable = round(grandTotal - tdsAmount)
+
     // Final totals
+    // grandTotal IS the invoice value.
+    // netReceivable is what we expect to get paid.
     return {
         lineItems,
         subtotal: round(subtotal),
         totalCGST: round(totalCGST),
         totalSGST: round(totalSGST),
         totalIGST: round(totalIGST),
-        grandTotal: round(subtotal + totalCGST + totalSGST + totalIGST)
+        grandTotal,
+        tdsAmount,
+        netReceivable
     }
 }

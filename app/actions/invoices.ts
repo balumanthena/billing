@@ -98,6 +98,9 @@ export async function createInvoice(prevState: any, formData: FormData) {
             subtotal: input.totals.subtotal,
             tax_total: input.totals.totalCGST + input.totals.totalSGST + input.totals.totalIGST,
             grand_total: input.totals.grandTotal,
+            tds_rate: input.tdsRate,
+            tds_amount: input.tdsAmount || input.totals.tdsAmount, // Check both sources
+            net_receivable: input.netReceivable || input.totals.netReceivable,
             customer_snapshot: party,
             company_snapshot: company,
             created_by: user.id
@@ -365,6 +368,9 @@ export async function updateInvoice(id: string, prevState: any, formData: FormDa
             subtotal: input.totals.subtotal,
             tax_total: input.totals.totalCGST + input.totals.totalSGST + input.totals.totalIGST,
             grand_total: input.totals.grandTotal,
+            tds_rate: input.tdsRate,
+            tds_amount: input.tdsAmount || input.totals.tdsAmount,
+            net_receivable: input.netReceivable || input.totals.netReceivable
         })
         .eq('id', id)
 
