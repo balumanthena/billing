@@ -142,7 +142,7 @@ export default function ExpensesPage() {
                                     </TableRow>
                                 )}
                                 {expenses.map((expense) => (
-                                    <TableRow key={expense.id}>
+                                    <TableRow key={expense.id} className="group hover:bg-[#7C5CFC]/5 hover:border-violet-200 transition-colors cursor-pointer">
                                         <TableCell>{format(new Date(expense.date), 'dd MMM yyyy')}</TableCell>
                                         <TableCell>
                                             <span className="font-medium">{expense.category}</span>

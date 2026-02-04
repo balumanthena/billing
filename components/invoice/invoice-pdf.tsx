@@ -16,124 +16,133 @@ const styles = StyleSheet.create({
     page: {
         fontFamily: 'Helvetica',
         fontSize: 10,
-        padding: 40,
+        padding: 0, // Reset padding for full-width header
         lineHeight: 1.5,
         flexDirection: 'column',
         backgroundColor: '#FFFFFF',
-        color: '#1a1a1a',
+        color: '#111',
     },
-    header: {
+    // Top Navy Header
+    topHeader: {
+        backgroundColor: '#0F172A',
+        height: 44,
         flexDirection: 'row',
+        alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: 20,
+        paddingHorizontal: 40,
+        width: '100%',
     },
-    companySection: {
-        width: '55%',
+    headerLogo: {
+        width: 100,
+        height: 28,
+        objectFit: 'contain',
     },
-    companyName: {
-        fontSize: 20,
-        fontWeight: 'bold',
+    headerWebsite: {
+        color: 'rgba(255, 255, 255, 0.7)',
+        fontSize: 10,
         textTransform: 'uppercase',
-        color: '#111827',
-        marginBottom: 8,
+        letterSpacing: 1.2,
     },
-    companyText: {
-        fontSize: 9,
-        color: '#4B5563',
-        marginBottom: 2,
+
+    // Main Content
+    container: {
+        padding: 40,
+        paddingTop: 40,
     },
-    invoiceSection: {
-        width: '40%',
-        alignItems: 'flex-end',
+
+    headerInfo: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end', // Info on right
+        marginBottom: 30,
+        borderBottomWidth: 2,
+        borderBottomColor: '#F1F5F9',
+        paddingBottom: 20,
     },
     invoiceTitle: {
-        fontSize: 24,
+        fontSize: 28,
         fontWeight: 'bold',
-        color: '#2563EB', // Corporate Blue
-        letterSpacing: 2,
-        marginBottom: 10,
+        color: '#0F172A',
         textTransform: 'uppercase',
+        marginBottom: 5,
     },
-    kvContainer: {
+    invoiceMeta: {
+        fontSize: 12,
+        color: '#64748B',
+        textAlign: 'right',
+    },
+
+    // Addresses
+    addresses: {
         flexDirection: 'row',
-        marginBottom: 4,
-        justifyContent: 'flex-end',
-        width: '100%',
+        justifyContent: 'space-between',
+        marginBottom: 40,
     },
-    kvLabel: {
-        fontSize: 9,
-        color: '#6B7280',
-        width: '40%',
-        textAlign: 'right',
-        marginRight: 8,
+    addressBlock: {
+        width: '45%',
     },
-    kvValue: {
-        fontSize: 9,
-        fontWeight: 'bold',
-        color: '#111827',
-        width: '60%',
-        textAlign: 'right',
-    },
-    divider: {
-        borderBottomWidth: 1,
-        borderBottomColor: '#E5E7EB',
-        marginBottom: 20,
-    },
-    billToSection: {
-        backgroundColor: '#F9FAFB',
-        padding: 15,
-        borderRadius: 6,
-        marginBottom: 30,
-        width: '100%',
-    },
-    billToLabel: {
-        fontSize: 8,
-        fontWeight: 'bold',
-        color: '#6B7280',
-        marginBottom: 6,
+    addressTitle: {
+        fontSize: 10,
         textTransform: 'uppercase',
+        color: '#64748B',
+        fontWeight: 'bold',
+        marginBottom: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E2E8F0',
+        paddingBottom: 4,
     },
-    billToName: {
+    addressText: {
+        fontSize: 10,
+        color: '#334155',
+        marginBottom: 2,
+    },
+    addressName: {
         fontSize: 12,
         fontWeight: 'bold',
-        color: '#111827',
-        marginBottom: 4,
+        color: '#0F172A',
+        marginBottom: 2,
     },
+
+    // Table
     table: {
         width: '100%',
         marginBottom: 20,
     },
     tableHeader: {
         flexDirection: 'row',
-        backgroundColor: '#1E293B', // Dark Grey Header
-        padding: 8,
-        alignItems: 'center',
+        backgroundColor: '#F8FAFC',
+        borderBottomWidth: 2,
+        borderBottomColor: '#E2E8F0',
+        paddingVertical: 8,
+        paddingHorizontal: 4,
     },
     th: {
-        color: '#FFFFFF',
         fontSize: 9,
         fontWeight: 'bold',
+        color: '#475569',
+        textTransform: 'uppercase',
     },
     tableRow: {
         flexDirection: 'row',
         borderBottomWidth: 1,
-        borderBottomColor: '#E5E7EB',
-        padding: 8,
-        alignItems: 'center', // Align vertically center
+        borderBottomColor: '#F1F5F9',
+        paddingVertical: 8,
+        paddingHorizontal: 4,
     },
     td: {
-        fontSize: 9,
-        color: '#374151',
+        fontSize: 10,
+        color: '#334155',
     },
-    // Column Widths
-    col1: { width: '40%' },
-    col2: { width: '10%', textAlign: 'center' },
-    col3: { width: '10%', textAlign: 'center' },
-    col4: { width: '15%', textAlign: 'right' },
-    col5: { width: '10%', textAlign: 'center' },
-    col6: { width: '15%', textAlign: 'right' },
 
-    totalsContainer: {
+    // Columns
+    colDesc: { width: '40%' },
+    colSac: { width: '10%', textAlign: 'right' },
+    colQty: { width: '10%', textAlign: 'right' },
+    colRate: { width: '15%', textAlign: 'right' },
+    colTax: { width: '10%', textAlign: 'right' },
+    colAmount: { width: '15%', textAlign: 'right' },
+
+    // Totals
+    totalsSection: {
         flexDirection: 'row',
         justifyContent: 'flex-end',
         marginTop: 10,
@@ -145,15 +154,18 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingVertical: 4,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F1F5F9',
+        borderStyle: 'dashed',
     },
     totalLabel: {
-        fontSize: 9,
-        color: '#6B7280',
+        fontSize: 10,
+        color: '#64748B',
     },
     totalValue: {
-        fontSize: 9,
+        fontSize: 10,
         fontWeight: 'bold',
-        color: '#111827',
+        color: '#1E293B',
         textAlign: 'right',
     },
     grandTotalRow: {
@@ -161,39 +173,66 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingVertical: 8,
         borderTopWidth: 2,
-        borderTopColor: '#2563EB',
+        borderTopColor: '#0F172A',
         marginTop: 8,
     },
     grandTotalLabel: {
-        fontSize: 11,
+        fontSize: 12,
         fontWeight: 'bold',
-        color: '#111827',
+        color: '#0F172A',
     },
     grandTotalValue: {
         fontSize: 14,
         fontWeight: 'bold',
-        color: '#2563EB',
+        color: '#0F172A', // Navy
     },
+
+    wordsRow: {
+        marginTop: 20,
+        borderTopWidth: 1,
+        borderTopColor: '#F1F5F9',
+        paddingTop: 10,
+    },
+    wordsLabel: {
+        fontSize: 10,
+        color: '#64748B',
+        textTransform: 'uppercase',
+        marginBottom: 4,
+    },
+    wordsText: {
+        fontFamily: 'Helvetica',
+        fontStyle: 'italic', // Times New Roman not standard in basic fonts, using italic
+        fontSize: 12,
+        color: '#0F172A',
+    },
+
     footer: {
         position: 'absolute',
-        bottom: 40,
+        bottom: 30,
         left: 40,
         right: 40,
         borderTopWidth: 1,
-        borderTopColor: '#E5E7EB',
-        paddingTop: 20,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+        borderTopColor: '#F1F5F9',
+        paddingTop: 15,
+        alignItems: 'center',
     },
     footerText: {
-        fontSize: 8,
+        fontSize: 9,
         color: '#9CA3AF',
+        textAlign: 'center',
     },
-    brandName: {
-        fontSize: 8,
-        fontWeight: 'bold',
-        color: '#9CA3AF',
-    },
+
+    logoWatermark: {
+        position: 'absolute',
+        width: 300,
+        height: 300,
+        top: '50%',
+        left: '50%',
+        marginLeft: -150,
+        marginTop: -150,
+        opacity: 0.03,
+        zIndex: -1,
+    }
 });
 
 interface InvoicePDFProps {
@@ -205,7 +244,6 @@ export const InvoicePDF = ({ invoice }: InvoicePDFProps) => {
     const customer = invoice.customer_snapshot
     const items = invoice.invoice_items
 
-    // Helper for formatting currency
     const formatCurrency = (amount: number) => {
         return amount.toLocaleString('en-IN', {
             minimumFractionDigits: 2,
@@ -213,150 +251,124 @@ export const InvoicePDF = ({ invoice }: InvoicePDFProps) => {
         });
     }
 
+    // Determine GST Type logic for Label
+    const isIntraState = (company?.state_code && customer?.state_code && company.state_code == customer.state_code) ||
+        (company?.state?.toLowerCase() === customer?.state?.toLowerCase());
+
+    const logoUrl = 'https://dashboard.citrux.in/logo.png'; // Using absolute URL for safety in PDF
+
     return (
         <Document>
             <Page size="A4" style={styles.page}>
-                {/* Header Section */}
-                <View style={styles.header}>
-                    <View style={styles.companySection}>
-                        {/* Logo removed as per request */}
-                        {/* {company?.logo_url && (
-                            <Image
-                                src={company.logo_url}
-                                style={{ width: 100, height: 40, objectFit: 'contain', marginBottom: 10 }}
-                            />
-                        )} */}
-                        <Text style={styles.companyName}>{company?.name || 'Company Name'}</Text>
-                        <Text style={styles.companyText}>{company?.address}</Text>
-                        <Text style={styles.companyText}>{company?.state} ({company?.state_code})</Text>
-                        <Text style={styles.companyText}>GSTIN: {company?.gstin}</Text>
-                        {company?.email && <Text style={styles.companyText}>Email: {company?.email}</Text>}
-                        {company?.phone && <Text style={styles.companyText}>Phone: {company?.phone}</Text>}
+                {/* Header Strip */}
+                <View style={styles.topHeader}>
+                    {/* React-PDF Image component requires a valid source. 
+                       If local file, it might fail in browser environment. 
+                       Assuming public URL or relative path works in context.
+                     */}
+                    <Image src="/logo.png" style={styles.headerLogo} />
+                    <Text style={styles.headerWebsite}>WWW.CITRUX.IN</Text>
+                </View>
+
+                {/* Main Body */}
+                <View style={styles.container}>
+
+                    {/* Header Info (Title + Details) */}
+                    <View style={styles.headerInfo}>
+                        <View>
+                            <Text style={styles.invoiceTitle}>TAX INVOICE</Text>
+                            <Text style={styles.invoiceMeta}>#{invoice.invoice_number}</Text>
+                            <Text style={styles.invoiceMeta}>Date: {format(new Date(invoice.date), 'dd MMM yyyy')}</Text>
+                            {invoice.due_date && (
+                                <Text style={styles.invoiceMeta}>Due: {format(new Date(invoice.due_date), 'dd MMM yyyy')}</Text>
+                            )}
+                        </View>
                     </View>
 
-                    <View style={styles.invoiceSection}>
-                        <Text style={styles.invoiceTitle}>INVOICE</Text>
-
-                        <View style={styles.kvContainer}>
-                            <Text style={styles.kvLabel}>Invoice No:</Text>
-                            <Text style={styles.kvValue}>{invoice.invoice_number}</Text>
+                    {/* Addresses */}
+                    <View style={styles.addresses}>
+                        <View style={styles.addressBlock}>
+                            <Text style={styles.addressTitle}>Billed By (Supplier)</Text>
+                            <Text style={styles.addressName}>{company?.name}</Text>
+                            <Text style={styles.addressText}>{company?.address}</Text>
+                            <Text style={styles.addressText}>{company?.city}, {company?.state} - {company?.pincode}</Text>
+                            <Text style={styles.addressText}>GSTIN: {company?.gstin}</Text>
+                            <Text style={styles.addressText}>Email: {company?.email || 'support@citrux.in'}</Text>
                         </View>
-
-                        <View style={styles.kvContainer}>
-                            <Text style={styles.kvLabel}>Date:</Text>
-                            <Text style={styles.kvValue}>{format(new Date(invoice.date), 'dd MMM yyyy')}</Text>
+                        <View style={styles.addressBlock}>
+                            <Text style={styles.addressTitle}>Billed To (Recipient)</Text>
+                            <Text style={styles.addressName}>{customer?.name}</Text>
+                            <Text style={styles.addressText}>{customer?.address}</Text>
+                            <Text style={styles.addressText}>{customer?.city}, {customer?.state} - {customer?.pincode}</Text>
+                            <Text style={styles.addressText}>GSTIN: {customer?.gstin || 'N/A'}</Text>
                         </View>
+                    </View>
 
-                        {invoice.due_date && (
-                            <View style={styles.kvContainer}>
-                                <Text style={styles.kvLabel}>Due Date:</Text>
-                                <Text style={styles.kvValue}>{format(new Date(invoice.due_date), 'dd MMM yyyy')}</Text>
+                    {/* Table */}
+                    <View style={styles.table}>
+                        <View style={styles.tableHeader}>
+                            <View style={styles.colDesc}><Text style={styles.th}>Description</Text></View>
+                            <View style={styles.colSac}><Text style={styles.th}>HSN/SAC</Text></View>
+                            <View style={styles.colQty}><Text style={styles.th}>Qty</Text></View>
+                            <View style={styles.colRate}><Text style={styles.th}>Rate</Text></View>
+                            <View style={styles.colTax}><Text style={styles.th}>Tax</Text></View>
+                            <View style={styles.colAmount}><Text style={styles.th}>Amount</Text></View>
+                        </View>
+                        {items?.map((item: any, i: number) => (
+                            <View key={i} style={styles.tableRow}>
+                                <View style={styles.colDesc}><Text style={styles.td}>{item.description}</Text></View>
+                                <View style={styles.colSac}><Text style={styles.td}>{item.sac_code}</Text></View>
+                                <View style={styles.colQty}><Text style={styles.td}>{item.quantity}</Text></View>
+                                <View style={styles.colRate}><Text style={styles.td}>{formatCurrency(item.unit_price)}</Text></View>
+                                <View style={styles.colTax}><Text style={styles.td}>{item.tax_rate}%</Text></View>
+                                <View style={styles.colAmount}><Text style={[styles.td, { fontWeight: 'bold' }]}>{formatCurrency(item.total_amount)}</Text></View>
                             </View>
-                        )}
-
-                        <View style={styles.kvContainer}>
-                            <Text style={styles.kvLabel}>Status:</Text>
-                            <Text style={[styles.kvValue, { color: invoice.status === 'finalized' ? '#16A34A' : '#CA8A04' }]}>
-                                {invoice.status.toUpperCase()}
-                            </Text>
-                        </View>
-
-                        {/* QR Code */}
-                        {invoice.barcodeUrl && (
-                            <View style={{ marginTop: 10, alignItems: 'flex-end', width: '100%' }}>
-                                <Image src={invoice.barcodeUrl} style={{ width: 60, height: 60 }} />
-                            </View>
-                        )}
-                    </View>
-                </View>
-
-                {/* Divider */}
-                <View style={styles.divider} />
-
-                {/* Bill To Section */}
-                <View style={styles.billToSection}>
-                    <Text style={styles.billToLabel}>Bill To</Text>
-                    <Text style={styles.billToName}>{customer?.name}</Text>
-                    <Text style={[styles.companyText, { color: '#374151' }]}>{customer?.address}</Text>
-                    <Text style={[styles.companyText, { color: '#374151' }]}>
-                        {customer?.state} ({customer?.state_code})
-                    </Text>
-                    <Text style={[styles.companyText, { color: '#374151', marginTop: 2 }]}>
-                        GSTIN: {customer?.gstin || 'N/A'}
-                    </Text>
-                </View>
-
-                {/* Line Items Table */}
-                <View style={styles.table}>
-                    {/* Header */}
-                    <View style={styles.tableHeader}>
-                        <View style={styles.col1}><Text style={styles.th}>Item Description</Text></View>
-                        <View style={styles.col2}><Text style={styles.th}>SAC</Text></View>
-                        <View style={styles.col3}><Text style={styles.th}>Qty</Text></View>
-                        <View style={styles.col4}><Text style={styles.th}>Rate</Text></View>
-                        <View style={styles.col5}><Text style={styles.th}>Tax</Text></View>
-                        <View style={styles.col6}><Text style={styles.th}>Amount</Text></View>
+                        ))}
                     </View>
 
-                    {/* Rows */}
-                    {items.map((item: any, i: number) => (
-                        <View style={[styles.tableRow, { backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#F9FAFB' }]} key={i}>
-                            <View style={styles.col1}><Text style={styles.td}>{item.description}</Text></View>
-                            <View style={styles.col2}><Text style={styles.td}>{item.sac_code}</Text></View>
-                            <View style={styles.col3}><Text style={styles.td}>{item.quantity}</Text></View>
-                            <View style={styles.col4}><Text style={styles.td}>{formatCurrency(item.unit_price)}</Text></View>
-                            <View style={styles.col5}><Text style={styles.td}>{item.tax_rate}%</Text></View>
-                            <View style={styles.col6}><Text style={[styles.td, { fontWeight: 'bold' }]}>{formatCurrency(item.total_amount)}</Text></View>
-                        </View>
-                    ))}
-                </View>
-
-                {/* Totals Section */}
-                <View style={styles.totalsContainer}>
-                    <View style={styles.totalsBox}>
-                        <View style={styles.totalRow}>
-                            <Text style={styles.totalLabel}>Subtotal</Text>
-                            <Text style={styles.totalValue}>{formatCurrency(invoice.subtotal)}</Text>
-                        </View>
-
-                        {(invoice.invoice_items.reduce((acc: number, item: any) => acc + (item.igst_amount), 0) > 0) ? (
+                    {/* Totals */}
+                    <View style={styles.totalsSection}>
+                        <View style={styles.totalsBox}>
                             <View style={styles.totalRow}>
-                                <Text style={styles.totalLabel}>IGST</Text>
-                                <Text style={styles.totalValue}>
-                                    {formatCurrency(invoice.invoice_items.reduce((acc: number, item: any) => acc + (item.igst_amount), 0))}
-                                </Text>
+                                <Text style={styles.totalLabel}>Taxable Value</Text>
+                                <Text style={styles.totalValue}>{formatCurrency(invoice.subtotal)}</Text>
                             </View>
-                        ) : (
-                            <>
+                            {(invoice.invoice_items.reduce((acc: number, item: any) => acc + (item.igst_amount), 0) > 0) ? (
                                 <View style={styles.totalRow}>
-                                    <Text style={styles.totalLabel}>CGST</Text>
+                                    <Text style={styles.totalLabel}>IGST</Text>
                                     <Text style={styles.totalValue}>
-                                        {formatCurrency(invoice.invoice_items.reduce((acc: number, item: any) => acc + (item.cgst_amount), 0))}
+                                        {formatCurrency(invoice.invoice_items.reduce((acc: number, item: any) => acc + (item.igst_amount), 0))}
                                     </Text>
                                 </View>
-                                <View style={styles.totalRow}>
-                                    <Text style={styles.totalLabel}>SGST</Text>
-                                    <Text style={styles.totalValue}>
-                                        {formatCurrency(invoice.invoice_items.reduce((acc: number, item: any) => acc + (item.sgst_amount), 0))}
-                                    </Text>
-                                </View>
-                            </>
-                        )}
-
-                        <View style={styles.grandTotalRow}>
-                            <Text style={styles.grandTotalLabel}>Grand Total</Text>
-                            <Text style={styles.grandTotalValue}>Rs. {formatCurrency(invoice.grand_total)}</Text>
+                            ) : (
+                                <>
+                                    <View style={styles.totalRow}>
+                                        <Text style={styles.totalLabel}>CGST</Text>
+                                        <Text style={styles.totalValue}>
+                                            {formatCurrency(invoice.invoice_items.reduce((acc: number, item: any) => acc + (item.cgst_amount), 0))}
+                                        </Text>
+                                    </View>
+                                    <View style={styles.totalRow}>
+                                        <Text style={styles.totalLabel}>SGST</Text>
+                                        <Text style={styles.totalValue}>
+                                            {formatCurrency(invoice.invoice_items.reduce((acc: number, item: any) => acc + (item.sgst_amount), 0))}
+                                        </Text>
+                                    </View>
+                                </>
+                            )}
+                            <View style={styles.grandTotalRow}>
+                                <Text style={styles.grandTotalLabel}>Grand Total</Text>
+                                <Text style={styles.grandTotalValue}>Rs. {formatCurrency(invoice.grand_total)}</Text>
+                            </View>
                         </View>
+                    </View>
+
+                    <View style={styles.footer}>
+                        <Text style={styles.footerText}>This is a computer generated invoice.</Text>
+                        <Text style={styles.footerText}>Powered by Citrux Billing • www.citrux.in</Text>
                     </View>
                 </View>
 
-
-
-                {/* Footer */}
-                <View style={styles.footer}>
-                    <Text style={styles.footerText}>Thank you for your business</Text>
-                    <Text style={styles.brandName}>Powered by Citrux Billing</Text>
-                </View>
             </Page>
         </Document>
     );

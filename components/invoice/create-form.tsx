@@ -167,7 +167,8 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
         const calc = calculateInvoice(
             lineItems,
             company.state_code,
-            selectedCustomer.state_code
+            selectedCustomer.state_code,
+            taxMode
         )
 
         setTotals({
@@ -178,7 +179,7 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
             grandTotal: calc.grandTotal
         })
 
-    }, [lineItems, customerId, company, selectedCustomer])
+    }, [lineItems, customerId, company, selectedCustomer, taxMode])
 
     const addItem = () => {
         setLineItems([...lineItems, {
@@ -487,7 +488,7 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
                 invoiceNumber, // Master Number if isMaster
                 date,
                 dueDate,
-                lineItems: calculateInvoice(lineItems, company?.state_code || '', selectedCustomer?.state_code || '').lineItems,
+                lineItems: calculateInvoice(lineItems, company?.state_code || '', selectedCustomer?.state_code || '', taxMode).lineItems,
                 totals,
                 // Master Invoice Data
                 isMaster,
@@ -495,11 +496,26 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
                 title: contractTitle,
                 startDate,
                 endDate,
-                totalAmount: finalContractTotal, // Always send Grand Total as the Contract Value
+                totalAmount: finalContractTotal, // Sending likely the Full Contract Value
+                taxMode: taxMode, // Direct string value
+                isTaxInclusive: taxMode === 'inclusive', // Keep for backward compat if needed
                 phases: phases.map(p => {
-                    const subtotal = p.amount;
-                    const tax = parseFloat((subtotal * 0.18).toFixed(2));
-                    const total = parseFloat((subtotal + tax).toFixed(2));
+                    let subtotal = 0;
+                    let tax = 0;
+                    let total = 0;
+
+                    if (taxMode === 'inclusive') {
+                        // Amount entered is Final Total
+                        total = p.amount;
+                        subtotal = parseFloat((total / 1.18).toFixed(2));
+                        tax = parseFloat((total - subtotal).toFixed(2));
+                    } else {
+                        // Amount entered is Taxable Value
+                        subtotal = p.amount;
+                        tax = parseFloat((subtotal * 0.18).toFixed(2));
+                        total = parseFloat((subtotal + tax).toFixed(2));
+                    }
+
                     return {
                         ...p,
                         invoiceNumber: `${invoiceNumber}-P${p.number}`,
@@ -649,6 +665,18 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
                                 <div className="space-y-2">
                                     <Label>Due Date</Label>
                                     <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Tax Mode</Label>
+                                    <Select value={taxMode} onValueChange={(v: any) => setTaxMode(v)}>
+                                        <SelectTrigger>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="exclusive">Exclusive (Add GST)</SelectItem>
+                                            <SelectItem value="inclusive">Inclusive (Extract GST)</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
                         </CardContent>

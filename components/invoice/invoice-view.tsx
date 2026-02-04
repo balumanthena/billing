@@ -1,5 +1,6 @@
 'use client'
 
+import { toast } from "sonner"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Download, ArrowLeft, Trash2, CheckCircle, Info, CircleHelp } from 'lucide-react'
@@ -11,7 +12,7 @@ import { IssueCreditNoteDialog } from './credit-note-dialog'
 import { CancelInvoiceDialog } from './cancel-dialog'
 import { AgreementDialog } from './agreement-dialog'
 import { finalizeInvoice, deleteInvoice } from '@/app/actions/invoices'
-import { InvoicePaymentsSection } from './invoice-payments'
+import { InvoicePaymentsSection } from '@/components/invoice/invoice-payments'
 import { useState, useEffect } from 'react'
 import { Badge } from "@/components/ui/badge"
 // @ts-ignore
@@ -42,22 +43,6 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
     const [loading, setLoading] = useState(false)
     const [barcodeUrl, setBarcodeUrl] = useState<string>('')
 
-    // Master Invoice Check: It has phases if it's a master invoice OR `master_invoices` table structure
-    // The passed `invoice` object structure depends on the fetcher. 
-    // If it's from `getInvoice`, it's a standard invoice.
-    // If it's a MASTER invoice, the ID would match a master_invoices record.
-    // We need to know WHICH one it is.
-    // The `getInvoice` action returns an invoice from `invoices` table.
-    // We likely need a dedicated `MasterInvoiceDetailView` or logic here.
-
-    // Assuming for now this view handles STANDARD invoices.
-    // But if `invoice.master_invoice_id` is present, we should show a link to the Master.
-
-    // Wait, the USER expects a Master Invoice View.
-    // The Page `/dashboard/invoices/[id]` calls `getInvoice(id)`.
-    // If ID belongs to `master_invoices`, `getInvoice` (which queries `invoices`) will return NULL.
-    // We need to handle this in the Page component to try fetching Master Invoice if Standard fails.
-
     useEffect(() => {
         try {
             const canvas = document.createElement('canvas')
@@ -79,9 +64,21 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
 
     const handleFinalize = async () => {
         setLoading(true)
-        await finalizeInvoice(invoice.id)
-        setLoading(false)
-        router.refresh()
+        try {
+            const res = await finalizeInvoice(invoice.id)
+
+            if (res.message !== 'success') {
+                toast.error(res.message)
+            } else {
+                toast.success("Invoice finalized successfully")
+                router.refresh()
+            }
+        } catch (error: any) {
+            console.error('Finalize error', error)
+            toast.error(error.message || "An unexpected error occurred")
+        } finally {
+            setLoading(false)
+        }
     }
 
     const handleDelete = async () => {
@@ -91,7 +88,7 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
         if (res.message === 'success') {
             router.push('/dashboard/invoices')
         } else {
-            alert(res.message)
+            toast.error(res.message)
         }
     }
 
@@ -109,48 +106,68 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                    <Button variant="outline" size="icon" onClick={() => router.back()}>
-                        <ArrowLeft className="h-4 w-4" />
-                    </Button>
-                    <div>
-                        <div className="flex items-center gap-3">
-                            <h1 className="text-3xl font-bold tracking-tight">
-                                {invoice.invoice_number}
-                            </h1>
-                            <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Badge className={`${getStatusColor(invoice.status)} cursor-help`} variant="outline">
-                                            {invoice.status.toUpperCase()}
-                                        </Badge>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>{invoice.status === 'draft' ? 'Visible only to you. Not sent to client.' :
-                                            invoice.status === 'finalized' ? 'Locked and ready for payment.' :
-                                                invoice.status === 'paid' ? 'Payment received in full.' :
-                                                    'Invoice status.'}</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
+            {/* ERP-Style Header */}
+            <div className="flex flex-col md:flex-row justify-between items-start gap-6 border-b border-slate-200 pb-6">
+                <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                        <Button variant="outline" size="sm" onClick={() => router.back()} className="h-9 w-9 p-0 rounded-full border-slate-300">
+                            <ArrowLeft className="h-4 w-4 text-slate-600" />
+                        </Button>
+
+                        <div>
+                            {/* Primary: Invoice Number */}
+                            <div className="flex items-center gap-3">
+                                <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
+                                    {invoice.invoice_number}
+                                </h1>
+                                {/* Status Badge - Subtle Pill */}
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <div className={`px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wide border ${invoice.status === 'finalized' ? 'bg-green-50 text-green-700 border-green-200' :
+                                                invoice.status === 'paid' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                                    invoice.status === 'cancelled' ? 'bg-red-50 text-red-700 border-red-200' :
+                                                        'bg-slate-100 text-slate-600 border-slate-200'
+                                                }`}>
+                                                {invoice.status}
+                                            </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Current Invoice Status</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </div>
+
+                            {/* Secondary: Phase Context */}
                             {isPhaseInvoice && (
-                                <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
-                                    {invoice.phase_label || `Phase ${invoice.phase_number}`}
-                                </Badge>
+                                <div className="flex items-center gap-3 mt-1.5">
+                                    <Badge variant="secondary" className="bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200 font-medium">
+                                        {invoice.phase_label || `Phase ${invoice.phase_number}`}
+                                    </Badge>
+
+                                    {/* Linked Contract - Muted & Professional */}
+                                    <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                                        <span className="text-slate-400">|</span>
+                                        <span className="font-medium">Linked Contract:</span>
+                                        <span className="font-mono text-slate-600 font-semibold tracking-tight">
+                                            {invoice.master_invoice?.master_invoice_number || 'PENDING'}
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Cancel Reason */}
+                            {invoice.status === 'cancelled' && (
+                                <p className="text-xs text-red-600 mt-2 font-medium bg-red-50 px-2 py-1 rounded inline-block">
+                                    Cancelled: {invoice.cancel_reason}
+                                </p>
                             )}
                         </div>
-                        {invoice.status === 'cancelled' && (
-                            <p className="text-xs text-red-600 mt-1">Reason: {invoice.cancel_reason}</p>
-                        )}
-                        {isPhaseInvoice && (
-                            <div className="text-sm text-muted-foreground mt-1">
-                                Part of Master Contract <span className="font-mono">{invoice.master_invoice_id}</span>
-                            </div>
-                        )}
                     </div>
                 </div>
 
+                {/* Right Side Actions */}
                 <div className="flex items-center gap-2">
                     {/* Actions for Draft */}
                     {invoice.status === 'draft' && (
@@ -181,20 +198,20 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
                             </AlertDialog>
 
                             <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <TooltipProvider>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <AlertDialogTrigger asChild>
                                                 <Button variant="default" size="sm" disabled={loading} className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm ring-1 ring-emerald-600">
                                                     <CheckCircle className="h-4 w-4 mr-2" /> Finalize
                                                 </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                <p>Locks the invoice to prevent further edits.</p>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
-                                </AlertDialogTrigger>
+                                            </AlertDialogTrigger>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Locks the invoice to prevent further edits.</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
                                 <AlertDialogContent className="max-w-md border-none shadow-2xl ring-1 ring-slate-100">
                                     <AlertDialogHeader>
                                         <AlertDialogTitle className="text-xl font-bold text-slate-900 flex items-center gap-2">

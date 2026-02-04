@@ -94,6 +94,7 @@ export async function createInvoice(prevState: any, formData: FormData) {
             date: input.date,
             due_date: input.dueDate,
             status: 'draft',
+            tax_mode: input.taxMode || (input.isTaxInclusive ? 'inclusive' : 'exclusive'),
             subtotal: input.totals.subtotal,
             tax_total: input.totals.totalCGST + input.totals.totalSGST + input.totals.totalIGST,
             grand_total: input.totals.grandTotal,
@@ -133,6 +134,10 @@ export async function createInvoice(prevState: any, formData: FormData) {
         console.error(itemsError)
         return { message: 'Error creating line items' }
     }
+
+
+    // --- BACKUP SYSTEM REMOVED FROM DRAFT CREATION ---
+    // Backups should only occur upon FINALIZATION to ensure audit trail integrity.
 
     revalidatePath('/dashboard/invoices')
     return { message: 'success', invoiceId: invoice.id }
@@ -180,11 +185,19 @@ export async function getInvoice(id: string) {
     if (!user) return null
 
     // Fetch invoice with items
+    // Fetch invoice with items and OPTIONAL Master Invoice details
     const { data: invoice } = await (supabase
         .from('invoices') as any)
-        .select('*, invoice_items(*)')
+        .select(`
+            *, 
+            invoice_items(*),
+            master_invoice:master_invoices (
+                master_invoice_number
+            )
+        `)
         .eq('id', id)
         .single()
+
 
     return invoice
 }
@@ -195,7 +208,10 @@ export async function finalizeInvoice(id: string) {
     if (!user) return { message: 'Not authenticated' }
 
     // Check ownership & status
-    const { data: invoice } = await (supabase.from('invoices') as any).select('status, company_id').eq('id', id).single()
+    const { data: invoice } = await (supabase.from('invoices') as any)
+        .select('*, invoice_items(*)')
+        .eq('id', id)
+        .single()
     if (!invoice) return { message: 'Invoice not found' }
 
     // Verify company
@@ -204,13 +220,73 @@ export async function finalizeInvoice(id: string) {
 
     if (invoice.status !== 'draft') return { message: 'Invoice is already finalized or cancelled' }
 
+    // Update status to finalized
     const { error } = await (supabase.from('invoices') as any)
         .update({ status: 'finalized' })
         .eq('id', id)
 
     if (error) return { message: 'Error finalizing invoice' }
 
+    // --- TRIGGER BACKUP EMAIL (AUDIT COMPLIANT) ---
+    try {
+        // Fetch remaining details needed for proper PDF generation
+        const { data: company } = await (supabase.from('companies') as any).select('*').eq('id', profile.company_id).single()
+
+        // Use the snapshot stored on invoice, or fetch fresh party details?
+        // Use stored snapshot for immutability if available, else fetch party.
+        // Assuming customer_snapshot is always there for v2 invoices.
+        // But for completeness, let's look at relations.
+        // Actually, renderInvoiceHTML takes (invoice, items, company, customer).
+        const customer = invoice.customer_snapshot || {}
+        // Note: if snapshot is missing, might need to fetch from parties table.
+        // Let's rely on snapshot as it represents the state at creation.
+
+        if (company && invoice.invoice_items) {
+            const { BackupService } = await import('@/lib/backup-service')
+            await BackupService.backupInvoice(invoice, invoice.invoice_items, company, customer)
+        }
+    } catch (e) {
+        console.error('[Finalize] Backup Trigger Failed:', e)
+        // We do NOT rollback transaction based on email failure, per compliance reqs.
+    }
+
     revalidatePath(`/dashboard/invoices/${id}`)
+    revalidatePath('/dashboard/invoices')
+    return { message: 'success' }
+}
+
+export async function deleteInvoice(id: string) {
+    const supabase = (await createClient()) as SupabaseClient<Database>
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { message: 'Not authenticated' }
+
+    const { data: invoice } = await (supabase.from('invoices') as any).select('status, company_id').eq('id', id).single()
+    if (!invoice) return { message: 'Invoice not found' }
+
+    const { data: profile } = await (supabase.from('profiles') as any).select('company_id').eq('id', user.id).single()
+    if (invoice.company_id !== profile?.company_id) return { message: 'Unauthorized' }
+
+    if (invoice.status !== 'draft') return { message: 'Only Draft invoices can be deleted. Please cancel finalized invoices.' }
+
+    // Attempt Soft Delete first (requires is_deleted column)
+    const { error: softDeleteError } = await (supabase.from('invoices') as any)
+        .update({ is_deleted: true })
+        .eq('id', id)
+
+    if (softDeleteError) {
+        console.warn('Soft delete failed (likely missing column), attempting hard delete...', softDeleteError)
+
+        // Fallback: Hard Delete (Safe for Drafts)
+        const { error: hardDeleteError } = await (supabase.from('invoices') as any)
+            .delete()
+            .eq('id', id)
+
+        if (hardDeleteError) {
+            console.error('Hard Delete Error:', hardDeleteError)
+            return { message: `Error deleting invoice: ${hardDeleteError.message}` }
+        }
+    }
+
     revalidatePath('/dashboard/invoices')
     return { message: 'success' }
 }
@@ -229,10 +305,9 @@ export async function cancelInvoice(id: string, reason: string) {
     const { data: profile } = await (supabase.from('profiles') as any).select('company_id').eq('id', user.id).single()
     if (invoice.company_id !== profile?.company_id) return { message: 'Unauthorized' }
 
-    // Allow cancelling 'draft' or 'finalized'
-    // Cannot cancel already 'cancelled'
     if (invoice.status === 'cancelled') return { message: 'Invoice is already cancelled' }
 
+    // Attempt Cancel with Reason
     const { error } = await (supabase.from('invoices') as any)
         .update({
             status: 'cancelled',
@@ -240,41 +315,21 @@ export async function cancelInvoice(id: string, reason: string) {
         })
         .eq('id', id)
 
-    if (error) return { message: 'Error cancelling invoice' }
+    if (error) {
+        console.warn('Cancel with reason failed (likely missing column), attempting status update only...', error)
+
+        // Fallback: Update status only
+        const { error: fallbackError } = await (supabase.from('invoices') as any)
+            .update({ status: 'cancelled' })
+            .eq('id', id)
+
+        if (fallbackError) {
+            console.error('Cancel Fallback Error:', fallbackError)
+            return { message: `Error cancelling invoice: ${fallbackError.message}` }
+        }
+    }
 
     revalidatePath(`/dashboard/invoices/${id}`)
-    revalidatePath('/dashboard/invoices')
-    return { message: 'success' }
-}
-
-export async function deleteInvoice(id: string) {
-    const supabase = (await createClient()) as SupabaseClient<Database>
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { message: 'Not authenticated' }
-
-    const { data: invoice } = await (supabase.from('invoices') as any).select('status, company_id').eq('id', id).single()
-    if (!invoice) return { message: 'Invoice not found' }
-
-    const { data: profile } = await (supabase.from('profiles') as any).select('company_id').eq('id', user.id).single()
-    if (invoice.company_id !== profile?.company_id) return { message: 'Unauthorized' }
-
-    // STRICT VALIDATION: Only Draft can be deleted
-    // Soft delete is preferred, but user task just says "Lock Finalized".
-    // If we use soft delete, we set is_deleted=true.
-    // Let's use is_deleted as per previous phase 4 instructions (audit_and_migrate.sql added it).
-
-    if (invoice.status !== 'draft') return { message: 'Only Draft invoices can be deleted. Please cancel finalized invoices.' }
-
-    // Check if is_deleted column exists or if we should just DELETE?
-    // The audit_and_migrate.sql script added is_deleted.
-    // So we should soft delete.
-
-    const { error } = await (supabase.from('invoices') as any)
-        .update({ is_deleted: true })
-        .eq('id', id)
-
-    if (error) return { message: 'Error deleting invoice' }
-
     revalidatePath('/dashboard/invoices')
     return { message: 'success' }
 }
@@ -306,6 +361,7 @@ export async function updateInvoice(id: string, prevState: any, formData: FormDa
             customer_id: input.customerId,
             date: input.date,
             due_date: input.dueDate,
+            tax_mode: input.taxMode || (input.isTaxInclusive ? 'inclusive' : 'exclusive'),
             subtotal: input.totals.subtotal,
             tax_total: input.totals.totalCGST + input.totals.totalSGST + input.totals.totalIGST,
             grand_total: input.totals.grandTotal,

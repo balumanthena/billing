@@ -29,7 +29,7 @@ export default async function DashboardLayout({
                     </div>
                 </header>
                 <div className="flex flex-1">
-                    <aside className="hidden w-[200px] flex-col border-r md:flex">
+                    <aside className="hidden w-[200px] flex-col border-r md:flex sticky top-16 h-[calc(100vh-4rem)]">
                         <div className="flex-1 py-4">
                             <SidebarNav className="flex-col space-x-0 space-y-1 px-2" />
                         </div>

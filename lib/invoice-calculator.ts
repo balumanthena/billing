@@ -24,7 +24,8 @@ function round(num: number) {
 export function calculateInvoice(
     items: InvoiceItem[],
     companyStateCode: string,
-    partyStateCode: string
+    partyStateCode: string,
+    taxMode: 'inclusive' | 'exclusive' = 'exclusive'
 ) {
     const isInterState = companyStateCode !== partyStateCode
 
@@ -34,17 +35,32 @@ export function calculateInvoice(
     let totalIGST = 0
 
     const lineItems = items.map(item => {
-        const taxable = round(item.quantity * item.unit_price) // Assuming no line-item discount for MVP complexity
+        const rawTotal = item.quantity * item.unit_price // Base amount
+
+        let taxable = 0
+        let taxAmount = 0
+
+        // Calculate Taxable & Tax based on Mode
+        if (taxMode === 'inclusive') {
+            // Formula: Taxable = Total / (1 + Rate/100)
+            taxable = round(rawTotal / (1 + (item.tax_rate / 100)))
+            taxAmount = round(rawTotal - taxable)
+        } else {
+            // Exclusive
+            taxable = round(rawTotal)
+            taxAmount = round(taxable * (item.tax_rate / 100))
+        }
 
         let cgst = 0
         let sgst = 0
         let igst = 0
 
+        // Distribute Tax Amount
         if (isInterState) {
-            igst = round(taxable * (item.tax_rate / 100))
+            igst = taxAmount
         } else {
-            cgst = round(taxable * ((item.tax_rate / 2) / 100))
-            sgst = round(taxable * ((item.tax_rate / 2) / 100))
+            cgst = round(taxAmount / 2)
+            sgst = round(taxAmount - cgst) // Balance rounding diffs
         }
 
         const total = round(taxable + cgst + sgst + igst)
@@ -64,9 +80,7 @@ export function calculateInvoice(
         }
     })
 
-    // Final totals (could also sum line items, but floating point drift might occur, typically sum of lines is safer for tax compliance than tax on total)
-    // GST Rule: Tax is calculated per line item and rounded.
-
+    // Final totals
     return {
         lineItems,
         subtotal: round(subtotal),

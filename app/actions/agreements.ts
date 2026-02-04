@@ -30,22 +30,28 @@ export async function createAgreement(prevState: any, formData: FormData) {
     const servicesSnapshot = JSON.parse(formData.get('services_snapshot') as string)
 
     // 3. Insert
-    const { error } = await (supabase.from('agreements') as any).insert({
-        company_id: profile.company_id,
-        customer_id: customerId,
-        date: date,
-        status: 'draft',
-        grand_total: grandTotal,
-        tax_mode: taxMode,
-        project_settings: projectSettings,
-        services_snapshot: servicesSnapshot,
-        created_by: user.id
-    })
+    const { data: newAgreement, error } = await (supabase.from('agreements') as any)
+        .insert({
+            company_id: profile.company_id,
+            customer_id: customerId,
+            date: date,
+            status: 'draft',
+            grand_total: grandTotal,
+            tax_mode: taxMode,
+            project_settings: projectSettings,
+            services_snapshot: servicesSnapshot,
+            created_by: user.id
+        })
+        .select('*, parties(*)') // Fetch party details for PDF
+        .single()
 
     if (error) {
         console.error('Error creating agreement:', error)
         return { message: 'Failed to create agreement: ' + error.message }
     }
+
+    // --- BACKUP SYSTEM REMOVED FROM DRAFT CREATION ---
+    // Backups trigger only on status change to Signed/Finalized via updateAgreementStatus
 
     revalidatePath('/dashboard/agreements')
     return { success: true, message: 'Agreement saved successfully!' }
@@ -125,6 +131,34 @@ export async function updateAgreementStatus(id: string, status: string) {
         .eq('id', id)
 
     if (error) return { success: false, message: error.message }
+
+    // --- AUTO-BACKUP ON STATUS CHANGE (Finalized/Signed) ---
+    // If status is specific interesting ones, or ALL. User said "Finalized, Signed".
+    // Let's do it for all status changes to be safe and audit-trail complete.
+    try {
+        const { data: agreement } = await (supabase.from('agreements') as any)
+            .select('*, parties(*)')
+            .eq('id', id)
+            .single()
+
+        if (agreement) {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user) {
+                const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', user.id).single() as any
+                if (profile?.company_id) {
+                    const { data: company } = await (supabase.from('companies') as any).select('*').eq('id', profile.company_id).single()
+
+                    if (company && agreement.parties) {
+                        const { BackupService } = await import('@/lib/backup-service')
+                        // Pass the relation data.
+                        await BackupService.backupAgreement(agreement, agreement.parties, company)
+                    }
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Agreement Status Update Backup Failed', e)
+    }
 
     revalidatePath('/dashboard/agreements')
     return { success: true }

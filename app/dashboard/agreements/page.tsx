@@ -69,7 +69,7 @@ export default async function AgreementsPage() {
                             )}
                             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                             {agreements.map((agreement: any) => (
-                                <TableRow key={agreement.id} className="hover:bg-muted/10 transition-colors">
+                                <TableRow key={agreement.id} className="hover:bg-[#7C5CFC]/5 hover:border-violet-200 transition-all cursor-pointer">
                                     <TableCell className="pl-6 py-4">
                                         <div className="flex flex-col">
                                             <span className="font-semibold text-foreground">{agreement.parties?.name || 'Unknown Client'}</span>

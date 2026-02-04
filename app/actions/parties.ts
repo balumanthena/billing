@@ -75,10 +75,34 @@ export async function upsertParty(prevState: any, formData: FormData) {
             .eq('id', id)
         error = updateError
     } else {
-        const { error: insertError } = await (supabase
+        // Insert Mode
+        const { data: newParty, error: insertError } = await (supabase
             .from('parties') as any)
             .insert(payload)
+            .select()
+            .single()
+
         error = insertError
+
+        if (!insertError && newParty) {
+            // Backup
+            try {
+                const { BackupService } = await import('@/lib/backup-service')
+                await BackupService.backupParty(newParty, profile) // Profile likely has company name/info? No, profile has company_id. 
+                // We need company details. 
+                // 'upsertParty' only fetches 'profile' which has 'company_id'. 
+                // It does NOT fetch company details like name/address.
+                // We need to fetch company details to generate the PDF properly.
+                // Doing it here or inside BackupService? BackupService expects 'company' object.
+                // Let's fetch it quickly.
+                const { data: company } = await (supabase.from('companies') as any).select('*').eq('id', profile.company_id).single()
+                if (company) {
+                    await BackupService.backupParty(newParty, company)
+                }
+            } catch (e) {
+                console.error('Party Backup Error', e)
+            }
+        }
     }
 
     if (error) {

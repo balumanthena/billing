@@ -182,6 +182,7 @@ export interface Database {
           date: string
           due_date: string | null
           status: 'draft' | 'finalized' | 'cancelled'
+          tax_mode: 'inclusive' | 'exclusive'
           subtotal: number | null
           tax_total: number | null
           grand_total: number | null
@@ -202,6 +203,7 @@ export interface Database {
           date: string
           due_date?: string | null
           status?: 'draft' | 'finalized' | 'cancelled'
+          tax_mode?: 'inclusive' | 'exclusive'
           subtotal?: number | null
           tax_total?: number | null
           grand_total?: number | null
@@ -222,6 +224,7 @@ export interface Database {
           date?: string
           due_date?: string | null
           status?: 'draft' | 'finalized' | 'cancelled'
+          tax_mode?: 'inclusive' | 'exclusive'
           subtotal?: number | null
           tax_total?: number | null
           grand_total?: number | null

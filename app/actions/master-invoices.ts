@@ -115,7 +115,8 @@ export async function createMasterInvoice(prevState: any, formData: FormData) {
             paid_amount: 0,
             outstanding_amount: input.totalAmount, // Initially full amount
             status: 'active',
-            created_by: user.id
+            created_by: user.id,
+            is_tax_inclusive: input.isTaxInclusive || false
         })
         .select()
         .single()
@@ -126,29 +127,40 @@ export async function createMasterInvoice(prevState: any, formData: FormData) {
     }
 
     // 3. Create Phases (Child Invoices)
-    const phasesPayload = input.phases.map((phase: any) => ({
-        company_id: profile.company_id,
-        customer_id: input.customerId,
-        master_invoice_id: masterInvoice.id,
+    // Helper logic for totals
+    const getTotals = (p: any) => {
+        const s = p.subtotal || p.amount || 0;
+        let t = p.tax_total || 0;
+        let g = p.grand_total || 0;
+        if (t === 0 && s > 0) t = s * 0.18;
+        if (g === 0) g = s + t;
+        return { s, t, g };
+    }
 
-        invoice_number: phase.invoiceNumber,
-        date: phase.date || input.startDate || new Date().toISOString().split('T')[0], // Phase invoice date
-        due_date: phase.dueDate || null,
+    const phasesPayload = input.phases.map((phase: any) => {
+        const { s, t, g } = getTotals(phase);
+        return {
+            company_id: profile.company_id,
+            customer_id: input.customerId,
+            master_invoice_id: masterInvoice.id,
 
-        status: 'draft', // Created as drafts
+            invoice_number: phase.invoiceNumber,
+            date: phase.date || input.startDate || new Date().toISOString().split('T')[0],
+            due_date: phase.dueDate || null,
+            status: 'draft',
 
-        // Totals
-        subtotal: phase.subtotal || phase.amount,
-        tax_total: phase.tax_total || 0,
-        grand_total: phase.grand_total || phase.amount,
+            subtotal: s,
+            tax_total: t,
+            grand_total: g,
 
-        phase_number: phase.number,
-        phase_label: phase.label,
+            phase_number: phase.number,
+            phase_label: phase.label,
 
-        customer_snapshot: customer,
-        company_snapshot: company,
-        created_by: user.id
-    }))
+            customer_snapshot: customer,
+            company_snapshot: company,
+            created_by: user.id
+        }
+    })
 
     const { data: createdPhases, error: phasesError } = await (supabase.from('invoices') as any)
         .insert(phasesPayload)
@@ -156,31 +168,27 @@ export async function createMasterInvoice(prevState: any, formData: FormData) {
 
     if (phasesError) {
         console.error('Phase Creation Error:', phasesError)
-        // Cleanup master?
         return { message: 'Error creating phase invoices: ' + phasesError.message }
     }
 
-    // 4. Create Line Items for each Phase (Generic "Consulting Services" item if not provided)
-    // For MVP, we add one generic line item matching the phase amount so PDF looks okay.
-    // Fetch a generic item or just insert ad-hoc.
-
     if (createdPhases && createdPhases.length > 0) {
         const lineItemsPayload = createdPhases.map((phaseInv: any) => {
-            // Find inputs for this phase
             const phaseInput = input.phases.find((p: any) => p.number === phaseInv.phase_number)
             const desc = phaseInput?.label || `Phase ${phaseInv.phase_number} Payment`
 
+            // Re-calculate to match above (or use saved values)
+            // phaseInv has the correct totals now.
             return {
                 invoice_id: phaseInv.id,
                 description: desc,
                 quantity: 1,
                 unit_price: phaseInv.subtotal,
-                tax_rate: 18, // Fixed 18% for IT Services as per requirement
+                tax_rate: 18,
                 taxable_amount: phaseInv.subtotal,
                 total_amount: phaseInv.grand_total,
-                cgst_amount: phaseInv.tax_total / 2, // Split 50/50 for MVP (Intra-state assumption)
+                cgst_amount: phaseInv.tax_total / 2,
                 sgst_amount: phaseInv.tax_total / 2,
-                igst_amount: 0 // Ideally check state codes
+                igst_amount: 0
             }
         })
 
@@ -222,7 +230,8 @@ export async function updateMasterInvoice(id: string, prevState: any, formData: 
             start_date: input.startDate || null,
             end_date: input.endDate || null,
             total_amount: input.totalAmount,
-            customer_id: input.customerId
+            customer_id: input.customerId,
+            is_tax_inclusive: input.isTaxInclusive || false
         })
         .eq('id', id)
 
@@ -243,20 +252,34 @@ export async function updateMasterInvoice(id: string, prevState: any, formData: 
         await (supabase.from('invoices') as any).delete().eq('id', p.id)
     }
 
+    // Helper to calculate totals
+    const calculatePhaseTotals = (p: any) => {
+        const subtotal = p.subtotal || p.amount || 0
+        let tax_total = p.tax_total || 0
+        let grand_total = p.grand_total || 0
+
+        // Auto-calculate 18% Tax if missing
+        if (tax_total === 0 && subtotal > 0) {
+            tax_total = subtotal * 0.18
+            grand_total = subtotal + tax_total
+        } else if (grand_total === 0) {
+            grand_total = subtotal + tax_total
+        }
+
+        return { subtotal, tax_total, grand_total }
+    }
+
     // Upsert: Create or Update
     for (const p of input.phases) {
         const existing = existingPhases.find((ep: any) => ep.phase_number === p.number)
 
         // If exists and IS NOT DRAFT -> PROTECT IT
-        // We only allow updating metadata like label if needed, but amounts should match if we want strictness.
-        // For now, if it's finalized, we skip updating finalized phases entirely to be safe,
-        // OR we only update benign fields. Let's just skip updating finalized phases to prevent data corruption.
+        // We only allow updating metadata like label if needed.
         if (existing && existing.status !== 'draft') {
-            // Optional: Check if user tried to change amount of finalized phase?
-            // For this MVP, we just skip updating finalized phases entirely to be safe,
-            // OR we only update benign fields. Let's just skip updating finalized phases to prevent data corruption.
             continue;
         }
+
+        const totals = calculatePhaseTotals(p)
 
         // Prepare payload for Drafts (New or Existing)
         const phasePayload = {
@@ -265,40 +288,49 @@ export async function updateMasterInvoice(id: string, prevState: any, formData: 
             master_invoice_id: id,
             phase_number: p.number,
             phase_label: p.label,
-            invoice_number: `${existingMaster.master_invoice_number}-P${p.number}`, // Ensure naming convention
-            date: existingMaster.start_date, // Default to contract start? Or specific phase date?
+            invoice_number: `${existingMaster.master_invoice_number}-P${p.number}`,
+            date: existingMaster.start_date,
             due_date: p.dueDate || null,
-            subtotal: p.subtotal || p.amount,
-            tax_total: p.tax_total || 0,
-            grand_total: p.grand_total || p.amount,
-            // If new, status is draft. If existing, it stays what it was (draft).
+            subtotal: totals.subtotal,
+            tax_total: totals.tax_total,
+            grand_total: totals.grand_total,
             status: existing ? existing.status : 'draft'
         }
 
+        let phaseId = existing?.id
+
         if (existing) {
+            // Update Phase Invoice
             await (supabase.from('invoices') as any).update(phasePayload).eq('id', existing.id)
-            // Ideally update line items too but skipping for MVP
+            phaseId = existing.id
+
+            // Delete existing line items to recreate them (Ensure tax update)
+            await (supabase.from('invoice_items') as any).delete().eq('invoice_id', existing.id)
+
         } else {
+            // Create New Phase Invoice
             const { data: newPhase } = await (supabase.from('invoices') as any).insert({
                 ...phasePayload,
                 created_by: user.id
             }).select().single()
 
-            // Create default line item for new phase
-            if (newPhase) {
-                await (supabase.from('invoice_items') as any).insert({
-                    invoice_id: newPhase.id,
-                    description: p.label || `Phase ${p.number} Payment`,
-                    quantity: 1,
-                    unit_price: p.subtotal || p.amount,
-                    tax_rate: 18,
-                    taxable_amount: p.subtotal || p.amount,
-                    total_amount: p.grand_total || p.amount,
-                    cgst_amount: (p.tax_total || 0) / 2,
-                    sgst_amount: (p.tax_total || 0) / 2,
-                    igst_amount: 0
-                })
-            }
+            phaseId = newPhase?.id
+        }
+
+        // Create Line Item
+        if (phaseId) {
+            await (supabase.from('invoice_items') as any).insert({
+                invoice_id: phaseId,
+                description: p.label || `Phase ${p.number} Payment`,
+                quantity: 1,
+                unit_price: totals.subtotal,
+                tax_rate: 18,
+                taxable_amount: totals.subtotal,
+                total_amount: totals.grand_total,
+                cgst_amount: totals.tax_total / 2,
+                sgst_amount: totals.tax_total / 2,
+                igst_amount: 0
+            })
         }
     }
 

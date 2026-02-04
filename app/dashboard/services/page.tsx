@@ -128,7 +128,7 @@ export default function ServicesPage() {
                                     </TableRow>
                                 )}
                                 {items.map((item) => (
-                                    <TableRow key={item.id}>
+                                    <TableRow key={item.id} className="group hover:bg-[#7C5CFC]/5 hover:border-violet-200 transition-colors cursor-pointer">
                                         <TableCell className="font-medium">
                                             <div>{item.name}</div>
                                             {item.description && <div className="text-xs text-muted-foreground">{item.description}</div>}
