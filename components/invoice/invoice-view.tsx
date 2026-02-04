@@ -2,7 +2,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Download, ArrowLeft, Trash2, CheckCircle } from 'lucide-react'
+import { Download, ArrowLeft, Trash2, CheckCircle, Info, CircleHelp } from 'lucide-react'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { InvoicePDF } from './invoice-pdf'
@@ -10,6 +11,7 @@ import { IssueCreditNoteDialog } from './credit-note-dialog'
 import { CancelInvoiceDialog } from './cancel-dialog'
 import { AgreementDialog } from './agreement-dialog'
 import { finalizeInvoice, deleteInvoice } from '@/app/actions/invoices'
+import { InvoicePaymentsSection } from './invoice-payments'
 import { useState, useEffect } from 'react'
 import { Badge } from "@/components/ui/badge"
 // @ts-ignore
@@ -117,9 +119,21 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
                             <h1 className="text-3xl font-bold tracking-tight">
                                 {invoice.invoice_number}
                             </h1>
-                            <Badge className={getStatusColor(invoice.status)} variant="outline">
-                                {invoice.status.toUpperCase()}
-                            </Badge>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Badge className={`${getStatusColor(invoice.status)} cursor-help`} variant="outline">
+                                            {invoice.status.toUpperCase()}
+                                        </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>{invoice.status === 'draft' ? 'Visible only to you. Not sent to client.' :
+                                            invoice.status === 'finalized' ? 'Locked and ready for payment.' :
+                                                invoice.status === 'paid' ? 'Payment received in full.' :
+                                                    'Invoice status.'}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                             {isPhaseInvoice && (
                                 <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
                                     {invoice.phase_label || `Phase ${invoice.phase_number}`}
@@ -168,9 +182,18 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
 
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                    <Button variant="default" size="sm" disabled={loading} className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm ring-1 ring-emerald-600">
-                                        <CheckCircle className="h-4 w-4 mr-2" /> Finalize
-                                    </Button>
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button variant="default" size="sm" disabled={loading} className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm ring-1 ring-emerald-600">
+                                                    <CheckCircle className="h-4 w-4 mr-2" /> Finalize
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Locks the invoice to prevent further edits.</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent className="max-w-md border-none shadow-2xl ring-1 ring-slate-100">
                                     <AlertDialogHeader>
@@ -351,6 +374,13 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Payments Section */}
+            <div className="pt-6 border-t border-border/40">
+                <InvoicePaymentsSection invoiceId={invoice.id} grandTotal={invoice.grand_total} />
+            </div>
         </div>
     )
 }
+
+

@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel, SelectSeparator } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Trash2, Plus, Save, Loader2, CalendarIcon, UserIcon, FileText, Lock } from 'lucide-react'
+import { Trash2, Plus, Save, Loader2, CalendarIcon, UserIcon, FileText, Lock, Info, CircleHelp } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { amountToWords } from '@/lib/number-to-words'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -551,7 +551,19 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="text-muted-foreground">Master ID</Label>
+                                    <div className="flex items-center gap-2">
+                                        <Label className="text-muted-foreground">Master ID</Label>
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Lock className="h-3 w-3 text-muted-foreground/50 cursor-help" />
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>Unique contract identifier. Cannot be changed once created.</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    </div>
                                     <Input
                                         value={invoiceNumber}
                                         onChange={e => setInvoiceNumber(e.target.value)}
@@ -569,7 +581,19 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="text-muted-foreground">Tax Mode</Label>
+                                    <div className="flex items-center gap-2">
+                                        <Label className="text-muted-foreground">Tax Mode</Label>
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <CircleHelp className="h-3 w-3 text-muted-foreground/50 cursor-help" />
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>Exclusive: GST is added on top. Inclusive: GST is extracted from total.</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    </div>
                                     <Select value={taxMode} onValueChange={(v: any) => setTaxMode(v)}>
                                         <SelectTrigger className="bg-secondary/30 border-0 h-11">
                                             <SelectValue />

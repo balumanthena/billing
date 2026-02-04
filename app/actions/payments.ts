@@ -42,30 +42,61 @@ export async function recordPayment(prevState: any, formData: FormData) {
 
     const invoice_id = formData.get('invoice_id') as string
     const amount = parseFloat(formData.get('amount') as string)
-    const payment_date = formData.get('payment_date') as string
+    const payment_date = formData.get('payment_date') || new Date().toISOString()
     const mode = formData.get('mode') as string
     const notes = formData.get('notes') as string
+    const reference_id = formData.get('reference_id') as string
 
     if (!invoice_id || !amount) {
         return { message: 'Invoice and Amount are required' }
     }
 
+    // 3. Insert Payment
+    // Receipt Number is generated automatically by DB Trigger (Atomic & ERP-grade)
     const { error } = await (supabase.from('payments') as any)
         .insert({
             company_id: profile.company_id,
             invoice_id,
             amount,
-            payment_date,
+            payment_date, // Store the actual date provided
             mode,
-            notes
+            notes,
+            reference_id
+            // receipt_number is auto-generated
         })
 
     if (error) {
         return { message: error.message }
     }
 
+    // 4. Update Invoice Status
+    // Fetch Invoice Total and Existing Payments
+    const { data: invoice } = await (supabase.from('invoices') as any)
+        .select('grand_total')
+        .eq('id', invoice_id)
+        .single()
+
+    const { data: allPayments } = await (supabase.from('payments') as any)
+        .select('amount')
+        .eq('invoice_id', invoice_id)
+
+    if (invoice && allPayments) {
+        const totalPaid = allPayments.reduce((sum: number, p: any) => sum + (p.amount || 0), 0)
+
+        let newStatus = 'partially_paid'
+        if (totalPaid >= invoice.grand_total) {
+            newStatus = 'paid'
+        }
+
+        // Update Invoice
+        await (supabase.from('invoices') as any)
+            .update({ status: newStatus })
+            .eq('id', invoice_id)
+    }
+
     revalidatePath('/dashboard/payments')
-    revalidatePath('/dashboard') // Update dashboard stats
+    revalidatePath(`/dashboard/invoices/${invoice_id}`)
+    revalidatePath('/dashboard')
     return { message: 'success' }
 }
 
