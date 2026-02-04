@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { Database } from '@/types/database.types'
 import { SupabaseClient } from '@supabase/supabase-js'
+import { createMasterInvoice } from './master-invoices'
 
 export async function getInvoices() {
     const supabase = (await createClient()) as SupabaseClient<Database>
@@ -18,9 +19,23 @@ export async function getInvoices() {
 
     if (!profile?.company_id) return []
 
+    // Fetch Standard Invoices (where master_invoice_id IS NULL)
+    // AND Master Invoices? Or just invoices?
+    // Requirement: "Master Invoice View should show Total contract value... Expandable phase breakdown"
+    // So main list likely shows Standard Invoices + Master Invoices.
+    // Child phases shouldn't clutter the main list maybe? Or maybe they should?
+    // Let's filter out CHILD phases from main list for clarity?
+    // "Phase Invoices (Children)... Payments are accepted ONLY on phase invoices"
+    // If I hide them, user can't find them to pay.
+    // So maybe show ALL. But distinguishing them is key.
+
     const { data: invoices } = await (supabase
         .from('invoices') as any)
-        .select('*, customer_snapshot')
+        .select(`
+            *, 
+            customer_snapshot,
+            master_invoice:master_invoices(master_invoice_number)
+        `)
         .eq('company_id', profile.company_id)
         .eq('is_deleted', false)
         .order('created_at', { ascending: false })
@@ -33,12 +48,16 @@ export async function createInvoice(prevState: any, formData: FormData) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { message: 'Not authenticated' }
 
-    // Parse raw form data (it's JSON stringified for complex structures or we use hidden inputs)
-    // For complex forms, often easier to submit JSON as a single field
+    // Parse raw form data
     const rawData = formData.get('data') as string
     if (!rawData) return { message: 'No data provided' }
 
     const input = JSON.parse(rawData)
+
+    // Check for Master Invoice Mode
+    if (input.isMaster) {
+        return await createMasterInvoice(prevState, formData)
+    }
 
     // Validation would go here (Zod)
 
@@ -258,4 +277,75 @@ export async function deleteInvoice(id: string) {
 
     revalidatePath('/dashboard/invoices')
     return { message: 'success' }
+}
+
+export async function updateInvoice(id: string, prevState: any, formData: FormData) {
+    const supabase = (await createClient()) as SupabaseClient<Database>
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { message: 'Not authenticated' }
+
+    const rawData = formData.get('data') as string
+    if (!rawData) return { message: 'No data provided' }
+
+    const input = JSON.parse(rawData)
+
+    // Check ownership
+    const { data: invoice } = await (supabase.from('invoices') as any).select('status, company_id').eq('id', id).single()
+    if (!invoice) return { message: 'Invoice not found' }
+
+    const { data: profile } = await (supabase.from('profiles') as any).select('company_id').eq('id', user.id).single()
+    if (invoice.company_id !== profile?.company_id) return { message: 'Unauthorized' }
+
+    if (invoice.status === 'finalized' || invoice.status === 'paid') {
+        return { message: 'Cannot edit finalized or paid invoices' }
+    }
+
+    // Update Invoice Record
+    const { error: invoiceError } = await (supabase.from('invoices') as any)
+        .update({
+            customer_id: input.customerId,
+            date: input.date,
+            due_date: input.dueDate,
+            subtotal: input.totals.subtotal,
+            tax_total: input.totals.totalCGST + input.totals.totalSGST + input.totals.totalIGST,
+            grand_total: input.totals.grandTotal,
+        })
+        .eq('id', id)
+
+    if (invoiceError) {
+        console.error(invoiceError)
+        return { message: 'Error updating invoice: ' + invoiceError.message }
+    }
+
+    // Update Items: Delete existing and re-insert (easiest for MVP)
+    // Or simpler: just delete all items for this invoice and recreate
+    const { error: deleteError } = await (supabase.from('invoice_items') as any).delete().eq('invoice_id', id)
+    if (deleteError) return { message: 'Error updating items (delete failed)' }
+
+    const itemsPayload = input.lineItems.map((item: any) => ({
+        invoice_id: id,
+        item_id: item.item_id,
+        description: item.description,
+        sac_code: item.sac_code,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        tax_rate: item.tax_rate,
+        taxable_amount: item.taxable,
+        cgst_amount: item.cgst,
+        sgst_amount: item.sgst,
+        igst_amount: item.igst,
+        total_amount: item.total
+    }))
+
+    const { error: itemsError } = await (supabase.from('invoice_items') as any)
+        .insert(itemsPayload)
+
+    if (itemsError) {
+        console.error(itemsError)
+        return { message: 'Error recreating line items' }
+    }
+
+    revalidatePath(`/dashboard/invoices/${id}`)
+    revalidatePath('/dashboard/invoices')
+    return { message: 'success', invoiceId: id }
 }

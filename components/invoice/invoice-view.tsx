@@ -40,12 +40,28 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
     const [loading, setLoading] = useState(false)
     const [barcodeUrl, setBarcodeUrl] = useState<string>('')
 
+    // Master Invoice Check: It has phases if it's a master invoice OR `master_invoices` table structure
+    // The passed `invoice` object structure depends on the fetcher. 
+    // If it's from `getInvoice`, it's a standard invoice.
+    // If it's a MASTER invoice, the ID would match a master_invoices record.
+    // We need to know WHICH one it is.
+    // The `getInvoice` action returns an invoice from `invoices` table.
+    // We likely need a dedicated `MasterInvoiceDetailView` or logic here.
+
+    // Assuming for now this view handles STANDARD invoices.
+    // But if `invoice.master_invoice_id` is present, we should show a link to the Master.
+
+    // Wait, the USER expects a Master Invoice View.
+    // The Page `/dashboard/invoices/[id]` calls `getInvoice(id)`.
+    // If ID belongs to `master_invoices`, `getInvoice` (which queries `invoices`) will return NULL.
+    // We need to handle this in the Page component to try fetching Master Invoice if Standard fails.
+
     useEffect(() => {
         try {
             const canvas = document.createElement('canvas')
 
             // Format data for the QR code
-            const qrData = `Invoice: ${invoice.invoice_number}\nCustomer: ${invoice.customer_snapshot.name}\nDate: ${invoice.date}\nAmount: ${invoice.grand_total}`
+            const qrData = `Invoice: ${invoice.invoice_number}\nCustomer: ${invoice.customer_snapshot?.name || 'Customer'}\nDate: ${invoice.date || ''}\nAmount: ${invoice.grand_total || 0}`
 
             bwipjs.toCanvas(canvas, {
                 bcid: 'qrcode',        // QR Code
@@ -81,9 +97,13 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
         switch (status) {
             case 'finalized': return 'bg-green-100 text-green-800'
             case 'cancelled': return 'bg-red-100 text-red-800'
+            case 'completed': return 'bg-purple-100 text-purple-800' // For Master
             default: return 'bg-gray-100 text-gray-800'
         }
     }
+
+    // Check if this is a Child Invoice (Phase)
+    const isPhaseInvoice = !!invoice.master_invoice_id;
 
     return (
         <div className="space-y-6">
@@ -100,9 +120,19 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
                             <Badge className={getStatusColor(invoice.status)} variant="outline">
                                 {invoice.status.toUpperCase()}
                             </Badge>
+                            {isPhaseInvoice && (
+                                <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
+                                    {invoice.phase_label || `Phase ${invoice.phase_number}`}
+                                </Badge>
+                            )}
                         </div>
                         {invoice.status === 'cancelled' && (
                             <p className="text-xs text-red-600 mt-1">Reason: {invoice.cancel_reason}</p>
+                        )}
+                        {isPhaseInvoice && (
+                            <div className="text-sm text-muted-foreground mt-1">
+                                Part of Master Contract <span className="font-mono">{invoice.master_invoice_id}</span>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -201,11 +231,11 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
                         <CardTitle className="text-sm font-medium text-muted-foreground">From</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="font-bold text-lg">{invoice.company_snapshot.name}</div>
+                        <div className="font-bold text-lg">{invoice.company_snapshot?.name || 'Unknown Company'}</div>
                         <div className="text-sm space-y-1 mt-2">
-                            <div>{invoice.company_snapshot.address}</div>
-                            <div>{invoice.company_snapshot.state}</div>
-                            <div>GSTIN: {invoice.company_snapshot.gstin}</div>
+                            <div>{invoice.company_snapshot?.address}</div>
+                            <div>{invoice.company_snapshot?.state}</div>
+                            <div>GSTIN: {invoice.company_snapshot?.gstin}</div>
                         </div>
                     </CardContent>
                 </Card>
@@ -214,41 +244,89 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
                         <CardTitle className="text-sm font-medium text-muted-foreground">Bill To</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="font-bold text-lg">{invoice.customer_snapshot.name}</div>
+                        <div className="font-bold text-lg">{invoice.customer_snapshot?.name || 'Unknown Customer'}</div>
                         <div className="text-sm space-y-1 mt-2">
-                            <div>{invoice.customer_snapshot.address}</div>
-                            <div>{invoice.customer_snapshot.state}</div>
-                            <div>GSTIN: {invoice.customer_snapshot.gstin}</div>
+                            <div>{invoice.customer_snapshot?.address}</div>
+                            <div>{invoice.customer_snapshot?.state}</div>
+                            <div>GSTIN: {invoice.customer_snapshot?.gstin}</div>
                         </div>
                     </CardContent>
                 </Card>
             </div>
 
+            {/* Content Table: Items (Standard) or Phases (Master) */}
             <Card>
                 <CardContent className="p-0">
                     <div className="relative w-full overflow-auto">
                         <table className="w-full caption-bottom text-sm">
                             <thead className="[&_tr]:border-b">
                                 <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Item</th>
-                                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">SAC</th>
-                                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Qty</th>
-                                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Price</th>
-                                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Tax</th>
-                                    <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Total</th>
+                                    {invoice.phases ? (
+                                        <>
+                                            <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground w-[100px] text-center">Phase #</th>
+                                            <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Description</th>
+                                            <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Due Date</th>
+                                            <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
+                                            <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Amount</th>
+                                            <th className="h-12 px-4 text-center align-middle font-medium text-muted-foreground">Action</th>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Item</th>
+                                            <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">SAC</th>
+                                            <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Qty</th>
+                                            <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Price</th>
+                                            <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Tax</th>
+                                            <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Total</th>
+                                        </>
+                                    )}
                                 </tr>
                             </thead>
                             <tbody className="[&_tr:last-child]:border-0">
-                                {invoice.invoice_items.map((item: any) => (
-                                    <tr key={item.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                                        <td className="p-4 align-middle">{item.description}</td>
-                                        <td className="p-4 align-middle">{item.sac_code}</td>
-                                        <td className="p-4 align-middle">{item.quantity}</td>
-                                        <td className="p-4 align-middle">{item.unit_price}</td>
-                                        <td className="p-4 align-middle">{item.tax_rate}%</td>
-                                        <td className="p-4 align-middle text-right">{item.total_amount}</td>
-                                    </tr>
-                                ))}
+                                {invoice.phases ? (
+                                    // Master Invoice Phases
+                                    invoice.phases.map((phase: any) => (
+                                        <tr key={phase.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                            <td className="p-4 align-middle text-center font-bold text-muted-foreground">{phase.phase_number}</td>
+                                            <td className="p-4 align-middle">
+                                                <div className="font-medium text-slate-900">{phase.phase_label}</div>
+                                                <div className="text-xs text-muted-foreground font-mono mt-0.5">{phase.invoice_number}</div>
+                                            </td>
+                                            <td className="p-4 align-middle">{phase.due_date}</td>
+                                            <td className="p-4 align-middle">
+                                                <Badge variant="secondary" className={`
+                                                    ${phase.status === 'finalized' ? 'bg-green-100 text-green-700' :
+                                                        phase.status === 'paid' ? 'bg-blue-100 text-blue-700' :
+                                                            'bg-gray-100 text-gray-700'}
+                                                `}>
+                                                    {phase.status}
+                                                </Badge>
+                                            </td>
+                                            <td className="p-4 align-middle text-right font-medium">₹{phase.grand_total}</td>
+                                            <td className="p-4 align-middle text-center">
+                                                <Button size="sm" variant="outline" asChild className="h-8">
+                                                    <a href={`/dashboard/invoices/${phase.id}`}>View</a>
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    // Standard Invoice Items
+                                    (invoice.invoice_items?.map((item: any) => (
+                                        <tr key={item.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                            <td className="p-4 align-middle">{item.description}</td>
+                                            <td className="p-4 align-middle">{item.sac_code}</td>
+                                            <td className="p-4 align-middle">{item.quantity}</td>
+                                            <td className="p-4 align-middle">{item.unit_price}</td>
+                                            <td className="p-4 align-middle">{item.tax_rate}%</td>
+                                            <td className="p-4 align-middle text-right">{item.total_amount}</td>
+                                        </tr>
+                                    )) || (
+                                            <tr>
+                                                <td colSpan={6} className="p-4 text-center text-muted-foreground">No items</td>
+                                            </tr>
+                                        ))
+                                )}
                             </tbody>
                         </table>
                     </div>

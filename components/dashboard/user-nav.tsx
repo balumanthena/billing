@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import {
     Avatar,
     AvatarFallback,
@@ -25,9 +26,26 @@ export interface UserNavProps {
 }
 
 export function UserNav({ email, name, image }: UserNavProps) {
+    const [isMounted, setIsMounted] = useState(false)
+
+    useEffect(() => {
+        setIsMounted(true)
+    }, [])
+
     const userInitials = name
         ? name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
         : email ? email.slice(0, 2).toUpperCase() : 'U'
+
+    if (!isMounted) {
+        return (
+            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Avatar className="h-8 w-8">
+                    <AvatarImage src={image || "/avatars/01.png"} alt="@user" />
+                    <AvatarFallback>{userInitials}</AvatarFallback>
+                </Avatar>
+            </Button>
+        )
+    }
 
     return (
         <DropdownMenu>

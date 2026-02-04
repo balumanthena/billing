@@ -1,5 +1,5 @@
 import React from 'react';
-import { Page, Text, View, Document, StyleSheet, Font } from '@react-pdf/renderer';
+import { Page, Text, View, Document, StyleSheet, Font, Link } from '@react-pdf/renderer';
 import { format } from 'date-fns';
 
 // Create styles
@@ -7,17 +7,17 @@ const styles = StyleSheet.create({
     page: {
         fontFamily: 'Helvetica',
         fontSize: 10,
-        paddingTop: 40,
-        paddingBottom: 60,
-        paddingHorizontal: 50, // Slightly wider margins for legal doc
-        lineHeight: 1.6, // More breathing room
-        color: '#000000', // Strict black for legal
+        paddingTop: 60, // Increased top padding
+        paddingBottom: 60, // Increased bottom padding
+        paddingHorizontal: 60, // Increased side margins
+        lineHeight: 1.5,
+        color: '#222', // Softer black for professional look
     },
     // Cover Page Styles
     coverPageContainer: {
         flex: 1,
-        margin: 40,
-        borderWidth: 1,
+        margin: 20,
+        borderWidth: 1, // Double border effect can be nice, but simple is better
         borderColor: '#000000',
         padding: 40,
         flexDirection: 'column',
@@ -25,116 +25,132 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     coverTitle: {
-        fontSize: 24,
+        fontSize: 26,
         fontWeight: 'bold',
         textTransform: 'uppercase',
-        marginBottom: 20,
+        marginBottom: 30, // More space
         textAlign: 'center',
+        color: '#000',
+        letterSpacing: 1,
     },
     coverSubtitle: {
         fontSize: 16,
         marginBottom: 60,
         textAlign: 'center',
+        color: '#444',
     },
     coverSection: {
-        marginBottom: 20,
+        marginBottom: 25,
         alignItems: 'center',
     },
     coverLabel: {
-        fontSize: 10,
-        color: '#444',
-        marginBottom: 4,
+        fontSize: 9,
+        color: '#666',
+        marginBottom: 6,
         textTransform: 'uppercase',
+        letterSpacing: 1.5,
     },
     coverValue: {
         fontSize: 14,
         fontWeight: 'bold',
+        color: '#000',
     },
 
     // Header/Footer
     header: {
         position: 'absolute',
-        top: 20,
-        left: 50,
-        right: 50,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ccc',
+        top: 25,
+        left: 60,
+        right: 60,
+        borderBottomWidth: 0.5,
+        borderBottomColor: '#999',
         paddingBottom: 5,
         flexDirection: 'row',
         justifyContent: 'space-between',
         fontSize: 8,
-        color: '#666',
+        color: '#888',
     },
     footer: {
         position: 'absolute',
-        bottom: 30,
-        left: 50,
-        right: 50,
-        borderTopWidth: 1,
-        borderTopColor: '#ccc',
+        bottom: 45, // Moved up to ensure visibility
+        left: 60,
+        right: 60,
+        borderTopWidth: 0.5,
+        borderTopColor: '#999',
         paddingTop: 10,
         flexDirection: 'row',
         justifyContent: 'space-between',
+        alignItems: 'center', // Align vertically
         fontSize: 8,
-        color: '#666',
+        color: '#444', // Darker for better visibility
     },
 
     // Content
     section: {
-        marginBottom: 15,
+        marginBottom: 20, // Better separation between clauses
     },
     heading: {
-        fontSize: 11, // Standard legal heading size
-        fontWeight: 'bold',
+        fontSize: 11,
+        fontWeight: 'bold', // Standard bold for Helvetica
         textTransform: 'uppercase',
-        marginBottom: 8,
-        textDecoration: 'underline',
+        marginBottom: 10,
+        marginTop: 5,
+        color: '#000',
+        letterSpacing: 0.5,
+        // textDecoration: 'underline', // Removed for modern look
     },
     text: {
         fontSize: 10,
         textAlign: 'justify',
-        marginBottom: 6,
+        marginBottom: 8,
+        color: '#222',
+        lineHeight: 1.6,
     },
     bold: {
         fontWeight: 'bold',
+        color: '#000',
     },
 
     // Lists
     list: {
         marginLeft: 20,
-        marginBottom: 6,
+        marginBottom: 10,
     },
     listItem: {
         flexDirection: 'row',
-        marginBottom: 4,
+        marginBottom: 6,
     },
     bullet: {
-        width: 15,
+        width: 20,
         fontSize: 10,
+        color: '#444',
     },
 
     // Tables
     table: {
         width: '100%',
-        marginVertical: 10,
-        borderWidth: 1,
-        borderColor: '#000',
+        marginVertical: 15,
+        borderWidth: 0.5,
+        borderColor: '#ccc',
     },
     tableHeader: {
         flexDirection: 'row',
-        backgroundColor: '#eee',
-        borderBottomWidth: 1,
+        backgroundColor: '#f5f5f5',
+        borderBottomWidth: 0.5,
         borderBottomColor: '#000',
-        padding: 4,
+        paddingVertical: 6,
+        paddingHorizontal: 4,
     },
     tableRow: {
         flexDirection: 'row',
-        borderBottomWidth: 1,
-        borderBottomColor: '#ccc',
-        padding: 4,
+        borderBottomWidth: 0.5,
+        borderBottomColor: '#eee',
+        paddingVertical: 6,
+        paddingHorizontal: 4,
     },
     tableCell: {
         fontSize: 9,
+        color: '#333',
     },
     col1: { width: '50%' },
     col2: { width: '25%' },
@@ -143,27 +159,28 @@ const styles = StyleSheet.create({
     // Financial Box
     financialBox: {
         borderWidth: 1,
-        borderColor: '#000',
-        padding: 10,
-        marginVertical: 10,
-        backgroundColor: '#f9f9f9',
+        borderColor: '#ddd',
+        padding: 15,
+        marginVertical: 15,
+        backgroundColor: '#fafafa',
+        borderRadius: 2,
     },
 
     // Signatures
     signatureBlock: {
-        marginTop: 50,
+        marginTop: 60,
         flexDirection: 'row',
         justifyContent: 'space-between',
         pageBreakInside: 'avoid',
     },
     signatureBox: {
-        width: '45%',
+        width: '48%', // Increased from 40% to 48% to prevent wrapping
     },
     signatureLine: {
         borderTopWidth: 1,
         borderTopColor: '#000',
-        marginTop: 40,
-        marginBottom: 5,
+        marginTop: 50,
+        marginBottom: 8,
     }
 });
 
@@ -220,6 +237,11 @@ export const ServiceAgreementPDF = ({ invoice }: ServiceAgreementProps) => {
         });
     };
 
+    // Contact Info (Footer)
+    const companyWebsite = invoice.project_settings?.companyWebsite || 'www.citrux.in';
+    const companyEmail = invoice.project_settings?.companyEmail || 'info@citrux.in';
+    // const companyPhone = invoice.project_settings?.companyPhone || ''; // Not used in footer yet
+
     return (
         <Document>
             {/* TITLE PAGE */}
@@ -261,7 +283,7 @@ export const ServiceAgreementPDF = ({ invoice }: ServiceAgreementProps) => {
                 </View>
 
                 {/* 1. DEFINITIONS */}
-                <View style={styles.section}>
+                <View style={styles.section} wrap={false}>
                     <Text style={styles.heading}>1. DEFINITIONS & INTERPRETATION</Text>
                     <Text style={styles.text}>
                         <Text style={styles.bold}>"Agreement"</Text> means this {agreementType}, including all schedules, annexures, and the Invoice.
@@ -278,7 +300,7 @@ export const ServiceAgreementPDF = ({ invoice }: ServiceAgreementProps) => {
                 </View>
 
                 {/* 2. PARTIES */}
-                <View style={styles.section}>
+                <View style={styles.section} wrap={false}>
                     <Text style={styles.heading}>2. PARTIES</Text>
                     <Text style={styles.text}>This Agreement is entered into by and between:</Text>
 
@@ -293,7 +315,7 @@ export const ServiceAgreementPDF = ({ invoice }: ServiceAgreementProps) => {
                 </View>
 
                 {/* 3. EFFECTIVE DATE & TERM */}
-                <View style={styles.section}>
+                <View style={styles.section} wrap={false}>
                     <Text style={styles.heading}>3. EFFECTIVE DATE & TERM</Text>
                     <Text style={styles.text}>
                         This Agreement shall commence on the Effective Date ({agreementDate}) and shall continue until the completion of the Services, unless terminated earlier in accordance with the provisions of this Agreement.
@@ -301,7 +323,7 @@ export const ServiceAgreementPDF = ({ invoice }: ServiceAgreementProps) => {
                 </View>
 
                 {/* 4. SCOPE OF SERVICES */}
-                <View style={styles.section}>
+                <View style={styles.section} wrap={false}>
                     <Text style={styles.heading}>4. SCOPE OF SERVICES</Text>
                     <Text style={styles.text}>The Developer shall provide the following Services:</Text>
                     <View style={styles.table}>
@@ -323,7 +345,7 @@ export const ServiceAgreementPDF = ({ invoice }: ServiceAgreementProps) => {
                 {/* 5. PROJECT SPECIFICATIONS */}
                 {/* Only include if present in project_settings */}
                 {invoice.project_settings?.technologyStack || invoice.project_settings?.totalPages ? (
-                    <View style={styles.section}>
+                    <View style={styles.section} wrap={false}>
                         <Text style={styles.heading}>5. PROJECT SPECIFICATIONS</Text>
                         <View style={styles.list}>
                             {invoice.project_settings?.technologyStack && (
@@ -344,7 +366,7 @@ export const ServiceAgreementPDF = ({ invoice }: ServiceAgreementProps) => {
 
                 {/* 6. ROLES & RESPONSIBILITIES (Conditional) */}
                 {isClauseEnabled('client_responsibilities') && (
-                    <View style={styles.section}>
+                    <View style={styles.section} wrap={false}>
                         <Text style={styles.heading}>6. ROLES & RESPONSIBILITIES</Text>
                         <Text style={styles.text}>{getClauseText('client_responsibilities')}</Text>
                     </View>
@@ -352,14 +374,14 @@ export const ServiceAgreementPDF = ({ invoice }: ServiceAgreementProps) => {
 
                 {/* 7. DELIVERY, ACCEPTANCE & SIGN-OFF (Conditional) */}
                 {isClauseEnabled('acceptance_period') && (
-                    <View style={styles.section}>
+                    <View style={styles.section} wrap={false}>
                         <Text style={styles.heading}>7. DELIVERY, ACCEPTANCE & SIGN-OFF</Text>
                         <Text style={styles.text}>{getClauseText('acceptance_period')}</Text>
                     </View>
                 )}
 
                 {/* 8. TECHNOLOGY STACK & SCALABILITY */}
-                <View style={styles.section}>
+                <View style={styles.section} wrap={false}>
                     <Text style={styles.heading}>8. TECHNOLOGY STACK & SCALABILITY</Text>
                     <Text style={styles.text}>
                         Unless otherwise specified, services are delivered using modern, industry-standard technology suitable for the Client's current requirements. Future scalability or feature enhancements beyond the initial Scope of Services shall be treated as a Change Order.
@@ -368,7 +390,7 @@ export const ServiceAgreementPDF = ({ invoice }: ServiceAgreementProps) => {
 
                 {/* 9. THIRD-PARTY SERVICES (Conditional) */}
                 {isClauseEnabled('third_party_services') && (
-                    <View style={styles.section}>
+                    <View style={styles.section} wrap={false}>
                         <Text style={styles.heading}>9. THIRD-PARTY SERVICES</Text>
                         <Text style={styles.text}>{getClauseText('third_party_services')}</Text>
                     </View>
@@ -376,14 +398,14 @@ export const ServiceAgreementPDF = ({ invoice }: ServiceAgreementProps) => {
 
                 {/* 10. DATA, CONTENT & COMPLIANCE (Conditional) */}
                 {isClauseEnabled('data_handling') && (
-                    <View style={styles.section}>
+                    <View style={styles.section} wrap={false}>
                         <Text style={styles.heading}>10. DATA, CONTENT & COMPLIANCE</Text>
                         <Text style={styles.text}>{getClauseText('data_handling')}</Text>
                     </View>
                 )}
 
                 {/* 11. COMMERCIAL TERMS & PAYMENT */}
-                <View style={styles.section}>
+                <View style={styles.section} wrap={false}>
                     <Text style={styles.heading}>11. COMMERCIAL TERMS & PAYMENT</Text>
                     <View style={styles.financialBox}>
                         <Text style={[styles.text, { textAlign: 'center' }]}>
@@ -411,7 +433,7 @@ export const ServiceAgreementPDF = ({ invoice }: ServiceAgreementProps) => {
                 </View>
 
                 {/* 12. TAXATION (GST) */}
-                <View style={styles.section}>
+                <View style={styles.section} wrap={false}>
                     <Text style={styles.heading}>12. TAXATION (GST)</Text>
                     <Text style={styles.text}>
                         All fees quoted are exclusive of Goods and Services Tax (GST) unless explicitly stated otherwise. GST shall be charged at the applicable rate (currently 18%) on all invoices.
@@ -419,7 +441,7 @@ export const ServiceAgreementPDF = ({ invoice }: ServiceAgreementProps) => {
                 </View>
 
                 {/* 13. INTELLECTUAL PROPERTY */}
-                <View style={styles.section}>
+                <View style={styles.section} wrap={false}>
                     <Text style={styles.heading}>13. INTELLECTUAL PROPERTY</Text>
                     <Text style={styles.text}>
                         Upon receipt of full payment, the Developer grants the Client ownership of the Deliverables. The Developer retains ownership of its pre-existing intellectual property, reusable code, tools, and methodologies used in creating the Deliverables.
@@ -428,7 +450,7 @@ export const ServiceAgreementPDF = ({ invoice }: ServiceAgreementProps) => {
 
                 {/* 14. SUPPORT & MAINTENANCE (Conditional) */}
                 {isClauseEnabled('support_clause') && (
-                    <View style={styles.section}>
+                    <View style={styles.section} wrap={false}>
                         <Text style={styles.heading}>14. SUPPORT & MAINTENANCE</Text>
                         <Text style={styles.text}>{getClauseText('support_clause')}</Text>
                     </View>
@@ -436,14 +458,14 @@ export const ServiceAgreementPDF = ({ invoice }: ServiceAgreementProps) => {
 
                 {/* 15. CONFIDENTIALITY (Conditional) */}
                 {isClauseEnabled('confidentiality') && (
-                    <View style={styles.section}>
+                    <View style={styles.section} wrap={false}>
                         <Text style={styles.heading}>15. CONFIDENTIALITY</Text>
                         <Text style={styles.text}>{getClauseText('confidentiality')}</Text>
                     </View>
                 )}
 
                 {/* 16. TERMINATION */}
-                <View style={styles.section}>
+                <View style={styles.section} wrap={false}>
                     <Text style={styles.heading}>16. TERMINATION</Text>
                     <Text style={styles.text}>
                         Either Party may terminate this Agreement for material breach by the other Party upon 30 days' written notice, provided the breach is not cured within the notice period. In the event of termination, the Client shall pay for all Services performed up to the termination date.
@@ -452,14 +474,14 @@ export const ServiceAgreementPDF = ({ invoice }: ServiceAgreementProps) => {
 
                 {/* 17. FORCE MAJEURE (Conditional) */}
                 {isClauseEnabled('force_majeure') && (
-                    <View style={styles.section}>
+                    <View style={styles.section} wrap={false}>
                         <Text style={styles.heading}>17. FORCE MAJEURE</Text>
                         <Text style={styles.text}>{getClauseText('force_majeure')}</Text>
                     </View>
                 )}
 
                 {/* 18. LIMITATION OF LIABILITY */}
-                <View style={styles.section}>
+                <View style={styles.section} wrap={false}>
                     <Text style={styles.heading}>18. LIMITATION OF LIABILITY</Text>
                     <Text style={styles.text}>
                         Except for confidentiality obligations, the Developer's total liability under this Agreement shall not exceed the total fees actually paid by the Client. Neither Party shall be liable for indirect, incidental, or consequential damages.
@@ -467,7 +489,7 @@ export const ServiceAgreementPDF = ({ invoice }: ServiceAgreementProps) => {
                 </View>
 
                 {/* 19. GOVERNING LAW & JURISDICTION */}
-                <View style={styles.section}>
+                <View style={styles.section} wrap={false}>
                     <Text style={styles.heading}>19. GOVERNING LAW & JURISDICTION</Text>
                     <Text style={styles.text}>
                         This Agreement shall be governed by the laws of India. The courts of <Text style={styles.bold}>{formattedJurisdiction}</Text> shall have exclusive jurisdiction over any disputes arising out of this Agreement.
@@ -475,7 +497,7 @@ export const ServiceAgreementPDF = ({ invoice }: ServiceAgreementProps) => {
                 </View>
 
                 {/* 20. ENTIRE AGREEMENT */}
-                <View style={styles.section}>
+                <View style={styles.section} wrap={false}>
                     <Text style={styles.heading}>20. ENTIRE AGREEMENT</Text>
                     <Text style={styles.text}>
                         This Agreement constitutes the entire agreement between the Parties and supersedes all prior agreements, understandings, or representations. No amendment shall be binding unless in writing and signed by both Parties.
@@ -483,7 +505,7 @@ export const ServiceAgreementPDF = ({ invoice }: ServiceAgreementProps) => {
                 </View>
 
                 {/* 21. ACCEPTANCE & SIGNATURES */}
-                <View style={styles.section} break={false}>
+                <View style={styles.section} break={false} wrap={false}>
                     <Text style={styles.heading}>21. ACCEPTANCE & SIGNATURES</Text>
                     <Text style={styles.text}>
                         IN WITNESS WHEREOF, the Parties have executed this Agreement as of the Effective Date.
@@ -506,8 +528,13 @@ export const ServiceAgreementPDF = ({ invoice }: ServiceAgreementProps) => {
 
                 {/* Footer on each page */}
                 <View style={styles.footer} fixed>
-                    <Text>{version} | Confidential</Text>
-                    <Text render={({ pageNumber, totalPages }) => (
+                    <Text style={{ width: '30%' }}>{version} | Confidential</Text>
+                    <View style={{ width: '40%', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                        <Link src={companyWebsite.startsWith('http') ? companyWebsite : `https://${companyWebsite}`} style={{ textDecoration: 'none', color: '#444' }}>{companyWebsite}</Link>
+                        <Text> | </Text>
+                        <Link src={`mailto:${companyEmail}`} style={{ textDecoration: 'none', color: '#444' }}>{companyEmail}</Link>
+                    </View>
+                    <Text style={{ width: '30%', textAlign: 'right' }} render={({ pageNumber, totalPages }) => (
                         `Page ${pageNumber} of ${totalPages}`
                     )} />
                 </View>

@@ -2,6 +2,8 @@
 
 import { useActionState, useEffect, useState } from 'react'
 import { getParties, upsertParty } from '@/app/actions/parties'
+import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -11,6 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Loader2, Pencil } from 'lucide-react'
 import { GST_STATES } from '@/lib/gst-states'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+
 
 const initialState = {
     message: '',
@@ -21,6 +25,8 @@ export default function PartiesPage() {
     const [loading, setLoading] = useState(true)
     const [open, setOpen] = useState(false)
     const [editingParty, setEditingParty] = useState<any>(null)
+    const searchParams = useSearchParams()
+    const router = useRouter()
 
     // Need key to reset form state when closing/opening
     const [state, formAction, isPending] = useActionState(upsertParty, initialState)
@@ -65,6 +71,20 @@ export default function PartiesPage() {
     useEffect(() => {
         loadParties()
     }, [])
+
+    // Check for edit param
+    useEffect(() => {
+        const editId = searchParams.get('edit')
+        if (editId && parties.length > 0) {
+            const partyToEdit = parties.find(p => p.id === editId)
+            if (partyToEdit) {
+                setEditingParty(partyToEdit)
+                setOpen(true)
+                // Clean up URL
+                router.replace('/dashboard/parties')
+            }
+        }
+    }, [parties, searchParams, router])
 
     useEffect(() => {
         if (state?.message === 'success') {
@@ -146,122 +166,86 @@ export default function PartiesPage() {
             </div>
 
             {loading ? (
-                <>
-                    {/* Desktop Skeleton */}
-                    <div className="hidden md:block border rounded-md">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Name</TableHead>
-                                    <TableHead>Type</TableHead>
-                                    <TableHead>GSTIN</TableHead>
-                                    <TableHead>State</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {Array.from({ length: 5 }).map((_, i) => (
-                                    <TableRow key={i}>
-                                        <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
-                                        <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
-                                        <TableCell><Skeleton className="h-4 w-[120px]" /></TableCell>
-                                        <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
-                                        <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto rounded-md" /></TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </div>
-                    {/* Mobile Skeleton */}
-                    <div className="md:hidden space-y-4">
-                        {Array.from({ length: 3 }).map((_, i) => (
-                            <div key={i} className="border rounded-lg p-4 space-y-3">
-                                <div className="flex justify-between">
-                                    <Skeleton className="h-4 w-[120px]" />
-                                    <Skeleton className="h-4 w-[60px]" />
+                <div className="space-y-2">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                        <div key={i} className="flex items-center justify-between p-3 rounded-lg border border-border/40 bg-card/20">
+                            <div className="flex items-center gap-4">
+                                <Skeleton className="h-9 w-9 rounded-full" />
+                                <div className="space-y-1.5">
+                                    <Skeleton className="h-4 w-[140px]" />
+                                    <Skeleton className="h-3 w-[100px]" />
                                 </div>
-                                <Skeleton className="h-3 w-[150px]" />
-                                <Skeleton className="h-3 w-[100px]" />
                             </div>
-                        ))}
-                    </div>
-                </>
+                            <Skeleton className="h-6 w-6 rounded-md" />
+                        </div>
+                    ))}
+                </div>
             ) : (
-                <>
-                    {/* Desktop Table */}
-                    <div className="hidden md:block border rounded-md">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Name</TableHead>
-                                    <TableHead>Type</TableHead>
-                                    <TableHead>GSTIN</TableHead>
-                                    <TableHead>State</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {parties.length === 0 && (
-                                    <TableRow>
-                                        <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
-                                            No parties found. Add one to get started.
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                                {parties.map((party) => (
-                                    <TableRow key={party.id}>
-                                        <TableCell className="font-medium">{party.name}</TableCell>
-                                        <TableCell className="capitalize">{party.type}</TableCell>
-                                        <TableCell>{party.gstin || '-'}</TableCell>
-                                        <TableCell>{party.state} <span className="text-muted-foreground text-xs">({party.state_code})</span></TableCell>
-                                        <TableCell className="text-right">
-                                            <Button variant="ghost" size="sm" onClick={() => handleEdit(party)}>
-                                                <Pencil className="h-4 w-4" />
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </div>
+                <div className="space-y-2">
+                    {parties.length === 0 && (
+                        <div className="text-center py-20 text-muted-foreground border border-dashed border-border/50 rounded-xl bg-card/20 backdrop-blur-sm">
+                            No parties found. Add one to get started.
+                        </div>
+                    )}
+                    {parties.map((party) => (
+                        <div
+                            key={party.id}
+                            onClick={() => router.push(`/dashboard/parties/${party.id}`)}
+                            className="group flex items-center justify-between p-3 rounded-lg border border-border/30 bg-card/30 hover:bg-violet-500/5 hover:border-violet-500/20 transition-all duration-200 cursor-pointer"
+                        >
+                            <div className="flex items-center gap-4">
+                                <Avatar className="h-9 w-9 border border-border/40">
+                                    <AvatarFallback className="bg-secondary text-xs font-semibold text-foreground/70">
+                                        {party.name.substring(0, 2).toUpperCase()}
+                                    </AvatarFallback>
+                                </Avatar>
 
-                    {/* Mobile Card List */}
-                    <div className="md:hidden space-y-4">
-                        {parties.length === 0 && (
-                            <div className="text-center py-10 text-slate-400 font-medium border-2 border-dashed border-slate-100 rounded-lg">
-                                No parties found. Add one to get started.
-                            </div>
-                        )}
-                        {parties.map((party) => (
-                            <div key={party.id} className="bg-white rounded-xl border-none shadow-md ring-1 ring-slate-100 p-4 space-y-3 transition-all active:scale-[0.98]">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <div className="font-bold text-lg text-slate-800">{party.name}</div>
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${party.type === 'customer'
-                                            ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100'
-                                            : 'bg-rose-50 text-rose-700 ring-1 ring-rose-100'
-                                            }`}>
-                                            {party.type}
-                                        </span>
-                                    </div>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50" onClick={() => handleEdit(party)}>
-                                        <Pencil className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                                <div className="space-y-2 pt-2 border-t border-slate-50">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-slate-500 font-medium">GSTIN</span>
-                                        <span className="font-mono text-slate-700 bg-slate-50 px-2 py-0.5 rounded">{party.gstin || 'N/A'}</span>
-                                    </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-slate-500 font-medium">State</span>
-                                        <span className="text-slate-700 font-medium">{party.state} <span className="text-slate-400 text-xs">({party.state_code})</span></span>
+                                <div>
+                                    <h3 className="text-sm font-semibold text-foreground group-hover:text-violet-600 transition-colors">
+                                        {party.name}
+                                    </h3>
+                                    <div className="flex items-center gap-2 text-[11px] text-muted-foreground mt-0.5">
+                                        <span className="capitalize">{party.type}</span>
+                                        {party.state && (
+                                            <>
+                                                <span className="text-border">•</span>
+                                                <span className="">{party.state}</span>
+                                            </>
+                                        )}
+                                        {party.gstin && (
+                                            <>
+                                                <span className="text-border">•</span>
+                                                <span className="font-mono">{party.gstin}</span>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                </>
+
+                            <div className="flex items-center gap-4">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-violet-600 hover:bg-violet-500/10"
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleEdit(party)
+                                    }}
+                                >
+                                    <Pencil size={14} />
+                                </Button>
+                                {/* Subtle chevron or just reliant on the row hover state. 
+                                    Per user request: "Single subtle action (chevron or “View”) revealed on hover" 
+                                    But since we have the edit button, maybe we just show that or a chevron.
+                                    Let's adding a chevron for clarity if edit is not primary. 
+                                    Actually, user layout said "Single subtle action". 
+                                    The Edit pencil is good, but maybe a ChevronRight is better for "View" as primary action intent. 
+                                    I'll keep the pencil since editing from list is useful, but make it very subtle.
+                                */}
+                            </div>
+                        </div>
+                    ))}
+                </div>
             )}
 
             <Dialog open={open} onOpenChange={handleOpenChange}>

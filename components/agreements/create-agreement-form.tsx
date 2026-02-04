@@ -91,6 +91,10 @@ interface ProjectParams {
     agreementVersion: string
     confidentiality?: boolean
     clauses: Clause[]
+    // New Contact Fields
+    companyWebsite: string
+    companyEmail: string
+    companyPhone: string
 }
 
 interface Clause {
@@ -174,10 +178,17 @@ export default function CreateAgreementForm({ company, parties, items, initialDa
         acceptancePeriod: '7',
         supportPeriod: '30',
         agreementVersion: '1.0',
-        clauses: DEFAULT_CLAUSES
+        clauses: DEFAULT_CLAUSES,
+        // Default Contact Info
+        companyWebsite: 'www.citrux.in',
+        companyEmail: 'info@citrux.in',
+        companyPhone: '+91 99999 99999'
     }
 
-    const [params, setParams] = useState<ProjectParams>(initialData?.project_settings || defaultParams)
+    const [params, setParams] = useState<ProjectParams>({
+        ...defaultParams,
+        ...(initialData?.project_settings || {})
+    })
 
     // Tax Mode: 'exclusive' | 'inclusive'
     const [taxMode, setTaxMode] = useState(initialData?.tax_mode || 'exclusive')
@@ -380,6 +391,32 @@ export default function CreateAgreementForm({ company, parties, items, initialDa
                         <div className="space-y-2">
                             <Label>Agreement Date</Label>
                             <Input type="date" value={agreementDate} onChange={e => setAgreementDate(e.target.value)} />
+                        </div>
+
+                        <div className="pt-2 border-t mt-4 space-y-3">
+                            <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Company Contact Info (Footer)</Label>
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className="space-y-1">
+                                    <Label className="text-[10px]">Website</Label>
+                                    <Input
+                                        name="companyWebsite"
+                                        value={params.companyWebsite}
+                                        onChange={handleParamChange}
+                                        className="h-8"
+                                        placeholder="www.example.com"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label className="text-[10px]">Email</Label>
+                                    <Input
+                                        name="companyEmail"
+                                        value={params.companyEmail}
+                                        onChange={handleParamChange}
+                                        className="h-8"
+                                        placeholder="info@example.com"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
