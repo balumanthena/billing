@@ -347,6 +347,88 @@ export interface Database {
           created_at?: string
         }
       }
+      recurring_rules: {
+        Row: {
+          id: string
+          company_id: string
+          customer_id: string
+          agreement_id: string | null
+          cron_expression: string
+          last_run_at: string | null
+          next_run_at: string
+          status: string | null
+          amount: number
+          items_snapshot: Json
+          tax_mode: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          customer_id: string
+          agreement_id?: string | null
+          cron_expression: string
+          last_run_at?: string | null
+          next_run_at: string
+          status?: string | null
+          amount?: number
+          items_snapshot: Json
+          tax_mode?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          customer_id?: string
+          agreement_id?: string | null
+          cron_expression?: string
+          last_run_at?: string | null
+          next_run_at?: string
+          status?: string | null
+          amount?: number
+          items_snapshot?: Json
+          tax_mode?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      communication_logs: {
+        Row: {
+          id: string
+          company_id: string
+          invoice_id: string | null
+          recipient_email: string
+          type: string
+          status: string | null
+          metadata: Json | null
+          sent_at: string | null
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          invoice_id?: string | null
+          recipient_email: string
+          type: string
+          status?: string | null
+          metadata?: Json | null
+          sent_at?: string | null
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          invoice_id?: string | null
+          recipient_email?: string
+          type?: string
+          status?: string | null
+          metadata?: Json | null
+          sent_at?: string | null
+        }
+      }
     }
     Views: {
       [_ in never]: never

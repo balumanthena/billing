@@ -248,12 +248,23 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
                                 document={<InvoicePDF invoice={{ ...invoice, barcodeUrl }} />}
                                 fileName={`${invoice.invoice_number}.pdf`}
                             >
-                                {({ blob, url, loading, error }) =>
-                                    <Button disabled={loading} variant="outline" size="sm">
-                                        <Download className="mr-2 h-4 w-4" />
-                                        {loading ? '...' : 'PDF'}
-                                    </Button>
-                                }
+                                {({ blob, url, loading, error }) => {
+                                    if (error) {
+                                        console.error("PDF Generation Error:", error);
+                                        return (
+                                            <Button variant="destructive" size="sm" disabled>
+                                                <Info className="mr-2 h-4 w-4" />
+                                                Error
+                                            </Button>
+                                        );
+                                    }
+                                    return (
+                                        <Button disabled={loading} variant="outline" size="sm">
+                                            <Download className="mr-2 h-4 w-4" />
+                                            {loading ? 'Generating...' : 'Download PDF'}
+                                        </Button>
+                                    );
+                                }}
                             </PDFDownloadLink>
                         </>
                     )}

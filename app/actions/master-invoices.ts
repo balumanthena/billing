@@ -30,6 +30,35 @@ export async function getMasterInvoices() {
     return invoices || []
 }
 
+export async function getNextMasterInvoiceNumber() {
+    const supabase = (await createClient()) as SupabaseClient<Database>
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return 'INV-001'
+
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single() as any
+
+    if (!profile?.company_id) return 'INV-001'
+
+    // Get latest master invoice
+    const { data: lastMaster } = await (supabase
+        .from('master_invoices') as any)
+        .select('master_invoice_number')
+        .eq('company_id', profile.company_id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
+    if (!lastMaster) return 'INV-001'
+
+    // Extract number and increment, assuming format INV-XXX
+    const lastNum = parseInt(lastMaster.master_invoice_number.replace('INV-', '')) || 0
+    return `INV-${String(lastNum + 1).padStart(3, '0')}`
+}
+
 export async function getMasterInvoice(id: string) {
     const supabase = (await createClient()) as SupabaseClient<Database>
     const { data: { user } } = await supabase.auth.getUser()
@@ -109,6 +138,7 @@ export async function createMasterInvoice(prevState: any, formData: FormData) {
             customer_id: input.customerId,
             master_invoice_number: input.masterNumber,
             title: input.title,
+            sac_code: input.sacCode || null,
             start_date: input.startDate || null,
             end_date: input.endDate || null,
             total_amount: input.totalAmount,
@@ -144,7 +174,7 @@ export async function createMasterInvoice(prevState: any, formData: FormData) {
             customer_id: input.customerId,
             master_invoice_id: masterInvoice.id,
 
-            invoice_number: phase.invoiceNumber,
+            invoice_number: `${masterInvoice.master_invoice_number}-P${phase.number}`,
             date: phase.date || input.startDate || new Date().toISOString().split('T')[0],
             due_date: phase.dueDate || null,
             status: 'draft',
@@ -174,13 +204,15 @@ export async function createMasterInvoice(prevState: any, formData: FormData) {
     if (createdPhases && createdPhases.length > 0) {
         const lineItemsPayload = createdPhases.map((phaseInv: any) => {
             const phaseInput = input.phases.find((p: any) => p.number === phaseInv.phase_number)
-            const desc = phaseInput?.label || `Phase ${phaseInv.phase_number} Payment`
+            // Combined Description: "{Service Name} - {Phase Label}"
+            const desc = `${input.title} - ${phaseInput?.label || `Phase ${phaseInv.phase_number}`}`
 
             // Re-calculate to match above (or use saved values)
             // phaseInv has the correct totals now.
             return {
                 invoice_id: phaseInv.id,
                 description: desc,
+                sac_code: input.sacCode || null, // Inherit SAC from Master
                 quantity: 1,
                 unit_price: phaseInv.subtotal,
                 tax_rate: 18,
@@ -337,3 +369,5 @@ export async function updateMasterInvoice(id: string, prevState: any, formData: 
     revalidatePath('/dashboard/invoices')
     return { message: 'success', masterInvoiceId: id }
 }
+
+

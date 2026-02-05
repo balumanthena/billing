@@ -1,18 +1,11 @@
+'use client';
 /* eslint-disable jsx-a11y/alt-text */
 import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Font, Image } from '@react-pdf/renderer';
 import { format } from 'date-fns';
 import { amountToWords } from '@/lib/number-to-words';
+import { formatLabel } from '@/lib/utils';
 
-// Register Fonts
-Font.register({
-    family: 'Helvetica-Bold',
-    src: 'https://cdn.jsdelivr.net/npm/open-sans-all@0.1.3/fonts/open-sans-700.ttf'
-});
-Font.register({
-    family: 'Helvetica',
-    src: 'https://cdn.jsdelivr.net/npm/open-sans-all@0.1.3/fonts/open-sans-regular.ttf'
-});
 
 const styles = StyleSheet.create({
     page: {
@@ -28,7 +21,7 @@ const styles = StyleSheet.create({
     // --- Header (Slim ERP Style) ---
     headerContainer: {
         width: '100%',
-        height: 52, // Fixed height: 52px
+        height: 120, // Increased height for larger logo
         backgroundColor: '#0F172A', // Slate 900
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -36,7 +29,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 32, // px-8
     },
     headerLogo: {
-        height: 32,  // Fits nicely in 52px header
+        height: 96,  // 3x size (32 * 3)
         width: 'auto',
         objectFit: 'contain',
     },
@@ -183,47 +176,58 @@ const styles = StyleSheet.create({
         textTransform: 'capitalize',
     },
 
-    // --- Amount Section ---
+    // --- Amount Section (Centered & Premium) ---
     amountContainer: {
-        marginTop: 20,
-        backgroundColor: '#FFFFFF', // Pure White - Fixes blue patch issue
+        marginTop: 32, // More breathing room
+        backgroundColor: '#F8FAFC', // Very light gray (Slate 50)
         borderWidth: 1,
-        borderColor: '#E2E8F0',
-        borderRadius: 6,
-        paddingVertical: 35,
-        paddingHorizontal: 20,
+        borderColor: '#E2E8F0', // Thin neutral border (Slate 200)
+        borderRadius: 8, // Slightly more rounded
+        paddingVertical: 32,
+        paddingHorizontal: 40,
         alignItems: 'center',
+        justifyContent: 'center',
+        // Ensure it doesn't span full width unnecessarily, but here we want block focus
+        marginHorizontal: 20, // Add side margins to centering effect
     },
     amountTitle: {
-        fontSize: 8,
+        fontSize: 10, // Increased slightly
         fontWeight: 'bold',
-        color: '#94A3B8',
+        color: '#64748B', // Muted Slate 500
         textTransform: 'uppercase',
         letterSpacing: 2,
-        marginBottom: 10,
+        marginBottom: 20, // Clear separation
     },
     amountValue: {
-        fontSize: 28,
+        fontSize: 32, // Large and confident
         fontWeight: 'bold',
-        color: '#0F172A',
-        // No margin, relying on spacer
+        color: '#0F172A', // Slate 900
+        letterSpacing: -0.5, // Tighter for large numbers
+        marginBottom: 20, // 20px space below number
     },
     amountWords: {
         fontSize: 12,
-        fontFamily: 'Times-Roman',
+        fontFamily: 'Times-Roman', // Official Serif for words
         fontStyle: 'italic',
-        color: '#475569',
+        color: '#334155', // Slate 700 (Darker than mute)
         textTransform: 'capitalize',
         textAlign: 'center',
-        paddingHorizontal: 20,
+        marginBottom: 20, // Space before disclaimer
+        lineHeight: 1.4,
+    },
+    disclaimerText: {
+        fontSize: 9,
+        color: '#94A3B8', // Slate 400
+        fontStyle: 'italic',
+        textAlign: 'center',
     },
 
     // --- Footer ---
     footer: {
-        marginTop: 40,
-        paddingTop: 20,
+        marginTop: 'auto', // Push to bottom if flex container allows, else fixed margin
+        paddingTop: 24,
         borderTopWidth: 1,
-        borderTopColor: '#F1F5F9', // slate-100
+        borderTopColor: '#F1F5F9',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'flex-end',
@@ -363,7 +367,7 @@ export const ReceiptPDF = ({ payment, invoice, company, customer }: ReceiptPDFPr
                             <Text style={styles.sectionHeader}>Payment Context</Text>
                             <View style={styles.contextRow}>
                                 <Text style={styles.contextLabel}>Payment Mode:</Text>
-                                <Text style={styles.contextValue}>{payment.mode}</Text>
+                                <Text style={styles.contextValue}>{formatLabel(payment.mode)}</Text>
                             </View>
                             <View style={styles.contextRow}>
                                 <Text style={styles.contextLabel}>Against Invoice:</Text>
@@ -377,16 +381,14 @@ export const ReceiptPDF = ({ payment, invoice, company, customer }: ReceiptPDFPr
                         <Text style={styles.amountTitle}>Amount Received</Text>
 
                         <Text style={styles.amountValue}>
-                            ₹{payment.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                            Rs. {payment.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                         </Text>
-
-                        <View style={{ height: 20 }} />
 
                         <Text style={styles.amountWords}>
-                            {amountToWords(payment.amount)}
+                            {amountToWords(payment.amount)} Only
                         </Text>
 
-                        <Text style={{ marginTop: 8, fontSize: 8, fontStyle: 'italic', color: '#64748B' }}>
+                        <Text style={styles.disclaimerText}>
                             * Amount received excludes TDS deducted by the client as per Income Tax Act.
                         </Text>
                     </View>

@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { ArrowLeft, Printer, Download, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import { amountToWords } from '@/lib/number-to-words'
+import { formatLabel } from '@/lib/utils'
 import { format } from 'date-fns'
 import { Database } from '@/types/database.types'
 import { SupabaseClient } from '@supabase/supabase-js'
@@ -57,11 +58,11 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
             <div className="w-full max-w-[210mm] bg-white shadow-xl print:shadow-none overflow-hidden text-slate-900 border border-slate-200">
 
                 {/* 1. Header (Slim ERP Style) */}
-                <div className="bg-slate-900 h-[52px] w-full flex items-center justify-between px-8 print:px-8">
+                <div className="bg-slate-900 h-[120px] w-full flex items-center justify-between px-8 print:px-8">
                     {/* Logo Area */}
                     <div className="h-full flex items-center">
                         {company?.logo_url ? (
-                            <img src={company.logo_url} alt={company.name} className="h-9 w-auto object-contain brightness-0 invert" />
+                            <img src={company.logo_url} alt={company.name} className="h-24 w-auto object-contain brightness-0 invert" />
                         ) : (
                             <span className="text-white font-bold text-xl uppercase tracking-wider">{company?.name}</span>
                         )}
@@ -149,7 +150,9 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
                                 <div className="space-y-2">
                                     <div className="flex justify-end gap-3">
                                         <span className="text-xs text-slate-500">Payment Mode:</span>
-                                        <span className="text-xs font-bold text-slate-900 capitalize">{payment.mode}</span>
+                                        <span className="text-xs font-bold text-slate-900">
+                                            {formatLabel(payment.mode)}
+                                        </span>
                                     </div>
                                     <div className="flex justify-end gap-3">
                                         <span className="text-xs text-slate-500">Against Invoice:</span>

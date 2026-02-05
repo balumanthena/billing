@@ -67,7 +67,7 @@ export function AgreementActions({ agreementId, currentStatus }: AgreementAction
                         <MoreVertical className="h-4 w-4" />
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="bg-white z-50 shadow-md border border-slate-200">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuItem asChild>
                         <Link href={`/dashboard/agreements/${agreementId}/edit`} className="flex items-center cursor-pointer">

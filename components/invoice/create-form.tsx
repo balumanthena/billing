@@ -31,6 +31,7 @@ interface CreateInvoiceFormProps {
     parties: any[]
     items: any[]
     nextInvoiceNumber: string
+    nextMasterInvoiceNumber?: string
     initialData?: any // For Edit Mode
     invoiceId?: string // For Edit Mode
 }
@@ -39,21 +40,29 @@ const initialState = {
     message: ''
 }
 
-export default function CreateInvoiceForm({ company, parties, items, nextInvoiceNumber, initialData, invoiceId }: CreateInvoiceFormProps) {
+export default function CreateInvoiceForm({ company, parties, items, nextInvoiceNumber, nextMasterInvoiceNumber, initialData, invoiceId }: CreateInvoiceFormProps) {
     const router = useRouter()
     const isEditMode = !!initialData
-    const isAgreementLinked = initialData?.isAgreementLinked || false
-    const lockedFields = initialData?.lockedFields || []
 
     // State Initialization
     const [customerId, setCustomerId] = useState(initialData?.customer_id || '')
+    // Default to Master Number if we are in Master Mode by default? No, logic below will switch.
     const [invoiceNumber, setInvoiceNumber] = useState(initialData?.invoice_number || initialData?.master_invoice_number || nextInvoiceNumber)
+
+    // Store both defaults
+    const [defaultNormalNum] = useState(nextInvoiceNumber)
+    const [defaultMasterNum] = useState(nextMasterInvoiceNumber || 'INV-001')
 
     // Dates - Initialize empty to prevent hydration mismatch (server vs client time)
     const [date, setDate] = useState(initialData?.date ? initialData.date.split('T')[0] : '')
     const [dueDate, setDueDate] = useState(initialData?.due_date ? initialData.due_date.split('T')[0] : '')
 
     // Line items state (For Standard Invoice)
+
+
+    // ... existing hooks
+
+
     const [lineItems, setLineItems] = useState<any[]>(
         initialData?.invoice_items?.map((item: any) => ({
             ...item,
@@ -76,12 +85,23 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
 
     // MASTER INVOICE STATE
     const [isMaster, setIsMaster] = useState(initialData?.master_invoice_number ? true : false)
-    const [contractTitle, setContractTitle] = useState(initialData?.title || '')
-    const [contractTotal, setContractTotal] = useState<number>(initialData?.total_amount || 0)
-
+    const [contractTitle, setContractTitle] = useState(initialData?.title || '') // Master Only
+    const [contractSac, setContractSac] = useState(initialData?.sac_code || '') // Master Only
+    const [contractTotal, setContractTotal] = useState<number>(initialData?.totalAmount || 0) // Master Only
     // Initialize empty for hydration safety
     const [startDate, setStartDate] = useState(initialData?.start_date ? initialData.start_date.split('T')[0] : '')
     const [endDate, setEndDate] = useState(initialData?.end_date ? initialData.end_date.split('T')[0] : '')
+
+    // Switch IDs based on mode
+    useEffect(() => {
+        if (!isEditMode) {
+            if (isMaster) {
+                setInvoiceNumber(defaultMasterNum)
+            } else {
+                setInvoiceNumber(defaultNormalNum)
+            }
+        }
+    }, [isMaster, defaultMasterNum, defaultNormalNum, isEditMode])
 
     // Hydration safe default dates
     useEffect(() => {
@@ -492,6 +512,8 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
     const phasesTotal = phases.reduce((acc, p) => acc + (p.amount || 0), 0)
     const isPhasesValid = Math.abs(phasesTotal - taxableBase) < 1 // Tolerance
 
+
+
     return (
         <form action={formAction} className="space-y-6">
             {/* Hidden input to pass all data as JSON */}
@@ -509,32 +531,22 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
                 title: contractTitle,
                 startDate,
                 endDate,
+                sacCode: contractSac,
                 totalAmount: finalContractTotal, // Sending likely the Full Contract Value
                 taxMode: taxMode, // Direct string value
                 isTaxInclusive: taxMode === 'inclusive', // Keep for backward compat if needed
                 tdsRate: tdsRate,
                 tdsAmount: tdsAmount,
                 netReceivable: netReceivable,
-                // Agreement Linkage
-                agreementId: initialData?.agreement_id,
-                agreementPhaseId: initialData?.agreement_phase_id,
-                isOneOff: !isMaster && !initialData?.agreement_id,
                 phases: phases.map(p => {
                     let subtotal = 0;
                     let tax = 0;
                     let total = 0;
 
-                    if (taxMode === 'inclusive') {
-                        // Amount entered is Final Total
-                        total = p.amount;
-                        subtotal = parseFloat((total / 1.18).toFixed(2));
-                        tax = parseFloat((total - subtotal).toFixed(2));
-                    } else {
-                        // Amount entered is Taxable Value
-                        subtotal = p.amount;
-                        tax = parseFloat((subtotal * 0.18).toFixed(2));
-                        total = parseFloat((subtotal + tax).toFixed(2));
-                    }
+                    // Amount entered is Taxable Value for both modes
+                    subtotal = p.amount;
+                    tax = parseFloat((subtotal * 0.18).toFixed(2));
+                    total = parseFloat((subtotal + tax).toFixed(2));
 
                     return {
                         ...p,
@@ -593,14 +605,29 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
                         <CardContent className="space-y-6 pt-6">
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-2 col-span-2">
-                                    <Label className="text-muted-foreground">Contract Title / Description</Label>
-                                    <Input
-                                        required
-                                        placeholder="e.g. Website Development Project"
+                                    <Label className="text-muted-foreground">Service / Contract Title</Label>
+                                    <Select
                                         value={contractTitle}
-                                        onChange={e => setContractTitle(e.target.value)}
-                                        className="bg-secondary/30 border-0 focus-visible:ring-1 focus-visible:ring-primary shadow-inner h-11"
-                                    />
+                                        onValueChange={(val) => {
+                                            setContractTitle(val)
+                                            // Auto-select SAC Code
+                                            const selectedItem = items.find(i => i.name === val)
+                                            if (selectedItem?.sac_code) {
+                                                setContractSac(selectedItem.sac_code)
+                                            }
+                                        }}
+                                    >
+                                        <SelectTrigger className="bg-secondary/30 border-0 h-11">
+                                            <SelectValue placeholder="Select a service..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {items.map((item: any) => (
+                                                <SelectItem key={item.id} value={item.name}>
+                                                    {item.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2">
@@ -621,6 +648,15 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
                                         onChange={e => setInvoiceNumber(e.target.value)}
                                         className="font-mono bg-secondary/30 border-0 shadow-inner h-11"
                                         readOnly={isEditMode}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-muted-foreground">SAC Code</Label>
+                                    <Input
+                                        placeholder="e.g. 998314"
+                                        value={contractSac}
+                                        onChange={e => setContractSac(e.target.value)}
+                                        className="bg-secondary/30 border-0 shadow-inner h-11"
                                     />
                                 </div>
                                 <div className="space-y-2">

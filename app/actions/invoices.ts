@@ -98,10 +98,6 @@ export async function createInvoice(prevState: any, formData: FormData) {
             subtotal: input.totals.subtotal,
             tax_total: input.totals.totalCGST + input.totals.totalSGST + input.totals.totalIGST,
             grand_total: input.totals.grandTotal,
-            // Agreement Linkage
-            agreement_id: input.agreementId || null,
-            agreement_phase_id: input.agreementPhaseId || null,
-            is_one_off: input.isOneOff || false,
             tds_rate: input.tdsRate,
             tds_amount: input.tdsAmount || input.totals.tdsAmount, // Check both sources
             net_receivable: input.netReceivable || input.totals.netReceivable,
