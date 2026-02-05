@@ -15,7 +15,8 @@ export default async function RecurringInvoicesPage() {
     let rules: any[] = []
 
     if (user) {
-        const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', user.id).single()
+        // Cast to any to prevent 'never' inference on build
+        const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', user.id).single() as any
         if (profile?.company_id) {
             // @ts-ignore
             const { data } = await (supabase
