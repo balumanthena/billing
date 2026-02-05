@@ -380,11 +380,14 @@ export const ReceiptPDF = ({ payment, invoice, company, customer }: ReceiptPDFPr
                             ₹{payment.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                         </Text>
 
-                        {/* SPACER VIEW TO FORCE SEPARATION - CRITICAL FIX */}
                         <View style={{ height: 20 }} />
 
                         <Text style={styles.amountWords}>
-                            {amountToWords(payment.amount)} Only
+                            {amountToWords(payment.amount)}
+                        </Text>
+
+                        <Text style={{ marginTop: 8, fontSize: 8, fontStyle: 'italic', color: '#64748B' }}>
+                            * Amount received excludes TDS deducted by the client as per Income Tax Act.
                         </Text>
                     </View>
 
@@ -404,6 +407,6 @@ export const ReceiptPDF = ({ payment, invoice, company, customer }: ReceiptPDFPr
 
                 </View>
             </Page>
-        </Document>
+        </Document >
     );
 };

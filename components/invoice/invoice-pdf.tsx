@@ -3,6 +3,8 @@ import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Font, Image } from '@react-pdf/renderer';
 import { format } from 'date-fns';
 
+import { amountToWords } from '@/lib/number-to-words';
+
 // Register nice font if needed, using default for now
 Font.register({
     family: 'Helvetica',
@@ -25,20 +27,24 @@ const styles = StyleSheet.create({
     // Top Navy Header
     topHeader: {
         backgroundColor: '#0F172A',
-        height: 44,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 40,
+        height: 8, // Slim border as requested
         width: '100%',
     },
+    headerSection: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 40,
+        paddingTop: 30, // Padding moved here
+    },
     headerLogo: {
-        width: 100,
-        height: 28,
+        width: 140, // Increased size
+        height: 60, // Adjusted aspect ratio
         objectFit: 'contain',
+        marginLeft: -10 // Reduced left padding visual
     },
     headerWebsite: {
-        color: 'rgba(255, 255, 255, 0.7)',
+        color: '#64748B',
         fontSize: 10,
         textTransform: 'uppercase',
         letterSpacing: 1.2,
@@ -261,11 +267,10 @@ export const InvoicePDF = ({ invoice }: InvoicePDFProps) => {
         <Document>
             <Page size="A4" style={styles.page}>
                 {/* Header Strip */}
-                <View style={styles.topHeader}>
-                    {/* React-PDF Image component requires a valid source. 
-                       If local file, it might fail in browser environment. 
-                       Assuming public URL or relative path works in context.
-                     */}
+                <View style={styles.topHeader} />
+
+                {/* Actual Header Content */}
+                <View style={styles.headerSection}>
                     <Image src="/logo.png" style={styles.headerLogo} />
                     <Text style={styles.headerWebsite}>WWW.CITRUX.IN</Text>
                 </View>
@@ -356,6 +361,11 @@ export const InvoicePDF = ({ invoice }: InvoicePDFProps) => {
                                     </View>
                                 </>
                             )}
+                            <View style={styles.wordsRow}>
+                                <Text style={styles.wordsLabel}>Amount in Words</Text>
+                                <Text style={styles.wordsText}>{amountToWords(invoice.grand_total)}</Text>
+                            </View>
+
                             <View style={styles.grandTotalRow}>
                                 <Text style={styles.grandTotalLabel}>Grand Total</Text>
                                 <Text style={styles.grandTotalValue}>Rs. {formatCurrency(invoice.grand_total)}</Text>
@@ -363,13 +373,18 @@ export const InvoicePDF = ({ invoice }: InvoicePDFProps) => {
                             {invoice.tds_amount > 0 && (
                                 <>
                                     <View style={styles.totalRow}>
-                                        <Text style={{ ...styles.totalLabel, color: '#ef4444' }}>Less: TDS ({invoice.tds_rate}%)</Text>
+                                        <Text style={{ ...styles.totalLabel, color: '#ef4444' }}>
+                                            Less: TDS @ {invoice.tds_rate}% on Rs. {formatCurrency(invoice.subtotal)}
+                                        </Text>
                                         <Text style={{ ...styles.totalValue, color: '#ef4444' }}>- {formatCurrency(invoice.tds_amount)}</Text>
                                     </View>
                                     <View style={{ ...styles.grandTotalRow, marginTop: 4, borderTopWidth: 1, borderTopColor: '#e2e8f0', paddingTop: 4 }}>
                                         <Text style={styles.grandTotalLabel}>Net Receivable</Text>
                                         <Text style={styles.grandTotalValue}>Rs. {formatCurrency(invoice.net_receivable)}</Text>
                                     </View>
+                                    <Text style={{ fontSize: 8, color: '#64748B', marginTop: 8, fontStyle: 'italic', textAlign: 'right' }}>
+                                        * As per Income Tax Act, TDS is to be deposited by the recipient. GST payable remains unchanged.
+                                    </Text>
                                 </>
                             )}
                         </View>
@@ -382,6 +397,6 @@ export const InvoicePDF = ({ invoice }: InvoicePDFProps) => {
                 </View>
 
             </Page>
-        </Document>
+        </Document >
     );
 };

@@ -2,9 +2,9 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { getProfitAndLoss, getOutstanding, getSalesRegister, getGSTSummary } from "@/app/actions/reports"
+import { getProfitAndLoss, getOutstanding, getSalesRegister, getGSTSummary, getTDSLedger, getClientHealthMetrics } from "@/app/actions/reports"
 import { useEffect, useState } from "react"
-import { Loader2, TrendingUp, TrendingDown, RefreshCcw, Download } from "lucide-react"
+import { Loader2, TrendingUp, TrendingDown, RefreshCcw, Download, BookText } from "lucide-react"
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -17,6 +17,8 @@ export default function ReportsPage() {
     const [outstandingData, setOutstandingData] = useState<any[]>([])
     const [salesData, setSalesData] = useState<any[]>([])
     const [gstData, setGstData] = useState<any>(null)
+    const [tdsData, setTdsData] = useState<any[]>([])
+    const [clientHealthData, setClientHealthData] = useState<any[]>([])
     const [loading, setLoading] = useState(false)
 
     // Fetch logic
@@ -36,6 +38,14 @@ export default function ReportsPage() {
         gst: async () => {
             const data = await getGSTSummary()
             setGstData(data)
+        },
+        tds: async () => {
+            const data = await getTDSLedger()
+            setTdsData(data)
+        },
+        client_health: async () => {
+            const data = await getClientHealthMetrics()
+            setClientHealthData(data)
         }
     }
 
@@ -81,6 +91,7 @@ export default function ReportsPage() {
         link.setAttribute("download", `GST_Summary.csv`)
         document.body.appendChild(link)
         link.click()
+        document.body.removeChild(link)
     }
 
     return (
@@ -99,6 +110,8 @@ export default function ReportsPage() {
                         <SelectItem value="outstanding">Outstanding Receivables</SelectItem>
                         <SelectItem value="sales">Sales Register</SelectItem>
                         <SelectItem value="gst">GST Summary</SelectItem>
+                        <SelectItem value="tds">TDS Ledger</SelectItem>
+                        <SelectItem value="client_health">Client Health</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
@@ -109,6 +122,8 @@ export default function ReportsPage() {
                     <TabsTrigger value="outstanding">Outstanding Receivables</TabsTrigger>
                     <TabsTrigger value="sales">Sales Register</TabsTrigger>
                     <TabsTrigger value="gst">GST Summary</TabsTrigger>
+                    <TabsTrigger value="tds">TDS Ledger</TabsTrigger>
+                    <TabsTrigger value="client_health">Client Health</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="pnl" className="space-y-4">
@@ -483,6 +498,148 @@ export default function ReportsPage() {
                                 </CardContent>
                             </Card>
                         </div>
+                    )}
+                </TabsContent>
+
+                <TabsContent value="tds" className="space-y-4">
+                    <div className="flex justify-end">
+                        <Button variant="outline" size="sm" onClick={() => handleExport(tdsData, 'TDS_Ledger')}>
+                            <Download className="mr-2 h-4 w-4" /> Export CSV
+                        </Button>
+                    </div>
+                    {loading ? (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>TDS Receivable Ledger</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-2">
+                                    {Array.from({ length: 5 }).map((_, i) => (
+                                        <div key={i} className="grid grid-cols-6 gap-4 py-2">
+                                            <Skeleton className="h-4 w-full" />
+                                        </div>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ) : (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>TDS Receivable Ledger</CardTitle>
+                                <CardDescription>Track TDS deducted by clients to be claimed in Income Tax Returns.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="p-0 md:p-6">
+                                {/* Desktop Table */}
+                                <div className="hidden md:block">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Date</TableHead>
+                                                <TableHead>Invoice</TableHead>
+                                                <TableHead>Customer</TableHead>
+                                                <TableHead>Financial Year</TableHead>
+                                                <TableHead className="text-right">TDS Rate</TableHead>
+                                                <TableHead className="text-right">TDS Amount</TableHead>
+                                                <TableHead className="text-right">Status</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {tdsData.length === 0 && (
+                                                <TableRow><TableCell colSpan={7} className="text-center h-24 text-muted-foreground">No TDS deductions found.</TableCell></TableRow>
+                                            )}
+                                            {tdsData.map((row: any) => (
+                                                <TableRow key={row.id}>
+                                                    <TableCell>{new Date(row.date).toLocaleDateString('en-IN')}</TableCell>
+                                                    <TableCell>{row.invoice_number}</TableCell>
+                                                    <TableCell>{row.customer_name}</TableCell>
+                                                    <TableCell>{row.fy}</TableCell>
+                                                    <TableCell className="text-right text-muted-foreground">{row.tds_rate}%</TableCell>
+                                                    <TableCell className="text-right font-bold text-red-600">₹{row.tds_amount.toLocaleString('en-IN')}</TableCell>
+                                                    <TableCell className="text-right">
+                                                        <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded-full text-xs font-bold uppercase ring-1 ring-blue-100">{row.status}</span>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+
+                                {/* Mobile List View */}
+                                <div className="md:hidden space-y-4 pt-2">
+                                    {tdsData.length === 0 && (
+                                        <div className="text-center py-10 text-slate-400 font-medium border-2 border-dashed border-slate-100 rounded-lg">No TDS deductions found.</div>
+                                    )}
+                                    {tdsData.map((row: any) => (
+                                        <div key={row.id} className="bg-white rounded-xl border-none shadow-md ring-1 ring-slate-100 p-4 space-y-3">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <div className="font-bold text-base text-slate-800">{row.customer_name}</div>
+                                                    <div className="text-xs text-slate-500 font-medium mt-0.5">{row.fy} • #{row.invoice_number}</div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="font-bold text-lg text-red-600">₹{row.tds_amount.toLocaleString('en-IN')}</div>
+                                                    <div className="text-xs text-slate-400 font-medium mt-0.5">{row.tds_rate}% Rate</div>
+                                                </div>
+                                            </div>
+                                            <div className="flex justify-between items-center pt-2 border-t border-slate-50">
+                                                <span className="text-xs text-slate-500">{new Date(row.date).toLocaleDateString('en-IN')}</span>
+                                                <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ring-1 ring-blue-100">
+                                                    {row.status}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+                </TabsContent>
+
+                <TabsContent value="client_health" className="space-y-4">
+                    <div className="flex justify-end">
+                        <Button variant="outline" size="sm" onClick={() => handleExport(clientHealthData, 'Client_Health_Metrics')}>
+                            <Download className="mr-2 h-4 w-4" /> Export CSV
+                        </Button>
+                    </div>
+                    {loading ? (
+                        <Card><CardHeader><CardTitle>Client Health & Risk</CardTitle></CardHeader><CardContent><Skeleton className="h-24 w-full" /></CardContent></Card>
+                    ) : (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Client Health Score</CardTitle>
+                                <CardDescription>Behavioral analysis of clients based on payment delays and outstanding ratios.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="p-0 md:p-6">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Client Name</TableHead>
+                                            <TableHead className="text-right">Revenue Contrib.</TableHead>
+                                            <TableHead className="text-right">Outstanding</TableHead>
+                                            <TableHead className="text-right">Avg Payment Delay</TableHead>
+                                            <TableHead className="text-right">Health Score</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {clientHealthData.map((c: any, i: number) => (
+                                            <TableRow key={i}>
+                                                <TableCell className="font-medium">{c.name}</TableCell>
+                                                <TableCell className="text-right">₹{c.total_revenue.toLocaleString('en-IN')}</TableCell>
+                                                <TableCell className="text-right font-medium text-slate-700">₹{c.outstanding.toLocaleString('en-IN')}</TableCell>
+                                                <TableCell className="text-right text-muted-foreground">{c.avg_payment_days} Days</TableCell>
+                                                <TableCell className="text-right">
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-bold border ${c.health_score > 80 ? 'bg-green-50 text-green-700 border-green-200' :
+                                                        c.health_score > 50 ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-red-50 text-red-700 border-red-200'
+                                                        }`}>
+                                                        {c.health_score}/100 ({c.status})
+                                                    </span>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
                     )}
                 </TabsContent>
             </Tabs>

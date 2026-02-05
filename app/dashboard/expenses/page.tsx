@@ -16,6 +16,11 @@ const initialState = {
     message: '',
 }
 
+const formatPaymentMode = (mode: string) => {
+    if (!mode) return '-'
+    return mode.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+}
+
 export default function ExpensesPage() {
     const [expenses, setExpenses] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
@@ -149,7 +154,7 @@ export default function ExpensesPage() {
                                             {expense.description && <div className="text-xs text-muted-foreground truncate max-w-[200px]">{expense.description}</div>}
                                         </TableCell>
                                         <TableCell>{expense.vendor_name || '-'}</TableCell>
-                                        <TableCell className="capitalize">{expense.payment_mode}</TableCell>
+                                        <TableCell>{formatPaymentMode(expense.payment_mode)}</TableCell>
                                         <TableCell className="text-right font-bold">
                                             ₹{expense.amount.toLocaleString('en-IN')}
                                         </TableCell>
@@ -199,7 +204,7 @@ export default function ExpensesPage() {
                                     </div>
                                     <div className="flex flex-col items-end">
                                         <span className="text-xs text-muted-foreground">Mode</span>
-                                        <span className="capitalize">{expense.payment_mode}</span>
+                                        <span className="font-medium">{formatPaymentMode(expense.payment_mode)}</span>
                                     </div>
                                 </div>
 

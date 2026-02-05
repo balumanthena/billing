@@ -2,7 +2,7 @@ import { getNextInvoiceNumber } from '@/app/actions/invoices'
 import { getParties } from '@/app/actions/parties'
 import { getItems } from '@/app/actions/items'
 import { getCompany } from '@/app/actions/company'
-import CreateInvoiceForm from '@/components/invoice/create-form'
+import { InvoiceWizard } from '@/components/invoice/wizard' // Import Wizard
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { createClient } from '@/lib/supabase/server'
 import { SupabaseClient } from '@supabase/supabase-js'
@@ -16,7 +16,7 @@ export default async function NewInvoicePage() {
         getCompany()
     ])
 
-    // Diagnostic Check if company is missing
+    // Diagnostic Check as before
     if (!company) {
         const supabase = (await createClient()) as SupabaseClient<Database>
         const { data: { user } } = await supabase.auth.getUser()
@@ -66,12 +66,17 @@ export default async function NewInvoicePage() {
 
     return (
         <div className="max-w-5xl mx-auto space-y-6 pb-12">
-            <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold tracking-tight">New Invoice</h1>
-            </div>
-
-            <CreateInvoiceForm
-                company={company}
+            {/* 
+                We don't show the header here anymore because Wizard has its own internal state headers.
+                Or we can keep a breadcrumb.
+             */}
+            <InvoiceWizard
+                companies={[company]} // Wizard handles array or single? Wrapper expects companies array or single?
+                // Wrapper signature: categories, parties, items, nextInvoiceNumber
+                // original create-form took 'company'. Wizard takes 'companies'?
+                // Let's check Wizard signature.
+                // It is: export function InvoiceWizard({ companies, parties, items, nextInvoiceNumber }: any)
+                // So I should pass array.
                 parties={parties}
                 items={items}
                 nextInvoiceNumber={nextNum}

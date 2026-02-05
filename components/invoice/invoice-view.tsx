@@ -394,7 +394,11 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
 
             {/* Payments Section */}
             <div className="pt-6 border-t border-border/40">
-                <InvoicePaymentsSection invoiceId={invoice.id} grandTotal={invoice.grand_total} />
+                <InvoicePaymentsSection
+                    invoiceId={invoice.id}
+                    grandTotal={invoice.grand_total}
+                    netReceivable={invoice.net_receivable || invoice.grand_total}
+                />
             </div>
         </div>
     )

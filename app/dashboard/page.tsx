@@ -20,7 +20,7 @@ export default async function DashboardPage() {
                     <RevenueExpenseChart data={stats.monthlyStats} />
                 </div>
                 <div className="col-span-1 lg:col-span-3">
-                    <ReceivablesAging aging={stats.aging} totalOutstanding={stats.outstanding} />
+                    <ReceivablesAging aging={stats.aging} totalOutstanding={stats.netReceivable} />
                 </div>
             </div>
 

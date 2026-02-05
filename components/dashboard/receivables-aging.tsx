@@ -23,6 +23,21 @@ export function ReceivablesAging({ aging, totalOutstanding }: ReceivablesAgingPr
             </CardHeader>
             <CardContent className="space-y-6 pt-4">
 
+                {/* Founder Signal: Red Flag */}
+                {(aging["45+"] / safeTotal) > 0.3 && totalOutstanding > 0 && (
+                    <div className="bg-red-50 border border-red-200 rounded-md p-3 flex items-start gap-3 mb-4 animate-in fade-in slide-in-from-top-2">
+                        <div className="bg-red-100 p-1.5 rounded-full shrink-0">
+                            <span className="text-red-600 font-bold text-xs">⚠️</span>
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-bold text-red-800">Founder Alert: High Risk</h4>
+                            <p className="text-[11px] text-red-600 mt-1 leading-tight">
+                                Over 30% of your receivables are stuck in 45+ days. Follow up immediately to prevent cash crunch.
+                            </p>
+                        </div>
+                    </div>
+                )}
+
                 <AgingRow
                     label="0-15 Days"
                     amount={aging["0-15"]}

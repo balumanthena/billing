@@ -98,6 +98,10 @@ export async function createInvoice(prevState: any, formData: FormData) {
             subtotal: input.totals.subtotal,
             tax_total: input.totals.totalCGST + input.totals.totalSGST + input.totals.totalIGST,
             grand_total: input.totals.grandTotal,
+            // Agreement Linkage
+            agreement_id: input.agreementId || null,
+            agreement_phase_id: input.agreementPhaseId || null,
+            is_one_off: input.isOneOff || false,
             tds_rate: input.tdsRate,
             tds_amount: input.tdsAmount || input.totals.tdsAmount, // Check both sources
             net_receivable: input.netReceivable || input.totals.netReceivable,
@@ -230,26 +234,71 @@ export async function finalizeInvoice(id: string) {
 
     if (error) return { message: 'Error finalizing invoice' }
 
+    // --- CREATE TDS LEDGER ENTRY (COMPLIANCE) ---
+    if (invoice.tds_amount && invoice.tds_amount > 0) {
+        const invoiceDate = new Date(invoice.date);
+        const month = invoiceDate.getMonth(); // 0 = Jan
+        const year = invoiceDate.getFullYear();
+        let fy = '';
+        if (month < 3) {
+            fy = `${year - 1}-${(year).toString().slice(-2)}`;
+        } else {
+            fy = `${year}-${(year + 1).toString().slice(-2)}`;
+        }
+
+        const tdsEntry = {
+            company_id: profile.company_id,
+            invoice_id: id,
+            customer_id: invoice.customer_id, // Ensure this exists on invoice or use customer_snapshot.id? 
+            // invoice.customer_id is nullable in schema but required for finalized?
+            // If null, we can try to use snapshot id.
+            // But let's assume valid Invoice has customer_id.
+            financial_year: fy,
+            taxable_value: invoice.subtotal,
+            tds_rate: invoice.tds_rate,
+            tds_amount: invoice.tds_amount,
+            section_code: '194J', // Default
+            deducted_on: invoice.date,
+            status: 'pending'
+        }
+
+        // We use upsert to be safe on re-runs (idempotent) if we had a unique constraint, but we don't.
+        // So checking existence first or just insert? User asked for "Enforce ONE TDS record".
+        // Let's check if exists.
+        const { count } = await (supabase.from('tds_ledger') as any)
+            .select('*', { count: 'exact', head: true })
+            .eq('invoice_id', id)
+
+        if (count === 0) {
+            await (supabase.from('tds_ledger') as any).insert(tdsEntry)
+        }
+    }
+
     // --- TRIGGER BACKUP EMAIL (AUDIT COMPLIANT) ---
     try {
         // Fetch remaining details needed for proper PDF generation
         const { data: company } = await (supabase.from('companies') as any).select('*').eq('id', profile.company_id).single()
 
-        // Use the snapshot stored on invoice, or fetch fresh party details?
-        // Use stored snapshot for immutability if available, else fetch party.
-        // Assuming customer_snapshot is always there for v2 invoices.
-        // But for completeness, let's look at relations.
-        // Actually, renderInvoiceHTML takes (invoice, items, company, customer).
         const customer = invoice.customer_snapshot || {}
-        // Note: if snapshot is missing, might need to fetch from parties table.
-        // Let's rely on snapshot as it represents the state at creation.
 
         if (company && invoice.invoice_items) {
             const { BackupService } = await import('@/lib/backup-service')
             await BackupService.backupInvoice(invoice, invoice.invoice_items, company, customer)
         }
+
+        // --- AUDIT LOG ---
+        const { logAuditEvent } = await import('./audit')
+        await logAuditEvent(
+            'invoices',
+            id,
+            'finalize',
+            { status: 'draft' },
+            { status: 'finalized', tds_entry: Boolean(invoice.tds_amount) },
+            `Invoice ${invoice.invoice_number} finalized by ${user.email}`
+        )
+
     } catch (e) {
-        console.error('[Finalize] Backup Trigger Failed:', e)
+        console.error('[Finalize] Backup/Audit Failed:', e)
         // We do NOT rollback transaction based on email failure, per compliance reqs.
     }
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { cn } from "@/lib/utils"
 import { createInvoice, updateInvoice } from '@/app/actions/invoices'
 import { updateMasterInvoice } from '@/app/actions/master-invoices'
 import { Button } from "@/components/ui/button"
@@ -41,6 +42,8 @@ const initialState = {
 export default function CreateInvoiceForm({ company, parties, items, nextInvoiceNumber, initialData, invoiceId }: CreateInvoiceFormProps) {
     const router = useRouter()
     const isEditMode = !!initialData
+    const isAgreementLinked = initialData?.isAgreementLinked || false
+    const lockedFields = initialData?.lockedFields || []
 
     // State Initialization
     const [customerId, setCustomerId] = useState(initialData?.customer_id || '')
@@ -512,6 +515,10 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
                 tdsRate: tdsRate,
                 tdsAmount: tdsAmount,
                 netReceivable: netReceivable,
+                // Agreement Linkage
+                agreementId: initialData?.agreement_id,
+                agreementPhaseId: initialData?.agreement_phase_id,
+                isOneOff: !isMaster && !initialData?.agreement_id,
                 phases: phases.map(p => {
                     let subtotal = 0;
                     let tax = 0;
@@ -541,12 +548,28 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
 
             {!isEditMode && (
                 <div className="flex justify-center mb-8">
-                    <Tabs defaultValue={isMaster ? "master" : "standard"} onValueChange={v => setIsMaster(v === 'master')} className="w-auto">
-                        <TabsList className="bg-secondary/20 p-1 rounded-full h-auto">
-                            <TabsTrigger value="standard" className="rounded-full px-6 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Standard Invoice</TabsTrigger>
-                            <TabsTrigger value="master" className="rounded-full px-6 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Proprietary Master Invoice</TabsTrigger>
-                        </TabsList>
-                    </Tabs>
+                    <div className="bg-secondary/20 p-1 rounded-full h-auto inline-flex">
+                        <button
+                            type="button"
+                            onClick={() => setIsMaster(false)}
+                            className={cn(
+                                "rounded-full px-6 py-2.5 text-sm font-medium transition-all",
+                                !isMaster ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-secondary/40"
+                            )}
+                        >
+                            Standard Invoice
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setIsMaster(true)}
+                            className={cn(
+                                "rounded-full px-6 py-2.5 text-sm font-medium transition-all",
+                                isMaster ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-secondary/40"
+                            )}
+                        >
+                            Proprietary Master Invoice
+                        </button>
+                    </div>
                 </div>
             )}
 
@@ -618,7 +641,7 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
                                                     <CircleHelp className="h-3 w-3 text-muted-foreground/50 cursor-help" />
                                                 </TooltipTrigger>
                                                 <TooltipContent>
-                                                    <p>Exclusive: GST is added on top. Inclusive: GST is extracted from total.</p>
+                                                    <p>TDS is deducted by the client and deposited to the Income Tax Department on your behalf.</p>
                                                 </TooltipContent>
                                             </Tooltip>
                                         </TooltipProvider>
@@ -647,9 +670,44 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
                                         <span className="font-mono font-medium text-xl text-foreground">₹{finalContractTotal.toLocaleString()}</span>
                                     </div>
                                     <div className="col-span-3 pt-3 border-t border-dashed border-primary/20 flex justify-between items-center">
-                                        <div className="text-muted-foreground text-xs">
-                                            Less: TDS ({tdsRate}%) <br />
-                                            <span className="font-mono text-red-400">- ₹{tdsAmount.toLocaleString()}</span>
+                                        <div className="flex items-center gap-6">
+                                            {/* TDS Selector Group */}
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex flex-col">
+                                                    <div className="flex items-center gap-1">
+                                                        <span className="text-xs font-medium text-muted-foreground">TDS Rate</span>
+                                                        <TooltipProvider>
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <CircleHelp className="h-3 w-3 text-muted-foreground/50 cursor-help" />
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    <p>TDS is deducted by the client and deposited to the Income Tax Department on your behalf.</p>
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                        </TooltipProvider>
+                                                    </div>
+                                                    <span className="text-[10px] text-muted-foreground/70">Deducted by Client</span>
+                                                </div>
+                                                <Select value={tdsRate.toString()} onValueChange={(v) => setTdsRate(parseFloat(v))}>
+                                                    <SelectTrigger className="h-8 w-[90px] text-xs bg-red-50/50 border-red-100">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="0">0%</SelectItem>
+                                                        <SelectItem value="2">2%</SelectItem>
+                                                        <SelectItem value="10">10%</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+
+                                            {/* TDS Amount Display */}
+                                            {tdsAmount > 0 && (
+                                                <div className="text-xs border-l pl-6 border-primary/10">
+                                                    <span className="text-muted-foreground block">Less: TDS</span>
+                                                    <span className="font-mono text-red-500 font-medium">- ₹{tdsAmount.toLocaleString()}</span>
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="text-right">
                                             <span className="text-primary block text-xs mb-1 font-semibold uppercase tracking-wider">Net Receivable</span>
@@ -1184,6 +1242,48 @@ export default function CreateInvoiceForm({ company, parties, items, nextInvoice
                                 <div className="flex justify-between items-center pt-3 border-t">
                                     <span className="font-bold text-lg">Grand Total</span>
                                     <span className="font-bold text-2xl text-primary">₹{totals.grandTotal.toFixed(2)}</span>
+                                </div>
+                                <div className="pt-4 border-t border-dashed space-y-3">
+                                    <div className="flex justify-between items-center">
+                                        <div className="flex flex-col">
+                                            <div className="flex items-center gap-1">
+                                                <span className="text-sm font-medium">TDS Rate</span>
+                                                <TooltipProvider>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <CircleHelp className="h-3 w-3 text-muted-foreground/50 cursor-help" />
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            <p>TDS is deducted by the client and deposited to the Income Tax Department on your behalf.</p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
+                                            </div>
+                                            <span className="text-[10px] text-muted-foreground">Deducted by Client</span>
+                                        </div>
+                                        <Select value={tdsRate.toString()} onValueChange={(v) => setTdsRate(parseFloat(v))}>
+                                            <SelectTrigger className="h-8 w-[100px]">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="0">0%</SelectItem>
+                                                <SelectItem value="2">2% (194C)</SelectItem>
+                                                <SelectItem value="10">10% (194J)</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    {tdsRate > 0 && (
+                                        <>
+                                            <div className="flex justify-between text-sm text-red-500">
+                                                <span>Less: TDS</span>
+                                                <span>- ₹{tdsAmount?.toFixed(2)}</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm font-bold text-primary pt-2 border-t">
+                                                <span>Net Receivable</span>
+                                                <span>₹{netReceivable?.toFixed(2)}</span>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>

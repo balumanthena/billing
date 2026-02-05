@@ -5,36 +5,36 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 interface RevenueExpenseChartProps {
     data: {
         name: string
-        Sales: number
-        Expenses: number
+        "Cash In": number
+        "Cash Out": number
     }[]
 }
 
 export function RevenueExpenseChart({ data }: RevenueExpenseChartProps) {
     // Determine max value for scaling
     const maxValue = Math.max(
-        ...data.map(d => Math.max(d.Sales, d.Expenses)),
+        ...data.map(d => Math.max(d["Cash In"], d["Cash Out"])),
         1000 // Minimum scale
     )
 
     return (
         <Card className="h-full">
             <CardHeader>
-                <CardTitle className="text-base font-semibold">Sales vs Expenses (Last 6 Months)</CardTitle>
+                <CardTitle className="text-base font-semibold">Cash Flow (Real Collections vs Expenses)</CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="h-[250px] w-full flex items-end justify-between gap-2 pt-6">
                     {data.map((item, index) => {
-                        const salesHeight = (item.Sales / maxValue) * 100
-                        const expenseHeight = (item.Expenses / maxValue) * 100
+                        const salesHeight = (item["Cash In"] / maxValue) * 100
+                        const expenseHeight = (item["Cash Out"] / maxValue) * 100
 
                         return (
                             <div key={index} className="flex flex-col items-center flex-1 h-full justify-end group relative">
                                 {/* Tooltip */}
                                 <div className="absolute bottom-full mb-2 hidden group-hover:flex flex-col bg-slate-900 text-white text-[10px] p-2 rounded shadow-lg z-10 whitespace-nowrap">
                                     <div className="font-semibold">{item.name}</div>
-                                    <div className="text-emerald-400">Sales: ₹{item.Sales.toLocaleString()}</div>
-                                    <div className="text-red-400">Exp: ₹{item.Expenses.toLocaleString()}</div>
+                                    <div className="text-emerald-400">Cash In: ₹{item["Cash In"].toLocaleString()}</div>
+                                    <div className="text-red-400">Cash Out: ₹{item["Cash Out"].toLocaleString()}</div>
                                 </div>
 
                                 <div className="w-full flex items-end justify-center gap-1 h-full px-1">

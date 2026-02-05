@@ -18,7 +18,7 @@ const initialState = {
     message: ''
 }
 
-export function InvoicePaymentsSection({ invoiceId, grandTotal }: { invoiceId: string, grandTotal: number }) {
+export function InvoicePaymentsSection({ invoiceId, grandTotal, netReceivable }: { invoiceId: string, grandTotal: number, netReceivable: number }) {
     const [payments, setPayments] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [open, setOpen] = useState(false)
@@ -56,7 +56,9 @@ export function InvoicePaymentsSection({ invoiceId, grandTotal }: { invoiceId: s
         }
     }, [state])
 
-    const outstanding = grandTotal - paidAmount
+    // Use Net Receivable (What we actually expect to get paid)
+    const baseAmount = netReceivable || grandTotal
+    const outstanding = baseAmount - paidAmount
     const status = outstanding <= 0 ? 'Paid' : (paidAmount > 0 ? 'Partially Paid' : 'Unpaid')
 
     return (

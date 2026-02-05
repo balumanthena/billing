@@ -245,3 +245,142 @@ export async function getGSTSummary(startDate?: string, endDate?: string) {
         net_payable: outputTax.total - inputTax.total_gst
     }
 }
+
+export async function getTDSLedger() {
+    const supabase = (await createClient()) as SupabaseClient<Database>
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return []
+
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single() as any
+
+    if (!profile?.company_id) return []
+
+    // Fetch invoices with TDS
+    const { data: invoices } = await (supabase.from('invoices') as any)
+        .select('*')
+        .eq('company_id', profile.company_id)
+        .gt('tds_amount', 0)
+        .neq('status', 'cancelled')
+        .order('date', { ascending: false })
+
+    if (!invoices) return []
+
+    return invoices.map((inv: any) => ({
+        id: inv.id,
+        date: inv.date,
+        invoice_number: inv.invoice_number,
+        customer_name: inv.customer_snapshot?.name || 'Unknown',
+        pan: inv.customer_snapshot?.pan || 'N/A',
+        grand_total: inv.grand_total,
+        tds_rate: inv.tds_rate,
+        tds_amount: inv.tds_amount,
+        net_receivable: inv.net_receivable,
+        status: inv.status === 'finalized' || inv.status === 'paid' ? 'Claimable' : 'Draft',
+        fy: new Date(inv.date).getMonth() < 3
+            ? `FY ${new Date(inv.date).getFullYear() - 1}-${new Date(inv.date).getFullYear()}`
+            : `FY ${new Date(inv.date).getFullYear()}-${new Date(inv.date).getFullYear() + 1}`
+    }))
+}
+
+export async function getClientHealthMetrics() {
+    const supabase = (await createClient()) as SupabaseClient<Database>
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return []
+
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single() as any
+
+    if (!profile?.company_id) return []
+
+    // Fetch all invoices and payments to analyze behavior
+    const { data: invoices } = await (supabase.from('invoices') as any)
+        .select('id, customer_snapshot, grand_total, tds_amount, date, status, net_receivable')
+        .eq('company_id', profile.company_id)
+        .neq('status', 'cancelled')
+
+    // Fetch payments
+    const { data: payments } = await (supabase.from('payments') as any)
+        .select('invoice_id, amount, payment_date')
+        .eq('company_id', profile.company_id)
+
+    if (!invoices) return []
+
+    const clientMap: Record<string, any> = {}
+
+    invoices.forEach((inv: any) => {
+        const name = inv.customer_snapshot?.name || 'Unknown'
+        if (!clientMap[name]) {
+            clientMap[name] = {
+                name,
+                total_invoiced: 0,
+                total_collected: 0,
+                total_outstanding: 0,
+                invoice_count: 0,
+                tds_deducted: 0,
+                payment_delays: [] // milliseconds diff
+            }
+        }
+
+        clientMap[name].total_invoiced += (inv.grand_total || 0)
+        clientMap[name].invoice_count += 1
+        clientMap[name].tds_deducted += (inv.tds_amount || 0)
+
+        // Calculate collected for this invoice
+        const invPayments = payments?.filter((p: any) => p.invoice_id === inv.id) || []
+        const collected = invPayments.reduce((s: number, p: any) => s + (p.amount || 0), 0)
+        clientMap[name].total_collected += collected
+
+        // Outstanding
+        const netReceivable = inv.net_receivable || inv.grand_total
+        const outstanding = Math.max(0, netReceivable - collected)
+        if (outstanding > 1 && inv.status !== 'draft') {
+            clientMap[name].total_outstanding += outstanding
+        }
+
+        // Behavior: Payment Delay logic
+        // If paid, calculate diff between Invoice Date (or Due Date) and Last Payment Date
+        if (invPayments.length > 0) {
+            // Find last payment date
+            const lastPay = invPayments.sort((a: any, b: any) => new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime())[0]
+            if (lastPay) {
+                const delay = new Date(lastPay.payment_date).getTime() - new Date(inv.date).getTime()
+                clientMap[name].payment_delays.push(delay)
+            }
+        }
+    })
+
+    // Compute aggregations
+    return Object.values(clientMap).map((c: any) => {
+        const avgDelayMs = c.payment_delays.length > 0
+            ? c.payment_delays.reduce((s: number, d: number) => s + d, 0) / c.payment_delays.length
+            : 0
+        const avgDelayDays = Math.ceil(avgDelayMs / (1000 * 60 * 60 * 24))
+
+        // Health Score (Simple Logic)
+        // 100 - (Delay > 45 ? 30 : 0) - (Unpaid % * 50)
+        // Base 100
+        let score = 100
+        if (avgDelayDays > 45) score -= 30
+        else if (avgDelayDays > 30) score -= 15
+
+        const unpaidRatio = c.total_invoiced > 0 ? (c.total_outstanding / c.total_invoiced) : 0
+        score -= (unpaidRatio * 50)
+
+        return {
+            name: c.name,
+            total_revenue: c.total_invoiced,
+            outstanding: c.total_outstanding,
+            tds_rate_avg: c.total_invoiced > 0 ? ((c.tds_deducted / c.total_invoice) * 100).toFixed(1) : 0, // Approx
+            avg_payment_days: avgDelayDays,
+            health_score: Math.max(0, Math.round(score)),
+            status: score > 80 ? 'Excellent' : score > 50 ? 'Average' : 'At Risk'
+        }
+    })
+}
