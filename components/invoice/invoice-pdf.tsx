@@ -144,6 +144,13 @@ const styles = StyleSheet.create({
         color: '#334155',
         lineHeight: 1.3,
     },
+    // New Style for Secondary Phase Text
+    phaseText: {
+        fontSize: 9,
+        color: '#94A3B8', // Light Gray
+        fontStyle: 'italic',
+        marginTop: 2,
+    },
 
     // Column Widths (Optimized for no overlap)
     colDesc: { width: '38%' },
@@ -253,13 +260,31 @@ const styles = StyleSheet.create({
 });
 
 interface InvoicePDFProps {
-    invoice: any
+    invoice: any;
+    showPhaseDetails?: boolean; // New prop
 }
 
-export const InvoicePDF = ({ invoice }: InvoicePDFProps) => {
+export const InvoicePDF = ({ invoice, showPhaseDetails = true }: InvoicePDFProps) => {
     const company = invoice.company_snapshot
     const customer = invoice.customer_snapshot
     const items = invoice.invoice_items
+
+    // Helper: Determining Primary/Secondary Item Names
+    const isPhaseInvoice = !!invoice.master_invoice_id;
+
+    const getPrimaryItemName = (item: any) => {
+        if (isPhaseInvoice && invoice.master_invoice?.title) {
+            return invoice.master_invoice.title;
+        }
+        return item.description;
+    }
+
+    const getSecondaryItemMeta = () => {
+        if (isPhaseInvoice) {
+            return invoice.phase_label || `Phase ${invoice.phase_number || ''}`;
+        }
+        return null; // Don't show anything if not phase invoice
+    }
 
     const formatCurrency = (amount: number) => {
         return amount.toLocaleString('en-IN', {
@@ -343,7 +368,18 @@ export const InvoicePDF = ({ invoice }: InvoicePDFProps) => {
 
                         {items?.map((item: any, i: number) => (
                             <View key={i} style={styles.tableRow}>
-                                <View style={styles.colDesc}><Text style={styles.td}>{item.description}</Text></View>
+                                <View style={styles.colDesc}>
+                                    {/* Primary Service Name */}
+                                    <Text style={[styles.td, { fontWeight: 'bold', color: '#0F172A' }]}>
+                                        {getPrimaryItemName(item)}
+                                    </Text>
+                                    {/* Secondary Phase Info */}
+                                    {isPhaseInvoice && showPhaseDetails && getSecondaryItemMeta() && (
+                                        <Text style={styles.phaseText}>
+                                            Phase: {getSecondaryItemMeta()}
+                                        </Text>
+                                    )}
+                                </View>
                                 <View style={styles.colSac}><Text style={styles.td}>{item.sac_code || '-'}</Text></View>
                                 <View style={styles.colQty}><Text style={styles.td}>{item.quantity}</Text></View>
                                 <View style={styles.colRate}><Text style={styles.td}>{formatCurrency(item.unit_price)}</Text></View>

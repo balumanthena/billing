@@ -195,7 +195,8 @@ export async function getInvoice(id: string) {
             *, 
             invoice_items(*),
             master_invoice:master_invoices (
-                master_invoice_number
+                master_invoice_number,
+                title
             )
         `)
         .eq('id', id)

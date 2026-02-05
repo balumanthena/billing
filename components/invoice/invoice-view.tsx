@@ -42,6 +42,7 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [barcodeUrl, setBarcodeUrl] = useState<string>('')
+    const [showPhaseDetails, setShowPhaseDetails] = useState(true)
 
     useEffect(() => {
         try {
@@ -92,17 +93,28 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
         }
     }
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'finalized': return 'bg-green-100 text-green-800'
-            case 'cancelled': return 'bg-red-100 text-red-800'
-            case 'completed': return 'bg-purple-100 text-purple-800' // For Master
-            default: return 'bg-gray-100 text-gray-800'
-        }
-    }
-
     // Check if this is a Child Invoice (Phase)
     const isPhaseInvoice = !!invoice.master_invoice_id;
+
+    // Determine correct service name (Primary Line)
+    // If it's a phase invoice, the REAL service name is the Master Invoice Title.
+    // If it's a standard invoice, it's the item description.
+    const getPrimaryItemName = (item: any) => {
+        if (isPhaseInvoice && invoice.master_invoice?.title) {
+            return invoice.master_invoice.title;
+        }
+        // Fallback: Check if description contains " - " (old format cleanup)
+        // If description is just "Phase 1", this logic prevents it from showing if we have title.
+        return item.description;
+    }
+
+    // Determine secondary meta (Phase Info)
+    const getSecondaryItemMeta = (item: any) => {
+        if (isPhaseInvoice) {
+            return invoice.phase_label || `Phase ${invoice.phase_number || ''}`;
+        }
+        return null;
+    }
 
     return (
         <div className="space-y-6">
@@ -169,6 +181,32 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
 
                 {/* Right Side Actions */}
                 <div className="flex items-center gap-2">
+                    {/* View Controls: Toggle Phase Details */}
+                    {isPhaseInvoice && (
+                        <div className="mr-2 flex items-center gap-2">
+                            <label className="text-xs font-medium text-slate-600 flex items-center gap-1 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={showPhaseDetails}
+                                    onChange={(e) => setShowPhaseDetails(e.target.checked)}
+                                    className="rounded border-slate-300 text-primary focus:ring-primary"
+                                />
+                                Show phase details
+                            </label>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger>
+                                        <Info className="h-3 w-3 text-slate-400" />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Phase indicates the billing milestone as per contract</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
+                    )}
+
+
                     {/* Actions for Draft */}
                     {invoice.status === 'draft' && (
                         <>
@@ -245,7 +283,7 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
                             <IssueCreditNoteDialog invoice={invoice} />
 
                             <PDFDownloadLink
-                                document={<InvoicePDF invoice={{ ...invoice, barcodeUrl }} />}
+                                document={<InvoicePDF invoice={{ ...invoice, barcodeUrl }} showPhaseDetails={showPhaseDetails} />}
                                 fileName={`${invoice.invoice_number}.pdf`}
                             >
                                 {({ blob, url, loading, error }) => {
@@ -362,15 +400,30 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
                                         </tr>
                                     ))
                                 ) : (
-                                    // Standard Invoice Items
+                                    // Standard/Phase Invoice Items
                                     (invoice.invoice_items?.map((item: any) => (
                                         <tr key={item.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                                            <td className="p-4 align-middle">{item.description}</td>
-                                            <td className="p-4 align-middle">{item.sac_code}</td>
+                                            <td className="p-4 align-middle">
+                                                {/* PRIMARY: Service Name (Bold) */}
+                                                <div className="font-bold text-slate-900 text-[13px]">
+                                                    {getPrimaryItemName(item)}
+                                                </div>
+
+                                                {/* SECONDARY: Phase Metadata (Subtle, Optional) */}
+                                                {isPhaseInvoice && showPhaseDetails && getSecondaryItemMeta(item) && (
+                                                    <div className="text-[11px] text-muted-foreground italic mt-1 font-medium flex items-center gap-1.5">
+                                                        <span className="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 text-slate-500 uppercase text-[10px] tracking-wide">
+                                                            Phase
+                                                        </span>
+                                                        {getSecondaryItemMeta(item)}
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td className="p-4 align-middle font-mono text-xs">{item.sac_code || '-'}</td>
                                             <td className="p-4 align-middle">{item.quantity}</td>
                                             <td className="p-4 align-middle">{item.unit_price}</td>
                                             <td className="p-4 align-middle">{item.tax_rate}%</td>
-                                            <td className="p-4 align-middle text-right">{item.total_amount}</td>
+                                            <td className="p-4 align-middle text-right font-medium">{item.total_amount}</td>
                                         </tr>
                                     )) || (
                                             <tr>
