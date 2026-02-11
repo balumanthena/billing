@@ -47,6 +47,11 @@ const items = [
         href: "/dashboard/agreements",
         icon: FileText,
     },
+    {
+        title: "Quotations",
+        href: "/dashboard/quotations",
+        icon: FileText,
+    },
 ]
 
 interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
