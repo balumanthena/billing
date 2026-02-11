@@ -58,7 +58,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
             <div className="w-full max-w-[210mm] bg-white shadow-xl print:shadow-none overflow-hidden text-slate-900 border border-slate-200">
 
                 {/* 1. Header (Slim ERP Style) */}
-                <div className="bg-slate-900 h-[120px] w-full flex items-center justify-between px-8 print:px-8">
+                <div className="bg-[#6e75ff] h-[120px] w-full flex items-center justify-between px-8 print:px-8">
                     {/* Logo Area */}
                     <div className="h-full flex items-center">
                         {company?.logo_url ? (
@@ -171,7 +171,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
                                 ₹{payment.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                             </div>
                             <p className="text-sm text-slate-600 font-serif italic capitalize px-8">
-                                {amountToWords(payment.amount)} Only
+                                {amountToWords(payment.amount)}
                             </p>
                         </div>
 

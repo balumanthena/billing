@@ -158,14 +158,14 @@ export async function getDashboardStats() {
     if (!profile?.company_id) return getEmptyStats()
 
     // 1. Fetch Invoices (Revenue, Outstanding, Aging, Locked TDS)
-    // We need payments for each invoice to calculate true outstanding
+    // EXCLUDE CANCELLED INVOICES explicitly
     const { data: invoices } = await (supabase.from('invoices') as any)
         .select(`
             id, invoice_number, date, due_date, grand_total, status, customer_snapshot, 
             net_receivable, tds_amount, subtotal, tax_total
         `)
         .eq('company_id', profile.company_id)
-        .neq('status', 'cancelled')
+        .neq('status', 'cancelled') // <--- CRITICAL FIX
         .eq('is_deleted', false)
         .order('created_at', { ascending: false })
 
@@ -177,24 +177,30 @@ export async function getDashboardStats() {
         .order('date', { ascending: false })
 
     // 3. Fetch Payments (Cash In Hand, Collections)
+    // We need to filter payments that belong to CANCELLED invoices.
+    // Since we don't have a direct join in this fetch style easily without extensive typing,
+    // we'll fetch payments and then filter them in memory against the valid 'invoices' list we just fetched.
+    // OR we fetch payments with invoice status.
     const { data: payments } = await (supabase.from('payments') as any)
-        .select('amount, payment_date, invoice_id')
+        .select('amount, payment_date, invoice_id, invoices(status)') // Fetch invoice status
         .eq('company_id', profile.company_id)
+
+    // Filter payments to exclude those from cancelled invoices
+    const validPayments = payments?.filter((p: any) => p.invoices?.status !== 'cancelled') || []
 
     // --- CALCULATIONS ---
 
     // A. Cash Flow & Profit
-    const cashCollected = payments?.reduce((sum: number, p: any) => sum + (p.amount || 0), 0) || 0
+    const cashCollected = validPayments.reduce((sum: number, p: any) => sum + (p.amount || 0), 0)
     const totalExpenses = expenses?.reduce((sum: number, exp: any) => sum + (exp.amount || 0), 0) || 0
 
     // "Cash In Hand" (Operating Cash Flow)
     const cashInHand = cashCollected - totalExpenses
 
     // "Accounting Profit" (Invoiced Taxable - Expenses)
+    // Only count NON-CANCELLED invoices (already filtered above)
     const totalInvoicedTaxable = invoices?.reduce((sum: number, inv: any) => sum + (inv.subtotal || 0), 0) || 0
-    const accountingProfit = totalInvoicedTaxable - (totalExpenses - (expenses?.reduce((sum: number, e: any) => sum + (e.gst_amount || 0), 0) || 0)) // Excl GST from expenses for true profit? 
-    // Simplified: Revenue - Expenses. Let's stick to simple "Invoiced - Expense" for now as requested.
-    // "Profit shown after expenses"
+    const accountingProfit = totalInvoicedTaxable - (totalExpenses - (expenses?.reduce((sum: number, e: any) => sum + (e.gst_amount || 0), 0) || 0))
 
     // B. Receivables & Locked TDS
     let netReceivable = 0
@@ -210,21 +216,24 @@ export async function getDashboardStats() {
     }
 
     invoices?.forEach((inv: any) => {
+        // Double check exclusion (redundant but safe)
+        if (inv.status === 'cancelled') return
+
         // Locked TDS: Sum of all TDS where invoice is finalized (assuming deducted)
         if (inv.status !== 'draft' && inv.tds_amount > 0) {
             lockedTDS += inv.tds_amount
         }
 
         // Net Receivable: Calculate balance per invoice
-        // Filter payments for this invoice
-        const paidForInv = payments?.filter((p: any) => p.invoice_id === inv.id)
-            .reduce((sum: number, p: any) => sum + (p.amount || 0), 0) || 0
+        // Filter payments for this invoice from VALID payments
+        const paidForInv = validPayments.filter((p: any) => p.invoice_id === inv.id)
+            .reduce((sum: number, p: any) => sum + (p.amount || 0), 0)
 
         // Use updated field net_receivable or fallback to grand_total
         const receivableTotal = inv.net_receivable || inv.grand_total
         const balance = Math.max(0, receivableTotal - paidForInv)
 
-        if (balance > 1 && inv.status !== 'cancelled' && inv.status !== 'draft') {
+        if (balance > 1 && inv.status !== 'draft') {
             netReceivable += balance
 
             // Aging (based on Invoice Date)
@@ -253,7 +262,7 @@ export async function getDashboardStats() {
         const monthKey = d.toLocaleString('default', { month: 'short' })
         const year = d.getFullYear()
 
-        const monthPayments = payments?.filter((p: any) => {
+        const monthPayments = validPayments.filter((p: any) => {
             const pdate = new Date(p.payment_date)
             return pdate.getMonth() === d.getMonth() && pdate.getFullYear() === year
         })

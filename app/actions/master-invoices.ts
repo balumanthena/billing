@@ -207,12 +207,17 @@ export async function createMasterInvoice(prevState: any, formData: FormData) {
             // Combined Description: "{Service Name} - {Phase Label}"
             const desc = `${input.title} - ${phaseInput?.label || `Phase ${phaseInv.phase_number}`}`
 
-            // Re-calculate to match above (or use saved values)
-            // phaseInv has the correct totals now.
             return {
                 invoice_id: phaseInv.id,
                 description: desc,
-                sac_code: input.sacCode || null, // Inherit SAC from Master
+                sac_code: input.sacCode || null,
+
+                // NEW COLUMNS
+                service_name: input.title,
+                phase_number: phaseInv.phase_number,
+                phase_name: phaseInput?.label,
+                phase_percentage: 0, // TODO: Compute if total known
+
                 quantity: 1,
                 unit_price: phaseInv.subtotal,
                 tax_rate: 18,
@@ -354,6 +359,14 @@ export async function updateMasterInvoice(id: string, prevState: any, formData: 
             await (supabase.from('invoice_items') as any).insert({
                 invoice_id: phaseId,
                 description: p.label || `Phase ${p.number} Payment`,
+                sac_code: input.sacCode || null,
+
+                // NEW COLUMNS
+                service_name: input.title,
+                phase_number: p.number,
+                phase_name: p.label,
+                phase_percentage: 0,
+
                 quantity: 1,
                 unit_price: totals.subtotal,
                 tax_rate: 18,

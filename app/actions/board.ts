@@ -19,6 +19,7 @@ export async function getBoardMetrics() {
         .select('total_amount, contract_type, status')
         .eq('company_id', companyId)
         .neq('status', 'cancelled')
+        .eq('is_deleted', false)
 
     // TCV is sum of all active/completed contracts
     const tcv = contracts?.reduce((sum: number, c: any) => sum + (c.total_amount || 0), 0) || 0
@@ -92,6 +93,7 @@ export async function getBoardMetrics() {
         .select('grand_total, customer_snapshot')
         .eq('company_id', companyId)
         .neq('status', 'cancelled')
+        .eq('is_deleted', false)
 
     const clientRevenue: Record<string, number> = {}
     let totalRevenue = 0

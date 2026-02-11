@@ -126,7 +126,13 @@ export async function createInvoice(prevState: any, formData: FormData) {
         cgst_amount: item.cgst,
         sgst_amount: item.sgst,
         igst_amount: item.igst,
-        total_amount: item.total
+        total_amount: item.total,
+
+        // NEW COLUMNS (Standard Invoice)
+        service_name: item.description, // For standard invoices, Service Name = Description
+        phase_number: null,
+        phase_name: null,
+        phase_percentage: null
     }))
 
     const { error: itemsError } = await (supabase.from('invoice_items') as any)
@@ -442,7 +448,14 @@ export async function updateInvoice(id: string, prevState: any, formData: FormDa
         cgst_amount: item.cgst,
         sgst_amount: item.sgst,
         igst_amount: item.igst,
-        total_amount: item.total
+        total_amount: item.total,
+
+        // NEW COLUMNS (Standard Invoice)
+        service_name: item.description,
+        sac_code: item.sac_code,
+        phase_number: null,
+        phase_name: null,
+        phase_percentage: null
     }))
 
     const { error: itemsError } = await (supabase.from('invoice_items') as any)

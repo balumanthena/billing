@@ -98,21 +98,32 @@ export default function InvoiceDetailView({ invoice }: { invoice: any }) {
 
     // Determine correct service name (Primary Line)
     // If it's a phase invoice, the REAL service name is the Master Invoice Title.
-    // If it's a standard invoice, it's the item description.
     const getPrimaryItemName = (item: any) => {
+        // 1. Prefer stored Service Name (New Standard)
+        if (item.service_name) return item.service_name;
+
+        // 2. Fallback: Master Invoice Title (Legacy Phase Invoices)
         if (isPhaseInvoice && invoice.master_invoice?.title) {
             return invoice.master_invoice.title;
         }
-        // Fallback: Check if description contains " - " (old format cleanup)
-        // If description is just "Phase 1", this logic prevents it from showing if we have title.
+
+        // 3. Fallback: Item Description (Standard Invoices / Legacy)
         return item.description;
     }
 
-    // Determine secondary meta (Phase Info)
     const getSecondaryItemMeta = (item: any) => {
+        // 1. Prefer stored Phase Details (New Standard)
+        if (item.phase_number) {
+            const label = item.phase_name || 'Phase';
+            const pct = item.phase_percentage ? `(${item.phase_percentage}%)` : '';
+            return `Phase ${item.phase_number} • ${label} ${pct}`;
+        }
+
+        // 2. Fallback: Invoice Level Phase Metadata (Legacy)
         if (isPhaseInvoice) {
             return invoice.phase_label || `Phase ${invoice.phase_number || ''}`;
         }
+
         return null;
     }
 

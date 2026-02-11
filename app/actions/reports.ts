@@ -30,6 +30,7 @@ export async function getProfitAndLoss(startDate?: string, endDate?: string) {
         .select('grand_total, subtotal, date')
         .eq('company_id', profile.company_id)
         .neq('status', 'cancelled')
+        .eq('is_deleted', false)
 
     let expenseQuery = (supabase.from('expenses') as any)
         .select('amount, date, category')
@@ -159,7 +160,8 @@ export async function getSalesRegister(startDate?: string, endDate?: string) {
             )
         `)
         .eq('company_id', profile.company_id)
-        .neq('status', 'cancelled')
+        .neq('status', 'cancelled') // Ensure excluded
+        .eq('is_deleted', false) // Also check deleted
         .order('date', { ascending: false })
 
     if (startDate && endDate) {
