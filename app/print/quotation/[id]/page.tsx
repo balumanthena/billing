@@ -48,17 +48,23 @@ export default async function PrintQuotationPage({ params }: { params: Promise<{
                 }
                 .quotation-header {
                     width: 100%;
-                    height: 80px;
+                    height: 60px;
                     background: linear-gradient(to right, #000000, #1a1a1a);
                     display: flex;
                     align-items: center;
-                    padding-left: 20mm; /* Match body padding */
+                    padding-left: 30px;
+                    border-bottom: 2px solid #e5e7eb;
                     -webkit-print-color-adjust: exact;
                     print-color-adjust: exact;
                 }
+                .quotation-header img {
+                    max-height: 50px;
+                    width: auto;
+                    object-fit: contain;
+                }
                 .quotation-body {
                     padding: 0 20mm 20mm 20mm;
-                    margin-top: 30px;
+                    margin-top: 20px;
                 }
             `}} />
 
@@ -72,7 +78,7 @@ export default async function PrintQuotationPage({ params }: { params: Promise<{
                         <img
                             src={company.logo_url}
                             alt={company.name}
-                            className="h-12 w-auto object-contain brightness-0 invert"
+                            className="object-contain brightness-0 invert"
                         />
                     ) : (
                         <div className="text-2xl font-bold text-white tracking-widest uppercase">
