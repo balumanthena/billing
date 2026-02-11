@@ -10,8 +10,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { QuotationStatusActions } from "@/components/quotation/status-actions" // Client Component for actions
 
-export default async function QuotationDetailsPage({ params }: { params: { id: string } }) {
-    const quotation = await getQuotation(params.id)
+export default async function QuotationDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params
+    const quotation = await getQuotation(id)
     if (!quotation) notFound()
 
     return (
