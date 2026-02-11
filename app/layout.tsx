@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Outfit } from 'next/font/google'
 import './globals.css'
 import { cn } from '@/lib/utils'
+import { Toaster } from "@/components/ui/toaster"
 
 const fontSans = Outfit({ subsets: ['latin'], variable: '--font-sans' })
 
@@ -19,6 +20,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={cn(fontSans.className, "min-h-screen bg-background antialiased font-sans")}>
         {children}
+        <Toaster />
       </body>
     </html>
   )
