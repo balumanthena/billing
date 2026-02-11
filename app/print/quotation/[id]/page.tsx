@@ -1,4 +1,5 @@
 import { getQuotation } from "@/app/actions/quotations"
+import { getCompanySettings } from "@/lib/getCompanySettings"
 import { notFound } from "next/navigation"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { PrintPageActions } from "@/components/quotation/print-page-actions"
@@ -7,6 +8,12 @@ export default async function PrintQuotationPage({ params }: { params: Promise<{
     const { id } = await params
     const quotation = await getQuotation(id)
     if (!quotation) notFound()
+
+    const company = await getCompanySettings(quotation.company_id)
+    if (!company) {
+        // Fallback or error handling if company not found, though unlikely
+        console.error("Company not found for quotation", quotation.id)
+    }
 
     return (
         <div className="print-layout bg-white min-h-screen">
@@ -47,12 +54,20 @@ export default async function PrintQuotationPage({ params }: { params: Promise<{
                 {/* Header */}
                 <div className="flex justify-between items-start border-b pb-6 mb-8">
                     <div className="w-1/2">
-                        {/* Logo Placeholder */}
-                        <div className="text-2xl font-bold text-blue-900 mb-2">CitruX Health</div>
-                        <div className="text-gray-500">
-                            Tech Park, Hitech City<br />
-                            Hyderabad, Telangana<br />
-                            GSTIN: 36ABCDE1234F1Z5
+                        {/* Dynamic Company Info */}
+                        {company?.logo_url ? (
+                            <img src={company.logo_url} alt={company.name} className="h-12 w-auto mb-2 object-contain" />
+                        ) : (
+                            <div className="text-2xl font-bold text-blue-900 mb-2">{company?.name || 'Company Name'}</div>
+                        )}
+
+                        <div className="text-gray-500 whitespace-pre-line">
+                            {company?.address}
+                            {company?.city && `, ${company.city}`}
+                            {company?.state && <><br />{company.state}</>}
+                            {company?.gstin && <><br />GSTIN: {company.gstin}</>}
+                            {company?.email && <><br />{company.email}</>}
+                            {company?.phone && <><br />{company.phone}</>}
                         </div>
                     </div>
                     <div className="text-right w-1/2">
@@ -153,14 +168,14 @@ export default async function PrintQuotationPage({ params }: { params: Promise<{
                             <ul className="list-disc list-inside text-xs text-gray-600 space-y-1">
                                 <li>Valid for 30 days from date of issue.</li>
                                 <li>50% advance payment required to commence work.</li>
-                                <li>Subject to CitruX Health standard service agreement.</li>
+                                <li>Subject to {company?.name} standard service agreement.</li>
                             </ul>
                         </div>
                         <div className="text-right flex flex-col items-end justify-end">
                             <div className="h-16 mb-2"></div> {/* Space for signature */}
                             <div className="border-t border-gray-400 w-48"></div>
                             <div className="text-xs font-bold mt-1 uppercase">Authorized Signature</div>
-                            <div className="text-xs text-gray-500">For CitruX Health Solutions</div>
+                            <div className="text-xs text-gray-500">For {company?.name}</div>
                         </div>
                     </div>
                 </div>

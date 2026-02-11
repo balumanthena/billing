@@ -20,7 +20,7 @@ export default async function DashboardLayout({
             <div className="flex min-h-screen flex-col pb-16 md:pb-0">
                 <header className="sticky top-0 z-30 flex h-16 items-center border-b border-gray-800 bg-gray-900 text-white pl-2 pr-4 md:pr-6 shadow-md">
                     <div className="flex items-center gap-2 text-lg font-semibold md:text-base h-full">
-                        <img src="/logo.png" alt="CitruX Health Solutions" className="h-16 w-auto" />
+                        <img src="/logo.png" alt="CitrUX Technologies" className="h-16 w-auto" />
                     </div>
                     {/* Desktop Sidebar Trigger (Hidden on Desktop usually, but here just hidden completely as we have sidebar) */}
 
@@ -48,7 +48,7 @@ export default async function DashboardLayout({
                 </SheetDescription>
                 <nav className="grid gap-2 text-lg font-medium">
                     <div className="flex items-center gap-2 text-lg font-semibold mb-4 bg-gray-900 text-white p-2 rounded-md">
-                        <img src="/logo.png" alt="CitruX Health Solutions" className="h-8 w-auto" />
+                        <img src="/logo.png" alt="CitrUX Technologies" className="h-8 w-auto" />
                     </div>
                     {/* Reusing SidebarNav but tailored for sheet if needed, or just insert links directly */}
                     {/* For simplicity, let's render SidebarNav here too */}

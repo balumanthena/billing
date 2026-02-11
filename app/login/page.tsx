@@ -24,7 +24,7 @@ export default function LoginPage() {
         <div className="min-h-screen flex items-center justify-center bg-gray-900 px-4">
             <div className="w-full max-w-sm">
                 <div className="flex items-center justify-center mb-2">
-                    <img src="/logo.png" alt="CitruX Health Solutions" className="h-60 w-auto" />
+                    <img src="/logo.png" alt="CitrUX Technologies" className="h-60 w-auto" />
                 </div>
 
                 <Card>
