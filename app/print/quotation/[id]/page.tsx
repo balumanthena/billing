@@ -48,17 +48,17 @@ export default async function PrintQuotationPage({ params }: { params: Promise<{
                 }
                 .quotation-header {
                     width: 100%;
-                    height: 60px;
+                    height: 120px;
                     background: linear-gradient(to right, #000000, #1a1a1a);
                     display: flex;
                     align-items: center;
-                    padding-left: 30px;
+                    padding-left: 40px;
                     border-bottom: 2px solid #e5e7eb;
                     -webkit-print-color-adjust: exact;
                     print-color-adjust: exact;
                 }
                 .quotation-header img {
-                    max-height: 50px;
+                    max-height: 100px;
                     width: auto;
                     object-fit: contain;
                 }
