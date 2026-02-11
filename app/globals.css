@@ -162,4 +162,71 @@
   body {
     @apply bg-background text-foreground;
   }
+@media print {
+  @page {
+    margin: 0;
+    size: auto;
+  }
+
+  body {
+    background: white;
+    color: black;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Hide navigation, sidebar, and buttons */
+  aside, 
+  header, 
+  nav, 
+  .no-print, 
+  button, 
+  .mobile-bottom-nav,
+  [data-radix-collection-item],
+  [role="dialog"] {
+    display: none !important;
+  }
+
+  /* Reset layout constraints */
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Make sure content takes full width */
+  .container, 
+  .w-full {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 20px !important;
+  }
+
+  /* Ensure cards look like clean sections */
+  .border, .shadow-sm, .shadow-md, .shadow-lg {
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Typography tweaks for print */
+  h1 { font-size: 24pt !important; }
+  h2 { font-size: 18pt !important; }
+  p, td, th, div { font-size: 10pt !important; }
+  
+  /* Specific tweaks for quotation details */
+  .grid-cols-12 {
+    display: grid !important;
+    grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+  }
+
+  /* Ensure background colors (like muted headers) are printed */
+  .bg-muted\/50 {
+    background-color: #f3f4f6 !important;
+  }
+
+  /* Hide the action buttons area specifically if generic button hide isn't enough */
+  .flex.items-center.gap-2 button {
+    display: none !important;
+  }
 }

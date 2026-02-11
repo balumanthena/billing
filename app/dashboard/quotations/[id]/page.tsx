@@ -9,6 +9,7 @@ import { formatCurrency, formatDate } from "@/lib/utils"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { QuotationStatusActions } from "@/components/quotation/status-actions" // Client Component for actions
+import { PrintQuotationButton } from "@/components/quotation/print-button"
 
 export default async function QuotationDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
@@ -33,13 +34,9 @@ export default async function QuotationDetailsPage({ params }: { params: Promise
                         <p className="text-muted-foreground">{quotation.project_title}</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Button variant="outline">
-                        <Printer className="mr-2 h-4 w-4" />
-                        Print / PDF
-                    </Button>
-
                     {/* Actions: Approve/Reject/Convert */}
+                    <PrintQuotationButton />
+
                     <QuotationStatusActions
                         id={quotation.id}
                         status={quotation.status}
@@ -174,6 +171,6 @@ export default async function QuotationDetailsPage({ params }: { params: Promise
                     </Card>
                 </div>
             </div>
-        </div>
+        </div >
     )
 }
