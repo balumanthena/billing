@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
@@ -31,6 +32,13 @@ const items = [
 
 export function MobileBottomNav() {
     const pathname = usePathname()
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    if (!mounted) return null
 
     return (
         <div className="fixed bottom-0 left-0 z-50 w-full h-16 bg-background border-t flex items-center justify-around md:hidden pb-1 px-1 shadow-[0_-1px_3px_rgba(0,0,0,0.05)]">
