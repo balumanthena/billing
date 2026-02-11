@@ -34,6 +34,7 @@ export default async function QuotationDetailsPage({ params }: { params: Promise
                         <p className="text-muted-foreground">{quotation.project_title}</p>
                     </div>
                 </div>
+                <div className="flex items-center gap-2">
                     {/* Actions: Approve/Reject/Convert */}
                     <PrintQuotationButton />
 
