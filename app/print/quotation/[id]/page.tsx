@@ -1,6 +1,7 @@
 import { getQuotation } from "@/app/actions/quotations"
 import { notFound } from "next/navigation"
 import { formatCurrency, formatDate } from "@/lib/utils"
+import { PrintPageActions } from "@/components/quotation/print-page-actions"
 
 export default async function PrintQuotationPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
@@ -39,20 +40,7 @@ export default async function PrintQuotationPage({ params }: { params: Promise<{
                 }
             `}} />
 
-            <div className="no-print fixed top-4 right-4 z-50 flex gap-2">
-                <button
-                    onClick="window.print()"
-                    className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition"
-                >
-                    Print / Save PDF
-                </button>
-                <button
-                    onClick="window.close()"
-                    className="bg-gray-200 text-gray-800 px-4 py-2 rounded shadow hover:bg-gray-300 transition"
-                >
-                    Close
-                </button>
-            </div>
+            <PrintPageActions />
 
             {/* A4 Page Content */}
             <div className="print-container text-sm text-gray-900 leading-snug">
