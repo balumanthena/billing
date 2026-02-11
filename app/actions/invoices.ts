@@ -452,7 +452,7 @@ export async function updateInvoice(id: string, prevState: any, formData: FormDa
 
         // NEW COLUMNS (Standard Invoice)
         service_name: item.description,
-        sac_code: item.sac_code,
+
         phase_number: null,
         phase_name: null,
         phase_percentage: null
